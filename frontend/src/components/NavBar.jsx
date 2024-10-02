@@ -1,9 +1,8 @@
-// src/components/NavBar.js
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { auth, db } from '../firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { auth } from '../firebase';
+import axios from 'axios'; // Axios for API requests
 import '../styles/NavBar.css';
 
 const Navbar = () => {
@@ -25,10 +24,21 @@ const Navbar = () => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setIsAuthenticated(true);
-        // Fetch the user's role from Firestore
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        const userData = userDoc.data();
-        setUserRole(userData.role);
+        
+        try {
+          // Fetch user data from your backend (MySQL)
+          const idToken = await user.getIdToken();
+          const response = await axios.get('http://localhost:3001/api/protected/user', {
+            headers: {
+              'Authorization': `Bearer ${idToken}`
+            }
+          });
+
+          const userData = response.data.user;
+          setUserRole(userData.UserType); // Adjust according to your database field
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        }
       } else {
         setIsAuthenticated(false);
         setUserRole(null);
@@ -58,10 +68,10 @@ const Navbar = () => {
         <li><Link to="/buses" onClick={toggleMenu}>Buses</Link></li> {/* New Link */}
         <li><Link to="/restaurants" onClick={toggleMenu}>Restaurants</Link></li> {/* New Link */}
         {/* Conditionally render links based on user role */}
-        {userRole === 'admin' && (
+        {userRole === 'Admin' && (
           <li><Link to="/admin/dashboard" onClick={toggleMenu}>Admin Dashboard</Link></li>
         )}
-        {userRole === 'business' && (
+        {userRole === 'BusinessAdministrator' && (
           <li><Link to="/business/dashboard" onClick={toggleMenu}>Business Dashboard</Link></li>
         )}
       </ul>
@@ -71,15 +81,9 @@ const Navbar = () => {
           <span>English</span>
           {languageMenuActive && (
             <ul className="language-dropdown">
-              <li>
-                <i className="fas fa-flag-usa"></i> English
-              </li>
-              <li>
-                <i className="fas fa-flag"></i> French
-              </li>
-              <li>
-                <i className="fas fa-flag"></i> German
-              </li>
+              <li><i className="fas fa-flag-usa"></i> English</li>
+              <li><i className="fas fa-flag"></i> French</li>
+              <li><i className="fas fa-flag"></i> German</li>
               {/* Add more languages as needed */}
             </ul>
           )}

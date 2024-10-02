@@ -1,9 +1,10 @@
+// frontend/src/pages/Login.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { auth, db } from "../firebase"; 
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { auth } from "../firebase"; 
 import '../styles/Auth.css';
+import axios from 'axios'; // Install axios: npm install axios
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -18,40 +19,54 @@ const Login = () => {
     }
 
     try {
+      // Sign in with Firebase Authentication
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Retrieve the user's role from Firestore
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      const userData = userDoc.data();
-      const role = userData?.role || 'user';
+      console.log('Logged in with Firebase:', user.uid);
 
-      console.log('Logged in successfully');
+      // Get Firebase ID token
+      const idToken = await user.getIdToken();
+
+      // Fetch user data from backend (MySQL)
+      const response = await axios.get('http://localhost:3001/api/protected/dashboard', {
+        headers: {
+          'Authorization': `Bearer ${idToken}`
+        }
+      });
+
+      const userData = response.data.user;
+      const role = userData.UserType || 'User';
+
+      console.log('User data from MySQL:', userData);
 
       // Redirect based on role
-      if (role === 'admin') {
+      if (role === 'Admin') {
         navigate('/admin/dashboard');
-      } else if (role === 'business') {
+      } else if (role === 'BusinessAdministrator') {
         navigate('/business/dashboard');
       } else {
         navigate('/');
       }
     } catch (error) {
-      console.error('Error logging in Firebase:', error.message);
-      console.error('Error code:', error.code);
-
-      switch (error.code) {
-        case 'auth/user-not-found':
-          alert('No user found with this email.');
-          break;
-        case 'auth/wrong-password':
-          alert('Incorrect password.');
-          break;
-        case 'auth/invalid-email':
-          alert('Invalid email format.');
-          break;
-        default:
-          alert('Failed to log in. Please try again.');
+      console.error('Error logging in Firebase:', error);
+      // Handle login errors
+      if (error.response && error.response.data && error.response.data.message) {
+        alert(error.response.data.message);
+      } else {
+        switch (error.code) {
+          case 'auth/user-not-found':
+            alert('No user found with this email.');
+            break;
+          case 'auth/wrong-password':
+            alert('Incorrect password.');
+            break;
+          case 'auth/invalid-email':
+            alert('Invalid email format.');
+            break;
+          default:
+            alert('Failed to log in. Please try again.');
+        }
       }
     }
   };
@@ -60,36 +75,66 @@ const Login = () => {
     const provider = new GoogleAuthProvider();
 
     try {
+      // Sign in with Google
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      // Check if the user already exists in Firestore
-      const userDoc = await getDoc(doc(db, "users", user.uid));
+      console.log('Logged in with Google:', user.uid);
 
-      if (!userDoc.exists()) {
-        // New user, set up profile in Firestore with a default role
-        await setDoc(doc(db, "users", user.uid), {
-          name: user.displayName,
+      // Get Firebase ID token
+      const idToken = await user.getIdToken();
+
+      // Check if user exists in MySQL
+      const response = await axios.get('http://localhost:3001/api/protected/dashboard', {
+        headers: {
+          'Authorization': `Bearer ${idToken}`
+        }
+      });
+
+      if (response.status === 404) {
+        // User doesn't exist in MySQL, synchronize
+        await axios.post('http://localhost:3001/api/auth/sync', {
+          name: user.displayName || '',
+          firstName: '', // Populate if available
+          lastName: '',  // Populate if available
           email: user.email,
-          role: 'user', // Default role is 'user'
-          createdAt: new Date()
+          phoneNumber: '', // Populate if available
+          userType: 'User',
+          profilePicture: user.photoURL || ''
+        }, {
+          headers: {
+            'Authorization': `Bearer ${idToken}`
+          }
         });
+        console.log('User synchronized with MySQL');
       }
 
-      // Redirect based on role
-      const userData = userDoc.exists() ? userDoc.data() : { role: 'user' };
-      const role = userData.role;
+      // Fetch updated user data
+      const updatedResponse = await axios.get('http://localhost:3001/api/protected/dashboard', {
+        headers: {
+          'Authorization': `Bearer ${idToken}`
+        }
+      });
 
-      if (role === 'admin') {
+      const userData = updatedResponse.data.user;
+      const role = userData.UserType || 'User';
+
+      // Redirect based on role
+      if (role === 'Admin') {
         navigate('/admin/dashboard');
-      } else if (role === 'business') {
+      } else if (role === 'BusinessAdministrator') {
         navigate('/business/dashboard');
       } else {
         navigate('/');
       }
     } catch (error) {
       console.error('Error during Google login:', error);
-      alert('Failed to log in with Google. Please try again.');
+      // Handle Google login errors
+      if (error.response && error.response.data && error.response.data.message) {
+        alert(error.response.data.message);
+      } else {
+        alert('Failed to log in with Google. Please try again.');
+      }
     }
   };
 

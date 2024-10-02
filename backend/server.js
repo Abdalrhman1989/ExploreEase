@@ -1,5 +1,4 @@
-// backend/server.js
-
+// backend/app.js
 require('dotenv').config();
 const express = require('express');
 const Amadeus = require('amadeus');
@@ -9,11 +8,15 @@ const axios = require('axios');
 const { body, validationResult } = require('express-validator');
 const rateLimit = require('express-rate-limit');
 const winston = require('winston');
-const testimonialsRouter = require('./routes/testimonials');
+const mysql = require('mysql2/promise'); // Flyttet her for klarhed
 
+// Ruter
+const authRoutes = require('./routes/auth');
+const protectedRoutes = require('./routes/protected');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
-const PORT = process.env.BACKEND_PORT || 3001;
+const PORT = process.env.PORT || 3001;
 
 // Setup Winston logger for logging events and errors
 const logger = winston.createLogger({
@@ -36,8 +39,12 @@ if (process.env.NODE_ENV !== 'production') {
 
 // Middleware Configuration
 app.use(express.json()); // To parse JSON bodies
+
+// Configure CORS
 app.use(cors({
   origin: 'http://localhost:3000', // Update this to your frontend URL in production
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Rate Limiting to prevent abuse
@@ -53,6 +60,38 @@ const amadeus = new Amadeus({
   clientId: process.env.AMADEUS_API_KEY,
   clientSecret: process.env.AMADEUS_API_SECRET,
 });
+
+// Databaseforbindelse
+let db;
+const initDB = async () => {
+  try {
+    db = await mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USERNAME, // Opdateret til DB_USERNAME
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME_DEVELOPMENT, // Opdateret til DB_NAME_DEVELOPMENT
+    });
+    console.log('Forbundet til MySQL');
+    logger.info('Forbundet til MySQL');
+  } catch (error) {
+    console.error('Fejl ved forbindelse til MySQL:', error);
+    logger.error('Fejl ved forbindelse til MySQL:', error);
+    process.exit(1);
+  }
+};
+
+// Initialiser DB og start server
+initDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server kører på port ${PORT}`);
+    logger.info(`Server startet på port ${PORT}`);
+  });
+});
+
+// Brug ruter
+app.use('/api/auth', authRoutes);
+app.use('/api/protected', protectedRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health Check Endpoint
 app.get('/', (req, res) => {
@@ -89,8 +128,6 @@ app.post('/api/search-flights', async (req, res) => {
   }
 });
 
-
-
 // Flight Booking Endpoint
 app.post('/api/book-flight', async (req, res) => {
   try {
@@ -123,7 +160,6 @@ app.post('/api/book-flight', async (req, res) => {
     res.status(500).json({ error: 'Failed to book flight' });
   }
 });
-app.use('/api/testimonials', testimonialsRouter);
 
 // Newsletter Subscription Endpoint using Mailchimp
 app.post('/api/subscribe',
@@ -338,9 +374,3 @@ ExploreEase Team`,
     }
   }
 );
-
-// Start Server
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-  logger.info(`Server started on port ${PORT}`);
-});

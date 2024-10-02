@@ -1,3 +1,4 @@
+// backend/migrations/20241001020605-create-user.js
 'use strict';
 module.exports = {
   async up(queryInterface, Sequelize) {
@@ -7,6 +8,11 @@ module.exports = {
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER,
+      },
+      FirebaseUID: { // New field
+        allowNull: false,
+        unique: true,
+        type: Sequelize.STRING(255),
       },
       UserName: {
         allowNull: false,
@@ -23,9 +29,10 @@ module.exports = {
       Email: {
         allowNull: false,
         type: Sequelize.STRING(100),
+        unique: true,
       },
-      Password: {
-        allowNull: false,
+      Password: { // Optional
+        allowNull: true,
         type: Sequelize.STRING(255),
       },
       PhoneNumber: {

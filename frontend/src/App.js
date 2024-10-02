@@ -1,3 +1,4 @@
+// frontend/src/App.js
 import React from 'react';
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import Home from './pages/Home';

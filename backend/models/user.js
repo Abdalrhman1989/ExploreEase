@@ -1,9 +1,10 @@
+// backend/models/user.js
 'use strict';
 const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     static associate(models) {
-      // associations can be defined here
+      // Define associations here if any
     }
   }
   User.init({
@@ -12,6 +13,11 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       autoIncrement: true,
       primaryKey: true
+    },
+    FirebaseUID: { // Link to Firebase UID
+      type: DataTypes.STRING(255),
+      allowNull: false,
+      unique: true
     },
     UserName: {
       type: DataTypes.STRING(50),
@@ -27,11 +33,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     Email: {
       type: DataTypes.STRING(100),
-      allowNull: false
-    },
-    Password: {
-      type: DataTypes.STRING(255),
-      allowNull: false
+      allowNull: false,
+      unique: true
     },
     PhoneNumber: {
       type: DataTypes.STRING(20),
@@ -53,6 +56,8 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'User',
+    tableName: 'Users',
+    timestamps: true, // Sequelize håndterer createdAt og updatedAt
   });
   return User;
 };

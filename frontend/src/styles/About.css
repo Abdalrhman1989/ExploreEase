@@ -1,0 +1,264 @@
+/* Base Styles */
+.about-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Roboto', sans-serif;
+    color: #2c3e50;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Hero Section */
+.about-hero {
+    background: linear-gradient(135deg, #3498db 0%, #2ecc71 100%);
+    color: white;
+    padding: 100px 20px;
+    text-align: center;
+    border-radius: 10px;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+.about-hero-content h1 {
+    font-size: 48px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.about-hero-content p {
+    font-size: 24px;
+}
+
+/* Mission and Vision Section */
+.about-mission-vision {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+    margin-bottom: 40px;
+}
+
+.mission, .vision {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.image-container {
+    flex: 1;
+    overflow: hidden;
+    border-radius: 10px 0 0 10px;
+}
+
+.image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.text-container {
+    flex: 1;
+    padding: 20px;
+}
+
+.mission h2, .vision h2 {
+    font-size: 28px;
+    margin-bottom: 10px;
+    color: #2980b9;
+}
+
+.mission p, .vision p {
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+.mission:hover .image-container img,
+.vision:hover .image-container img {
+    transform: scale(1.05);
+}
+
+/* Core Values Section */
+.about-values {
+    background: #2980b9;
+    color: white;
+    padding: 40px 20px;
+    border-radius: 10px;
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.about-values h2 {
+    font-size: 32px;
+    margin-bottom: 20px;
+}
+
+.values-list {
+    list-style: none;
+    padding: 0;
+}
+
+.values-list li {
+    font-size: 18px;
+    line-height: 2;
+    margin-bottom: 10px;
+}
+
+.values-list span {
+    font-weight: bold;
+}
+
+/* Meet Our Team Section */
+.about-team {
+    margin-bottom: 40px;
+}
+
+.about-team h2 {
+    font-size: 32px;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #2980b9;
+}
+
+.team-members {
+    display: flex;
+    justify-content: space-around;
+    gap: 20px;
+}
+
+.team-member {
+    flex: 1;
+    text-align: center;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.team-member:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.team-member img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    margin-bottom: 15px;
+    object-fit: cover;
+}
+
+.team-member h3 {
+    font-size: 20px;
+    margin-bottom: 5px;
+    color: #2c3e50;
+}
+
+.team-member p {
+    font-size: 16px;
+    color: #7f8c8d;
+}
+
+/* Our Journey Section */
+.about-history {
+    display: flex;
+    align-items: center;
+    background: #ecf0f1;
+    padding: 40px 20px;
+    border-radius: 10px;
+    margin-bottom: 40px;
+}
+
+.about-history .image-container {
+    flex: 1;
+    border-radius: 10px 0 0 10px;
+    overflow: hidden;
+}
+
+.about-history .image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.about-history .text-container {
+    flex: 1;
+    padding: 20px;
+    text-align: left;
+}
+
+.about-history h2 {
+    font-size: 32px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+.about-history p {
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+/* Testimonials Section */
+.about-testimonials {
+    text-align: center;
+    padding: 40px 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.about-testimonials h2 {
+    font-size: 32px;
+    margin-bottom: 20px;
+    color: #2980b9;
+}
+
+.testimonials {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 40px;
+}
+
+.testimonial {
+    background: #3498db;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 500px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    flex: 1 1 45%;
+}
+
+.testimonial h4 {
+    margin-top: 15px;
+    font-size: 18px;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .about-mission-vision {
+        flex-direction: column;
+    }
+
+    .mission, .vision {
+        flex-direction: column;
+    }
+
+    .about-history {
+        flex-direction: column;
+    }
+
+    .team-members {
+        flex-direction: column;
+    }
+
+    .testimonial {
+        margin-bottom: 20px;
+    }
+}

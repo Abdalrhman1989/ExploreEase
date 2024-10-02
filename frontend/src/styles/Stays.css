@@ -1,0 +1,14 @@
+.stays {
+    font-family: 'Arial', sans-serif;
+    color: #333;
+  }
+  
+  .content-wrapper {
+    padding: 40px 20px;
+    background-color: #f4f4f4;
+  }
+  
+  .content-wrapper .trending-section + .trending-section {
+    margin-top: 40px;
+  }
+  

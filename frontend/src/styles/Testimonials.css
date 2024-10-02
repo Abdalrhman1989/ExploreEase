@@ -1,0 +1,18 @@
+/* src/styles/Testimonials.css */
+
+.testimonials-section {
+    padding: 40px 20px;
+    background-color: #f0f4f8;
+  }
+  
+  .testimonial-card {
+    text-align: center;
+    padding: 20px;
+  }
+  
+  .testimonial-avatar {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 20px;
+  }
+  

@@ -1,0 +1,76 @@
+.privacy-policy-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Roboto', sans-serif;
+    color: #2c3e50;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.privacy-hero {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: white;
+    padding: 100px 20px;
+    text-align: center;
+    border-radius: 10px;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+.privacy-hero-content {
+    background-color: rgba(0, 0, 0, 0.5); /* Add dark overlay */
+    padding: 20px;
+    border-radius: 10px;
+    display: inline-block;
+}
+
+.privacy-hero h1 {
+    font-size: 48px;
+    font-weight: bold;
+}
+
+.privacy-hero p {
+    font-size: 24px;
+}
+
+.privacy-introduction, .privacy-collection, .privacy-use, .privacy-sharing, .privacy-security, .privacy-rights, .privacy-contact {
+    margin-bottom: 40px;
+}
+
+.privacy-introduction h2, .privacy-collection h2, .privacy-use h2, .privacy-sharing h2, .privacy-security h2, .privacy-rights h2, .privacy-contact h2 {
+    font-size: 28px;
+    font-weight: bold;
+    color: #2980b9;
+    margin-bottom: 20px;
+}
+
+.privacy-introduction p, .privacy-collection p, .privacy-use p, .privacy-sharing p, .privacy-security p, .privacy-rights p, .privacy-contact p {
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+.privacy-collection ul, .privacy-use ul, .privacy-sharing ul, .privacy-security ul, .privacy-rights ul, .privacy-contact ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.privacy-collection li, .privacy-use li, .privacy-sharing li, .privacy-security li, .privacy-rights li, .privacy-contact li {
+    font-size: 18px;
+    color: #34495e;
+    margin-bottom: 10px;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .privacy-hero h1 {
+        font-size: 36px;
+    }
+
+    .privacy-hero p {
+        font-size: 20px;
+    }
+}

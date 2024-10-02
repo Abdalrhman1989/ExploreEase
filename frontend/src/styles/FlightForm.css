@@ -1,0 +1,86 @@
+.flight-management {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .flight-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .flight-form input {
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .form-buttons {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .flight-form button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .flight-form button:hover {
+    background-color: #0056b3;
+  }
+  
+  .flight-table {
+    width: 100%;
+    margin-top: 30px;
+    border-collapse: collapse;
+  }
+  
+  .flight-table th,
+  .flight-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+  }
+  
+  .flight-table th {
+    background-color: #f4f4f4;
+  }
+  
+  .flight-table td button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  
+  .flight-table td button:first-child {
+    background-color: #ffc107;
+    color: #fff;
+    margin-right: 5px;
+  }
+  
+  .flight-table td button:first-child:hover {
+    background-color: #e0a800;
+  }
+  
+  .flight-table td button:last-child {
+    background-color: #dc3545;
+    color: #fff;
+  }
+  
+  .flight-table td button:last-child:hover {
+    background-color: #c82333;
+  }
+  

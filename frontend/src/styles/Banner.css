@@ -1,0 +1,76 @@
+.banner {
+    height: 75vh;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    padding: 20px;
+  }
+  
+  .banner-overlay {
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 1200px;
+    text-align: center;
+  }
+  
+  .banner h1 {
+    font-size: 3rem;
+    margin-bottom: 10px;
+  }
+  
+  .banner p {
+    font-size: 1.25rem;
+    margin-bottom: 20px;
+  }
+  
+  .banner-button {
+    padding: 12px 25px;
+    background-color: #ff7e5f;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .banner-button:hover {
+    background-color: #ff4500;
+  }
+  
+  @media (max-width: 768px) {
+    .banner h1 {
+      font-size: 2rem;
+    }
+  
+    .banner p {
+      font-size: 1rem;
+    }
+  
+    .banner-button {
+      padding: 10px 20px;
+      font-size: 0.9rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .banner h1 {
+      font-size: 1.5rem;
+    }
+  
+    .banner p {
+      font-size: 0.9rem;
+    }
+  
+    .banner-button {
+      padding: 8px 15px;
+      font-size: 0.8rem;
+    }
+  }
+  

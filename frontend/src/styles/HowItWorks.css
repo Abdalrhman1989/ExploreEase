@@ -1,0 +1,12 @@
+/* src/styles/HowItWorks.css */
+
+.how-it-works-section {
+    padding: 40px 20px;
+  }
+  
+  .how-it-works-section .MuiStepLabel-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  

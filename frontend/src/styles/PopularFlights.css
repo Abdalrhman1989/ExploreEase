@@ -1,0 +1,27 @@
+.popular-flights-container {
+    padding: 40px 20px;
+    background-color: #ffffff;
+    text-align: center;
+  }
+  
+  .popular-flights-container h5 {
+    margin-bottom: 30px;
+    color: #333;
+  }
+  
+  .flight-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    transition: box-shadow 0.3s;
+  }
+  
+  .flight-card:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .popular-flights-loading,
+  .popular-flights-error {
+    padding: 40px 20px;
+    text-align: center;
+  }
+  

@@ -1,0 +1,52 @@
+/* src/styles/BusinessOverview.css */
+.dashboard-overview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
+  }
+  
+  .overview-card {
+    flex: 1 1 calc(25% - 40px);
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #333;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s ease;
+  }
+  
+  .overview-card:hover {
+    background-color: #e2e6ea;
+  }
+  
+  .overview-icon {
+    font-size: 2rem;
+    margin-right: 15px;
+  }
+  
+  .overview-info h3 {
+    margin: 0;
+    font-size: 1.2rem;
+  }
+  
+  .overview-info p {
+    margin: 5px 0 0 0;
+    font-size: 0.9rem;
+    color: #666;
+  }
+  
+  @media (max-width: 768px) {
+    .overview-card {
+      flex: 1 1 calc(50% - 40px);
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .overview-card {
+      flex: 1 1 100%;
+    }
+  }
+  

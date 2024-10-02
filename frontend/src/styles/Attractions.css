@@ -1,0 +1,204 @@
+.attractions {
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+    padding-bottom: 50px;
+}
+
+.map-container {
+    position: relative;
+    margin: 50px auto;
+    width: 90%;
+    max-width: 1200px;
+    text-align: center;
+}
+
+.map-container h2 {
+    margin-bottom: 30px;
+    font-size: 2.5rem;
+    color: #003580;
+}
+
+.map-search-bar {
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 600px;
+    z-index: 1000;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.map-search-bar input {
+    width: 70%;
+    padding: 12px;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    outline: none;
+}
+
+.map-search-bar button {
+    padding: 12px 25px;
+    font-size: 1rem;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-left: 10px;
+}
+
+.map-search-bar button:hover {
+    background-color: #0056b3;
+}
+
+.featured-categories {
+    padding: 50px 20px;
+    background-color: #f4f4f4;
+    text-align: center;
+}
+
+.featured-categories h2 {
+    margin-bottom: 40px;
+    font-size: 2.5rem;
+    color: #003580;
+}
+
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 25px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.category-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.category-item img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 10px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.category-item:hover img {
+    transform: scale(1.05);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.category-item h3 {
+    position: absolute;
+    bottom: 15px;
+    left: 20px;
+    color: white;
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
+    font-size: 1.5rem;
+    transition: color 0.3s ease;
+}
+
+.category-item:hover h3 {
+    color: #ff9900;
+}
+
+.trending-destinations {
+    padding: 50px 20px;
+    background-color: #fff;
+}
+
+.trending-destinations h2 {
+    text-align: center;
+    margin-bottom: 40px;
+    font-size: 2.5rem;
+    color: #003580;
+}
+
+.trending-destinations .destination-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.trending-destinations .destination-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.trending-destinations .destination-item img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 10px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.trending-destinations .destination-item:hover img {
+    transform: scale(1.05);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.trending-destinations .destination-item h3 {
+    position: absolute;
+    bottom: 15px;
+    left: 20px;
+    color: white;
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
+    font-size: 1.5rem;
+    transition: color 0.3s ease;
+}
+
+.trending-destinations .destination-item:hover h3 {
+    color: #ff9900;
+}
+
+/* Additional global styling */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+    line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+    padding: 0;
+    font-weight: 700;
+}
+
+button {
+    cursor: pointer;
+    outline: none;
+    border: none;
+}
+
+img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+.container {
+    width: 90%;
+    margin: 0 auto;
+    max-width: 1200px;
+}
+

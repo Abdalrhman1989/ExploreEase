@@ -1,0 +1,48 @@
+/* src/adminStyles/AdminSettings.css */
+
+.page-content {
+    padding: 20px;
+  }
+  
+  .page-content h2 {
+    margin-bottom: 20px;
+  }
+  
+  .settings-form {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .form-group input,
+  .form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .btn-save {
+    padding: 10px 20px;
+    background-color: #1f2937;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  
+  .btn-save:hover {
+    background-color: #374151;
+  }
+  

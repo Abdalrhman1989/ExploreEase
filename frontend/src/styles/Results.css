@@ -1,0 +1,205 @@
+/* Global styles */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f5f6fa;
+    margin: 0;
+    padding: 0;
+    color: #2c3e50;
+}
+
+/* Results Container */
+.results-container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Search Summary */
+.search-summary {
+    margin-bottom: 30px;
+}
+
+.search-header {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.filters {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.filter-item {
+    font-size: 14px;
+    color: #7f8c8d;
+    background-color: #ecf0f1;
+    padding: 8px 12px;
+    border-radius: 8px;
+}
+
+/* Popular Filters */
+.popular-filters {
+    margin-top: 20px;
+    border-top: 1px solid #ddd;
+    padding-top: 20px;
+}
+
+.filter-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    font-size: 14px;
+    color: #34495e;
+}
+
+.filter-checkbox {
+    display: flex;
+    align-items: center;
+}
+
+.filter-checkbox input {
+    margin-right: 10px;
+    width: 18px;
+    height: 18px;
+    accent-color: #3498db;
+    cursor: pointer;
+}
+
+/* Result Card */
+.results-section {
+    margin-top: 20px;
+}
+
+.result-card {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    background-color: #fdfdfd;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.result-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Price Section */
+.price-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.price {
+    font-size: 24px;
+    font-weight: bold;
+    color: #e74c3c;
+}
+
+.view-details-btn {
+    padding: 10px 20px;
+    background-color: #3498db;
+    color: #fff;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 12px;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.view-details-btn:hover {
+    background-color: #2980b9;
+    transform: scale(1.05);
+}
+
+/* Media Queries */
+@media (min-width: 768px) {
+    .results-container {
+        padding: 25px;
+    }
+
+    .search-header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .filters {
+        flex-direction: row;
+        gap: 15px;
+    }
+
+    .filter-options {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .result-card {
+        flex-direction: row;
+        align-items: center;
+        padding: 25px;
+    }
+
+    .flight-details,
+    .stay-details,
+    .car-details,
+    .attraction-details {
+        flex-direction: row;
+        gap: 20px;
+        flex: 2;
+    }
+
+    .price-section {
+        flex: 1;
+        align-items: flex-end;
+    }
+}
+
+@media (min-width: 1024px) {
+    .results-container {
+        max-width: 1400px;
+    }
+
+    .title {
+        font-size: 32px;
+    }
+
+    .result-card {
+        padding: 30px;
+    }
+
+    .price {
+        font-size: 30px;
+    }
+}
+
+@media (min-width: 1440px) {
+    .result-card {
+        padding: 35px;
+    }
+
+    .price {
+        font-size: 36px;
+    }
+}

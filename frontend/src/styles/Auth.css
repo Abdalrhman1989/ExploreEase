@@ -1,0 +1,128 @@
+/* Container for the entire authentication page */
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: url('../assets/171b2c11-ffcd-43ec-8b2b-313e08cd40f8.webp') no-repeat center center/cover; /* Background image */
+    font-family: 'Arial', sans-serif;
+}
+
+/* Box containing the login/register form */
+.auth-box {
+    background: rgba(255, 255, 255, 0.9); /* Semi-transparent background for better readability */
+    padding: 50px;
+    border-radius: 15px;
+    box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.15); /* Subtle shadow for depth */
+    width: 100%;
+    max-width: 450px; /* Ensures form isn't too wide */
+    text-align: center;
+}
+
+/* Heading within the auth box */
+.auth-box h2 {
+    margin-bottom: 35px;
+    font-size: 2.2rem;
+    color: #34495e;
+    font-weight: 600;
+}
+
+/* Form layout and spacing */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 25px; /* Space between form elements */
+}
+
+/* Styling for input fields */
+.auth-form input {
+    padding: 14px;
+    font-size: 1.1rem;
+    border: 1px solid #d3d9de;
+    border-radius: 8px;
+    background: #ecf0f1; /* Light grey background */
+    transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+/* Input fields on focus */
+.auth-form input:focus {
+    background: #ffffff; /* White background when focused */
+    border-color: #2980b9; /* Blue border when focused */
+    outline: none;
+}
+
+/* Primary button styling */
+.auth-button {
+    padding: 14px;
+    font-size: 1.2rem;
+    background-color: #2980b9; /* Blue background for the button */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* Button hover effect */
+.auth-button:hover {
+    background-color: #1f5c81; /* Darker blue on hover */
+}
+
+/* Text and links for switching between login and register */
+.auth-switch {
+    margin-top: 25px;
+    font-size: 1rem;
+    color: #7f8c8d; /* Grey text */
+}
+
+.auth-switch a {
+    color: #2980b9; /* Blue link */
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+.auth-switch a:hover {
+    color: #1f5c81; /* Darker blue on hover */
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .auth-box {
+        padding: 40px;
+        width: 90%;
+        max-width: 100%;
+    }
+
+    .auth-form input {
+        font-size: 1rem;
+    }
+
+    .auth-button {
+        font-size: 1rem;
+        padding: 12px;
+    }
+
+    .auth-box h2 {
+        font-size: 1.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .auth-box {
+        padding: 30px;
+    }
+
+    .auth-form input {
+        font-size: 0.9rem;
+    }
+
+    .auth-button {
+        font-size: 0.9rem;
+        padding: 10px;
+    }
+
+    .auth-box h2 {
+        font-size: 1.6rem;
+    }
+}

@@ -1,0 +1,115 @@
+/* General Footer Styling */
+.footer {
+  background-color: #333;
+  color: #fff;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.footerContainer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Styling for columns */
+.column {
+  flex: 1;
+  margin: 20px;
+  min-width: 200px; /* Ensures columns don't shrink too small */
+}
+
+.column h4 {
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.column ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.column ul li {
+  margin-bottom: 10px;
+}
+
+.column ul li a {
+  color: #fff;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.column ul li a:hover {
+  color: #ffdd57;
+}
+
+/* Social Links Styling */
+.socialLinks a {
+  margin: 0 10px;
+  color: #fff;
+  text-decoration: none;
+  font-size: 18px;
+}
+
+.socialLinks a:hover {
+  color: #ffdd57;
+}
+
+/* Footer Bottom */
+.footerBottom {
+  margin-top: 40px;
+  border-top: 1px solid #444;
+  padding-top: 20px;
+}
+
+.footerBottom p {
+  margin: 5px 0;
+}
+
+.languageLocation {
+  margin-top: 10px;
+}
+
+.languageLocation span {
+  margin-right: 10px;
+}
+
+/* Responsive Design */
+/* On small screens, stack the columns vertically */
+@media (max-width: 768px) {
+  .footerContainer {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .column {
+    margin: 10px 0;
+    text-align: center;
+  }
+  
+  .socialLinks {
+    margin: 20px 0;
+  }
+  
+  .footerBottom {
+    padding-top: 15px;
+  }
+}
+
+/* Extra small devices (phones) */
+@media (max-width: 480px) {
+  .footer {
+    padding: 20px 10px;
+  }
+
+  .footerContainer {
+    width: 100%;
+  }
+
+  .column {
+    min-width: 100%; /* Ensures columns take full width on mobile */
+    text-align: center;
+  }
+}

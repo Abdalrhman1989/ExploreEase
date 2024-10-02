@@ -1,0 +1,93 @@
+/* src/components/styles/AdminConfirmBookings.css */
+
+.page-content {
+    padding: 20px;
+  }
+  
+  .bookings-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .bookings-table th,
+  .bookings-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+  }
+  
+  .bookings-table th {
+    background-color: #f2f2f2;
+  }
+  
+  .bookings-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .bookings-table tr:hover {
+    background-color: #f1f1f1;
+  }
+  
+  .btn-approve,
+  .btn-reject {
+    padding: 8px 12px;
+    margin-right: 5px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .btn-approve {
+    background-color: #28a745;
+    color: white;
+  }
+  
+  .btn-reject {
+    background-color: #dc3545;
+    color: white;
+  }
+  
+  .btn-approve:hover {
+    background-color: #218838;
+  }
+  
+  .btn-reject:hover {
+    background-color: #c82333;
+  }
+  
+  /* Responsive Styles */
+  @media (max-width: 600px) {
+    .bookings-table thead {
+      display: none;
+    }
+  
+    .bookings-table,
+    .bookings-table tbody,
+    .bookings-table tr,
+    .bookings-table td {
+      display: block;
+      width: 100%;
+    }
+  
+    .bookings-table tr {
+      margin-bottom: 15px;
+    }
+  
+    .bookings-table td {
+      text-align: right;
+      padding-left: 50%;
+      position: relative;
+    }
+  
+    .bookings-table td::before {
+      content: attr(data-label);
+      position: absolute;
+      left: 15px;
+      width: 45%;
+      padding-left: 15px;
+      font-weight: bold;
+      text-align: left;
+    }
+  }
+  

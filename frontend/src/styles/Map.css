@@ -1,0 +1,49 @@
+.map-container {
+    position: relative;
+    margin: 50px auto;
+    width: 90%;
+    max-width: 1200px;
+    text-align: center;
+}
+
+.map-search-bar {
+    position: absolute;
+    top: 10px; 
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%; 
+    max-width: 600px;
+    z-index: 1000;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.map-search-bar input {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    outline: none;
+    margin-right: 10px;
+}
+
+.map-search-bar button {
+    padding: 12px 25px;
+    font-size: 1rem;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.map-search-bar button:hover {
+    background-color: #0056b3;
+}

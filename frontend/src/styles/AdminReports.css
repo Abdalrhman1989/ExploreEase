@@ -1,0 +1,27 @@
+/* src/adminStyles/AdminReports.css */
+
+.page-content {
+    padding: 20px;
+  }
+  
+  .page-content h2 {
+    margin-bottom: 20px;
+  }
+  
+  .reports-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  
+  .chart-placeholder {
+    background-color: #f4f4f4;
+    height: 300px;
+    flex: 1;
+    min-width: 300px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  

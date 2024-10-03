@@ -1,18 +1,13 @@
 // backend/middleware/authorize.js
 const authorize = (roles = []) => {
-    // roles param can be a single role string (e.g., 'Admin') or an array of roles (e.g., ['Admin', 'BusinessAdministrator'])
     if (typeof roles === 'string') {
       roles = [roles];
     }
   
     return [
-      // Authentication middleware should have been called before
-      (req, res, next) => {
-        if (!req.user) {
-          return res.status(401).json({ message: 'Unauthorized' });
-        }
-        next();
-      },
+      // Authentication middleware
+      require('./authenticate'),
+  
       // Authorization middleware
       async (req, res, next) => {
         const { User } = require('../models');

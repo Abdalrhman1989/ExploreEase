@@ -88,7 +88,7 @@ const Register = () => {
         <form onSubmit={handleRegister} className="auth-form">
           <input 
             type="text" 
-            placeholder="Name" 
+            placeholder="User Name" 
             value={name}
             onChange={(e) => setName(e.target.value)}
             required

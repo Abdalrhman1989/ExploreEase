@@ -1,0 +1,198 @@
+/* frontend/src/styles/FAQ.css */
+
+.faq-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
+  
+  .faq-container h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2.5em;
+    color: #333;
+  }
+  
+  .faq-search {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    padding: 10px 20px;
+    background-color: #f9f9f9;
+  }
+  
+  .faq-search .search-icon {
+    color: #555;
+    margin-right: 10px;
+  }
+  
+  .faq-search input {
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 1em;
+    background-color: transparent;
+  }
+  
+  .faq-accordion .faq-category {
+    margin-bottom: 20px;
+  }
+  
+  .faq-accordion .faq-category h2 {
+    font-size: 1.5em;
+    color: #007BFF;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #007BFF;
+    padding-bottom: 5px;
+  }
+  
+  .accordion-item {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    background-color: #fff;
+  }
+  
+  .accordion-question {
+    width: 100%;
+    text-align: left;
+    padding: 15px 20px;
+    font-size: 1.1em;
+    background-color: #f1f1f1;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.3s ease;
+  }
+  
+  .accordion-question:hover {
+    background-color: #e2e2e2;
+  }
+  
+  .accordion-icon {
+    font-size: 1.5em;
+    color: #007BFF;
+  }
+  
+  .accordion-answer {
+    padding: 15px 20px;
+    background-color: #fff;
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  .faq-suggest {
+    margin-top: 40px;
+    text-align: center;
+  }
+  
+  .faq-suggest button {
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    font-size: 1em;
+    border-radius: 25px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s ease;
+  }
+  
+  .faq-suggest button:hover {
+    background-color: #218838;
+  }
+  
+  .faq-suggest .fa-plus {
+    margin-right: 8px;
+  }
+  
+  .suggestion-form {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .suggestion-form textarea {
+    width: 100%;
+    max-width: 500px;
+    height: 100px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    resize: vertical;
+    font-size: 1em;
+  }
+  
+  .suggestion-form button {
+    margin-top: 10px;
+    background-color: #17a2b8;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1em;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .suggestion-form button:hover {
+    background-color: #138496;
+  }
+  
+  .suggestion-status {
+    margin-top: 10px;
+    color: #28a745;
+  }
+  
+  @media (max-width: 600px) {
+    .faq-container {
+      padding: 20px 10px;
+    }
+  
+    .faq-search {
+      padding: 8px 15px;
+    }
+  
+    .faq-search input {
+      font-size: 0.9em;
+    }
+  
+    .faq-accordion .faq-category h2 {
+      font-size: 1.3em;
+    }
+  
+    .accordion-question {
+      font-size: 1em;
+    }
+  
+    .faq-suggest button {
+      padding: 10px 16px;
+      font-size: 0.9em;
+    }
+  
+    .suggestion-form textarea {
+      height: 80px;
+    }
+  
+    .suggestion-form button {
+      padding: 8px 16px;
+      font-size: 0.9em;
+    }
+  }
+  

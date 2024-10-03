@@ -321,6 +321,8 @@ body {
   transform: scale(1.05);
 }
 
+
+
 /* Testimonials Section */
 .testimonials {
   padding: 80px 20px;
@@ -352,10 +354,6 @@ body {
   max-width: 800px;
   width: 100%;
   margin: 0 auto;
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 30px;
 }
 
 .testimonial-card {
@@ -404,6 +402,70 @@ body {
   margin-top: 10px;
   text-align: center;
 }
+
+/* Testimonial Form */
+.testimonial-form-container {
+  margin-top: 60px;
+  width: 100%;
+  max-width: 600px;
+}
+
+.testimonial-form-container h3 {
+  font-size: 1.75rem;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.testimonial-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.testimonial-form .form-group textarea {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  resize: vertical;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.testimonial-form .form-group textarea:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+  outline: none;
+}
+
+.testimonial-form .cta-button {
+  align-self: center;
+  background-color: #007bff;
+  border: none;
+  color: white;
+  padding: 12px 25px;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 25px;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.testimonial-form .cta-button:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+}
+
+/* Form Status Message */
+.form-status {
+  margin-top: 15px;
+  font-size: 1rem;
+  color: #28a745; /* Green color for success */
+}
+
+.form-status.error {
+  color: #dc3545; /* Red color for errors */
+}
+
 
 /* Contact Us Section */
 .contact-us {

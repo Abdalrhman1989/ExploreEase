@@ -1,15 +1,18 @@
-import React, { useEffect, useState } from 'react';
+// src/components/Navbar.jsx
+
+import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
-import axios from 'axios'; // Axios for API requests
+import axios from 'axios';
 import '../styles/NavBar.css';
+import { AuthContext } from '../context/AuthContext';
 
 const Navbar = () => {
   const [menuActive, setMenuActive] = useState(false);
   const [languageMenuActive, setLanguageMenuActive] = useState(false);
-  const [userRole, setUserRole] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  
+  const { isAuthenticated, userRole } = useContext(AuthContext);
 
   const toggleMenu = () => {
     setMenuActive(!menuActive);
@@ -19,39 +22,13 @@ const Navbar = () => {
     setLanguageMenuActive(!languageMenuActive);
   };
 
-  useEffect(() => {
-    // Listen for auth state changes
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        setIsAuthenticated(true);
-        
-        try {
-          // Fetch user data from your backend (MySQL)
-          const idToken = await user.getIdToken();
-          const response = await axios.get('http://localhost:3001/api/protected/user', {
-            headers: {
-              'Authorization': `Bearer ${idToken}`
-            }
-          });
-
-          const userData = response.data.user;
-          setUserRole(userData.UserType); // Adjust according to your database field
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-        }
-      } else {
-        setIsAuthenticated(false);
-        setUserRole(null);
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
   const handleLogout = async () => {
-    await signOut(auth);
-    setIsAuthenticated(false);
-    setUserRole(null);
+    try {
+      await signOut(auth);
+      // The AuthContext will automatically update the state
+    } catch (error) {
+      console.error('Error during sign out:', error);
+    }
   };
 
   return (

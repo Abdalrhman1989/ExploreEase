@@ -3,12 +3,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/Home.css';
-import Slider from 'react-slick';
-import 'slick-carousel/slick/slick.css'; 
+import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
 import { FaHotel, FaPlane, FaCar, FaTrain, FaBus, FaUtensils } from 'react-icons/fa';
-import axios from 'axios'; // Import axios
+import axios from 'axios';
 
 // Importing Images
 import hotelImage from '../assets/hotel.jpg';
@@ -17,9 +16,6 @@ import carRentalImage from '../assets/carrenter.jpg';
 import trainImage from '../assets/train1.jpg';
 import busImage from '../assets/bus1.jpg';
 import restaurantImage from '../assets/Restaurant1.jpg';
-import person1 from '../assets/person1.jpg';
-import person2 from '../assets/person2.jpg';
-import person3 from '../assets/person3.jpg';
 
 // Importing Trending Destination Images
 import paris1 from '../assets/paris1.jpg';
@@ -27,16 +23,19 @@ import newyork1 from '../assets/newyork1.jpg';
 import tokyo1 from '../assets/tokyo1.jpg';
 import london1 from '../assets/london1.jpg';
 
+// Import the Testimonials component
+import Testimonials from '../components/Testimonials';
+
 const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  
+
   // Contact Form State
   const [contactFormData, setContactFormData] = useState({
     name: '',
     email: '',
     message: '',
   });
-  
+
   const [contactFormStatus, setContactFormStatus] = useState('');
 
   // Newsletter Form State
@@ -44,53 +43,53 @@ const Home = () => {
   const [newsletterStatus, setNewsletterStatus] = useState('');
 
   const slides = [
-    { 
-      title: 'Explore Stays', 
-      subtitle: 'Find the best hotels and more', 
-      imageUrl: hotelImage, 
-      link: '/stays', 
-      buttonText: 'Book Hotel Now', 
-      icon: <FaHotel /> 
+    {
+      title: 'Explore Stays',
+      subtitle: 'Find the best hotels and more',
+      imageUrl: hotelImage,
+      link: '/stays',
+      buttonText: 'Book Hotel Now',
+      icon: <FaHotel />,
     },
-    { 
-      title: 'Book Flights', 
-      subtitle: 'Discover great deals on flights', 
-      imageUrl: flightImage, 
-      link: '/flights', 
-      buttonText: 'Book Flight Now', 
-      icon: <FaPlane /> 
+    {
+      title: 'Book Flights',
+      subtitle: 'Discover great deals on flights',
+      imageUrl: flightImage,
+      link: '/flights',
+      buttonText: 'Book Flight Now',
+      icon: <FaPlane />,
     },
-    { 
-      title: 'Rent a Car', 
-      subtitle: 'Convenient car rentals at your destination', 
-      imageUrl: carRentalImage, 
-      link: '/car-rentals', 
-      buttonText: 'Rent Car Now', 
-      icon: <FaCar /> 
+    {
+      title: 'Rent a Car',
+      subtitle: 'Convenient car rentals at your destination',
+      imageUrl: carRentalImage,
+      link: '/car-rentals',
+      buttonText: 'Rent Car Now',
+      icon: <FaCar />,
     },
-    { 
-      title: 'Travel by Train', 
-      subtitle: 'Comfortable and scenic train journeys', 
-      imageUrl: trainImage, 
-      link: '/trains', 
-      buttonText: 'Book Train Now', 
-      icon: <FaTrain /> 
+    {
+      title: 'Travel by Train',
+      subtitle: 'Comfortable and scenic train journeys',
+      imageUrl: trainImage,
+      link: '/trains',
+      buttonText: 'Book Train Now',
+      icon: <FaTrain />,
     },
-    { 
-      title: 'Bus Services', 
-      subtitle: 'Affordable and reliable bus services', 
-      imageUrl: busImage, 
-      link: '/buses', 
-      buttonText: 'Book Bus Now', 
-      icon: <FaBus /> 
+    {
+      title: 'Bus Services',
+      subtitle: 'Affordable and reliable bus services',
+      imageUrl: busImage,
+      link: '/buses',
+      buttonText: 'Book Bus Now',
+      icon: <FaBus />,
     },
-    { 
-      title: 'Find Restaurants', 
-      subtitle: 'Delicious dining options near you', 
-      imageUrl: restaurantImage, 
-      link: '/restaurants', 
-      buttonText: 'Book Restaurant Now', 
-      icon: <FaUtensils /> 
+    {
+      title: 'Find Restaurants',
+      subtitle: 'Delicious dining options near you',
+      imageUrl: restaurantImage,
+      link: '/restaurants',
+      buttonText: 'Book Restaurant Now',
+      icon: <FaUtensils />,
     },
   ];
 
@@ -132,7 +131,9 @@ const Home = () => {
     e.preventDefault();
     setNewsletterStatus('Subscribing...');
     try {
-      const response = await axios.post('http://localhost:3001/api/subscribe', { email: newsletterEmail });
+      const response = await axios.post('http://localhost:3001/api/subscribe', {
+        email: newsletterEmail,
+      });
       if (response.data.success) {
         setNewsletterStatus('Subscribed successfully!');
         setNewsletterEmail('');
@@ -147,51 +148,6 @@ const Home = () => {
         setNewsletterStatus('An error occurred. Please try again later.');
       }
     }
-  };
-
-  // Testimonials Data
-  const testimonialsData = [
-    {
-      image: person1,
-      quote: "The best travel experience I've ever had! Everything was seamless and enjoyable.",
-      name: 'Sarah L.',
-    },
-    {
-      image: person2,
-      quote: 'Amazing service and unbeatable prices. Highly recommended!',
-      name: 'John D.',
-    },
-    {
-      image: person3,
-      quote: 'Highly recommend for anyone looking to explore the world. Fantastic support!',
-      name: 'Emily R.',
-    },
-    // Add more testimonials as needed
-  ];
-
-  // Testimonials Slider Settings
-  const testimonialSettings = {
-    dots: true,
-    infinite: true,
-    speed: 800,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    autoplay: true,
-    autoplaySpeed: 9000,
-    arrows: true,
-    adaptiveHeight: true,
-    pauseOnHover: true,
-    accessibility: true,
-    centerMode: true, // Ensures centering on mobile
-    centerPadding: '0px', // Removes extra padding
-    responsive: [
-      {
-        breakpoint: 768, // Tablet and below
-        settings: {
-          centerMode: false, // Disable centerMode on smaller screens
-        },
-      },
-    ],
   };
 
   return (
@@ -225,9 +181,7 @@ const Home = () => {
         <div className="service-cards">
           {slides.map((service, index) => (
             <div className="service-card" key={index}>
-              <div className="service-icon">
-                {service.icon}
-              </div>
+              <div className="service-icon">{service.icon}</div>
               <div className="service-content">
                 <h3>{service.title}</h3>
                 <p>{service.subtitle}</p>
@@ -268,10 +222,10 @@ const Home = () => {
         <h2>Trending Destinations</h2>
         <div className="destination-cards">
           {[
-             { name: 'Paris', imageUrl: paris1 },
-             { name: 'New York', imageUrl: newyork1 },
-             { name: 'Tokyo', imageUrl: tokyo1 },
-             { name: 'London', imageUrl: london1 },
+            { name: 'Paris', imageUrl: paris1 },
+            { name: 'New York', imageUrl: newyork1 },
+            { name: 'Tokyo', imageUrl: tokyo1 },
+            { name: 'London', imageUrl: london1 },
             // Add more destinations as needed
           ].map((dest, index) => (
             <div className="destination-card" key={index}>
@@ -279,7 +233,7 @@ const Home = () => {
               <div className="destination-info">
                 <h3>{dest.name}</h3>
                 <Link to={`/destination/${dest.name.toLowerCase()}`}>
-                  <button className="explore-button">Explore {dest.name}</button> {/* Dynamic Button */}
+                  <button className="explore-button">Explore {dest.name}</button>
                 </Link>
               </div>
             </div>
@@ -288,20 +242,7 @@ const Home = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="testimonials">
-        <h2>What Our Customers Say</h2>
-        <Slider {...testimonialSettings} className="testimonials-slider">
-          {testimonialsData.map((testimonial, index) => (
-            <div className="testimonial-card" key={index}>
-              <img src={testimonial.image} alt={testimonial.name} className="testimonial-image" loading="lazy" />
-              <div className="testimonial-content">
-                <p>"{testimonial.quote}"</p>
-                <h4>{testimonial.name}</h4>
-              </div>
-            </div>
-          ))}
-        </Slider>
-      </section>
+      <Testimonials />
 
       {/* Contact Us Section */}
       <section className="contact-us">
@@ -342,7 +283,9 @@ const Home = () => {
             ></textarea>
             <label htmlFor="message">Your Message</label>
           </div>
-          <button type="submit" className="cta-button">Send Message</button>
+          <button type="submit" className="cta-button">
+            Send Message
+          </button>
         </form>
         {contactFormStatus && <p className="form-status">{contactFormStatus}</p>}
       </section>
@@ -360,7 +303,9 @@ const Home = () => {
             required
             aria-label="Email Address"
           />
-          <button type="submit" className="cta-button">Subscribe</button>
+          <button type="submit" className="cta-button">
+            Subscribe
+          </button>
         </form>
         {newsletterStatus && <p className="form-status">{newsletterStatus}</p>}
       </section>

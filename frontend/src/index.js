@@ -1,17 +1,21 @@
+// src/index.js
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
 import App from './App';
+import { AuthProvider } from './context/AuthContext'; // Import AuthProvider
+import './styles/App.css'; // Ensure your global styles are imported
 
-
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
-/>
+// Ensure your public/index.html includes the Font Awesome link within the <head> tag.
 
 ReactDOM.render(
-  <Router>
-    <App />
-  </Router>,
+  <React.StrictMode>
+    <AuthProvider>
+      <Router>
+        <App />
+      </Router>
+    </AuthProvider>
+  </React.StrictMode>,
   document.getElementById('root')
 );

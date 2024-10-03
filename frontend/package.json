@@ -13,6 +13,7 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.7.5",
     "chart.js": "^4.4.4",
+    "cors": "^2.8.5",
     "date-fns": "^2.29.3",
     "firebase": "^10.13.1",
     "leaflet": "^1.9.4",

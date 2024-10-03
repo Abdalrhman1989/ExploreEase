@@ -1,4 +1,5 @@
 // frontend/src/App.js
+
 import React from 'react';
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
@@ -36,6 +37,11 @@ import Users from './components/Users';
 import Settings from './components/Settings';
 import BusinessOverview from './components/BusinessOverview';
 import NotFound from './pages/NotFound';
+
+// Importing new pages
+import FAQ from './pages/FAQ';
+import Support from './pages/Support';
+
 import './styles/App.css';
 
 function App() {
@@ -60,6 +66,10 @@ function App() {
         <Route path="/restaurants" element={<Restaurants />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+
+        {/* New Routes */}
+        <Route path="/faq" element={<FAQ />} />
+        <Route path="/support" element={<Support />} />
 
         {/* Admin Routes */}
         <Route path="/admin/*" element={<AdminDashboard />} />

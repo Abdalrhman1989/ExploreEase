@@ -1,4 +1,3 @@
-// src/pages/Restaurants.jsx
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import {
   GoogleMap,
@@ -6,12 +5,9 @@ import {
   MarkerClusterer,
   InfoWindow,
 } from '@react-google-maps/api';
-import { AuthContext } from '../context/AuthContext';
+import { AuthContext } from '../context/AuthContext'; // Import AuthContext
 import axios from 'axios';
-import Banner from '../components/Banner';
-import TrendingSection from '../components/TrendingSection';
-import '../styles/Restaurants.css';
-import restaurantImage from '../assets/Restaurant1.jpg';
+import '../styles/Attractions.css';
 
 const libraries = ['places'];
 
@@ -25,42 +21,38 @@ const options = {
   zoomControl: true,
 };
 
-// Categories specific to Restaurants
-const categories = [
-  { name: 'Italian', type: 'italian_restaurant', icon: '🍝' },
-  { name: 'Chinese', type: 'chinese_restaurant', icon: '🥡' },
-  { name: 'Mexican', type: 'mexican_restaurant', icon: '🌮' },
-  { name: 'Japanese', type: 'japanese_restaurant', icon: '🍣' },
-  { name: 'Indian', type: 'indian_restaurant', icon: '🍛' },
-  { name: 'Fast Food', type: 'fast_food_restaurant', icon: '🍔' },
-  { name: 'Seafood', type: 'seafood_restaurant', icon: '🦞' },
-  { name: 'Vegetarian', type: 'vegetarian_restaurant', icon: '🥗' },
-  { name: 'Vegan', type: 'vegan_restaurant', icon: '🌱' },
-  { name: 'Desserts', type: 'dessert_restaurant', icon: '🍰' },
-  // Add more categories as needed
-];
-
-const Restaurants = () => {
-  const { user, isAuthenticated, loading: authLoading } = useContext(AuthContext);
-  
-  // Define state variables
-  const [mapCenter, setMapCenter] = useState({ lat: 40.7128, lng: -74.0060 }); // Default to New York City
+// Ensure you have set REACT_APP_GOOGLE_MAPS_API_KEY in your .env file
+const Attractions = () => {
+  const { user, isAuthenticated, loading: authLoading } = useContext(AuthContext); // Access AuthContext
+  const [mapCenter, setMapCenter] = useState({ lat: 48.8566, lng: 2.3522 }); // Paris center
   const [mapZoom, setMapZoom] = useState(12);
   const [markers, setMarkers] = useState([]);
   const [selected, setSelected] = useState(null);
-  const [favorites, setFavorites] = useState([]);
+  const [favorites, setFavorites] = useState([]); // Initialize favorites as empty array
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  
-  // **Added:** Define selectedCategory state to manage the currently selected category
-  const [selectedCategory, setSelectedCategory] = useState(null);
-
   const mapRef = useRef(null);
 
-  // Environment variables (ensure these are set in your .env file)
+  // Define categories array
+  const categories = [
+    { name: 'Adventure', type: 'park', icon: '🚵' },
+    { name: 'Cultural', type: 'museum', icon: '🏛️' },
+    { name: 'Nature', type: 'natural_feature', icon: '🌳' },
+    { name: 'Historical', type: 'tourist_attraction', icon: '🏰' },
+    { name: 'Food & Drink', type: 'restaurant', icon: '🍽️' },
+    { name: 'Shopping', type: 'shopping_mall', icon: '🛍️' },
+    { name: 'Nightlife', type: 'night_club', icon: '🎉' },
+    { name: 'Health', type: 'hospital', icon: '🏥' },
+    { name: 'Education', type: 'university', icon: '🎓' },
+    { name: 'Entertainment', type: 'movie_theater', icon: '🎬' },
+    { name: 'Sports', type: 'stadium', icon: '🏟️' },
+    { name: 'Religious', type: 'hindu_temple', icon: '🕌' },
+    { name: 'Transportation', type: 'parking', icon: '🅿️' },
+    { name: 'Government', type: 'city_hall', icon: '🏢' },
+    { name: 'Healthcare', type: 'pharmacy', icon: '💊' },
+  ];
+
   const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
-  const GOOGLE_PLACES_API_KEY = process.env.REACT_APP_GOOGLE_PLACES_API_KEY;
-  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: GOOGLE_MAPS_API_KEY,
@@ -71,13 +63,13 @@ const Restaurants = () => {
     mapRef.current = map;
   };
 
-  // Fetch favorites from backend
+  // Function to fetch favorites from backend
   const fetchFavorites = async () => {
     if (!isAuthenticated || !user) return;
 
     try {
       const idToken = await user.getIdToken();
-      const response = await axios.get(`${BACKEND_URL}/api/favorites`, {
+      const response = await axios.get('http://localhost:3001/api/favorites', {
         headers: {
           Authorization: `Bearer ${idToken}`,
         },
@@ -89,7 +81,7 @@ const Restaurants = () => {
     }
   };
 
-  // Add a favorite via backend
+  // Function to add a favorite via backend
   const addFavoriteToDB = async (favoriteData) => {
     if (!isAuthenticated || !user) {
       alert('Please log in to add favorites.');
@@ -99,7 +91,7 @@ const Restaurants = () => {
     try {
       const idToken = await user.getIdToken();
       const response = await axios.post(
-        `${BACKEND_URL}/api/favorites`,
+        'http://localhost:3001/api/favorites',
         favoriteData,
         {
           headers: {
@@ -120,7 +112,7 @@ const Restaurants = () => {
     }
   };
 
-  // Remove a favorite via backend
+  // Function to remove a favorite via backend
   const removeFavoriteFromDB = async (favoriteId) => {
     if (!isAuthenticated || !user) {
       alert('Please log in to remove favorites.');
@@ -129,7 +121,7 @@ const Restaurants = () => {
 
     try {
       const idToken = await user.getIdToken();
-      await axios.delete(`${BACKEND_URL}/api/favorites/${favoriteId}`, {
+      await axios.delete(`http://localhost:3001/api/favorites/${favoriteId}`, {
         headers: {
           Authorization: `Bearer ${idToken}`,
         },
@@ -143,18 +135,18 @@ const Restaurants = () => {
     }
   };
 
-  // Handle category selection
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
   const handleCategoryClick = (category) => {
-    setSelectedCategory(category.name); // **Ensure setSelectedCategory is defined**
+    setSelectedCategory(category.name);
     setError(null);
     setIsLoading(true);
     setMarkers([]);
     setSelected(null);
-    searchRestaurantsByType(category.type);
+    searchAttractionsByType(category.type);
   };
 
-  // Search restaurants by type using Google Places API
-  const searchRestaurantsByType = (type) => {
+  const searchAttractionsByType = (type) => {
     if (!window.google) {
       setError('Google Maps is not loaded properly.');
       setIsLoading(false);
@@ -165,8 +157,7 @@ const Restaurants = () => {
     const request = {
       location: mapCenter,
       radius: '10000',
-      type: ['restaurant'],
-      keyword: type, // Using keyword to filter by category
+      type: type,
     };
 
     service.nearbySearch(request, (results, status) => {
@@ -174,15 +165,14 @@ const Restaurants = () => {
         setMarkers(results);
         setIsLoading(false);
       } else {
-        setError('No restaurants found for the selected category.');
+        setError('No places found for the selected category.');
         setMarkers([]);
         setIsLoading(false);
       }
     });
   };
 
-  // Search restaurants by query (e.g., city or cuisine)
-  const searchRestaurantsByQuery = (query) => {
+  const searchAttractionsByQuery = (query) => {
     if (!window.google) {
       setError('Google Maps is not loaded properly.');
       setIsLoading(false);
@@ -202,7 +192,7 @@ const Restaurants = () => {
         const request = {
           location: location,
           radius: '10000',
-          type: ['restaurant'],
+          type: ['tourist_attraction', 'lodging'],
           keyword: query,
         };
 
@@ -211,14 +201,14 @@ const Restaurants = () => {
             setMarkers(results);
             setIsLoading(false);
           } else {
-            setError('No restaurants found for the specified search.');
+            setError('No places found for the specified search.');
             setMarkers([]);
             setIsLoading(false);
           }
         });
       } else {
         setError('Location not found. Please try a different search.');
-        setMapCenter({ lat: 40.7128, lng: -74.0060 }); // Reset to NYC
+        setMapCenter({ lat: 48.8566, lng: 2.3522 });
         setMapZoom(12);
         setMarkers([]);
         setIsLoading(false);
@@ -226,12 +216,11 @@ const Restaurants = () => {
     });
   };
 
-  // Get photo URL from photo reference
   const getPhotoUrl = (photoReference) => {
     if (photoReference) {
-      return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photoReference}&key=${GOOGLE_PLACES_API_KEY}`;
+      return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photoReference}&key=${GOOGLE_MAPS_API_KEY}`;
     }
-    return restaurantImage; // Fallback image if no photo reference
+    return 'https://via.placeholder.com/400'; // Fallback image if no photo reference
   };
 
   // Fetch detailed place information
@@ -254,14 +243,17 @@ const Restaurants = () => {
     );
   };
 
-  // Define addAdvancedMarker to add markers using google.maps.Marker
+  // Define addAdvancedMarker to add markers using google.maps.marker.AdvancedMarkerElement
   const addAdvancedMarker = (position, place) => {
     if (!window.google || !mapRef.current) return;
 
-    const marker = new window.google.maps.Marker({
+    const MarkerClass = window.google.maps?.marker?.AdvancedMarkerElement || window.google.maps.Marker;
+
+    const marker = new MarkerClass({
       map: mapRef.current,
       position,
       title: place.name,
+      // Optionally, set a custom icon based on category
       icon: {
         url: getCategoryIcon(place.types[0]),
         scaledSize: new window.google.maps.Size(30, 30),
@@ -276,16 +268,12 @@ const Restaurants = () => {
       });
       setMapZoom(15);
     });
-
-    // Cleanup marker on unmount
-    return marker;
   };
 
-  // Get category icon based on type
   const getCategoryIcon = (type) => {
     const category = categories.find((cat) => cat.type === type);
     if (category) {
-      // Using emoji as marker icons
+      // You can replace emoji with actual icon URLs if desired
       return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
         `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30">
           <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="24">${category.icon}</text>
@@ -298,9 +286,9 @@ const Restaurants = () => {
 
   useEffect(() => {
     if (isLoaded && markers.length > 0) {
-      const newMarkers = markers.map((marker) => {
+      markers.forEach((marker) => {
         if (marker.geometry && marker.geometry.location) {
-          return addAdvancedMarker(
+          addAdvancedMarker(
             {
               lat: marker.geometry.location.lat(),
               lng: marker.geometry.location.lng(),
@@ -309,15 +297,15 @@ const Restaurants = () => {
           );
         } else {
           console.warn(`Marker with ID ${marker.place_id} is missing geometry/location.`);
-          return null;
         }
-      }).filter(marker => marker !== null);
-
-      // Cleanup markers on unmount or markers change
-      return () => {
-        newMarkers.forEach((marker) => marker.setMap(null));
-      };
+      });
     }
+    // Cleanup markers on unmount or markers change
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.markers?.forEach((marker) => marker.setMap(null));
+      }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded, markers]);
 
@@ -331,33 +319,36 @@ const Restaurants = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, user]);
 
-  if (loadError) return <div className="restaurants-error">Error loading maps</div>;
-  if (!isLoaded || authLoading) return <div className="restaurants-loading">Loading Maps...</div>;
+  if (loadError) return <div className="attractions-error">Error loading maps</div>;
+  if (!isLoaded || authLoading) return <div className="attractions-loading">Loading Maps...</div>;
 
   return (
-    <div className="restaurants-page">
+    <div className="attractions">
       {/* Banner Section */}
-      <Banner
-        title="Find Your Favorite Restaurant"
-        subtitle="Discover and book restaurants with ease"
-        buttonText="Explore Restaurants"
-        imageUrl={restaurantImage}
-      />
+      <div className="attractions-banner">
+        <div className="attractions-banner-content">
+          <h1>Discover Attractions</h1>
+          <p>Explore the world's best attractions</p>
+          <button onClick={() => document.getElementById('search-input').focus()} className="attractions-explore-button">
+            Explore Now
+          </button>
+        </div>
+      </div>
 
       {/* Categories Section */}
-      <div className="restaurants-categories-section">
-        <h2>Explore by Cuisine</h2>
-        <div className="restaurants-categories-grid">
+      <div className="attractions-categories-section">
+        <h2>Explore by Category</h2>
+        <div className="attractions-categories-grid">
           {categories.map((category, index) => (
             <div
               key={index}
-              className={`restaurants-category-item ${selectedCategory === category.name ? 'selected' : ''}`}
+              className="attractions-category-item"
               onClick={() => handleCategoryClick(category)}
               role="button"
               tabIndex={0}
               onKeyPress={(e) => { if (e.key === 'Enter') handleCategoryClick(category); }}
             >
-              <div className="restaurants-category-icon">{category.icon}</div>
+              <div className="attractions-category-icon">{category.icon}</div>
               <h3>{category.name}</h3>
             </div>
           ))}
@@ -365,34 +356,34 @@ const Restaurants = () => {
       </div>
 
       {/* Search Bar Section */}
-      <div className="restaurants-map-search-section">
-        <div className="restaurants-map-search-bar">
+      <div className="attractions-map-search-section">
+        <div className="attractions-map-search-bar">
           <input
             id="search-input"
             type="text"
-            placeholder="Search for a city or cuisine..."
+            placeholder="Search for a city or attraction..."
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 setIsLoading(true);
-                searchRestaurantsByQuery(e.target.value);
+                searchAttractionsByQuery(e.target.value);
               }
             }}
-            aria-label="Search for a city or cuisine"
+            aria-label="Search for a city or attraction"
           />
           <button onClick={() => {
             const query = document.getElementById('search-input').value.trim();
             if (query) {
               setIsLoading(true);
-              searchRestaurantsByQuery(query);
+              searchAttractionsByQuery(query);
             }
-          }} aria-label="Search" className="restaurants-search-button">
+          }} aria-label="Search" className="attractions-search-button">
             Search
           </button>
         </div>
       </div>
 
       {/* Map Section */}
-      <div className="restaurants-map-section">
+      <div className="attractions-map-section">
         <GoogleMap
           mapContainerStyle={mapContainerStyle}
           zoom={mapZoom}
@@ -416,7 +407,7 @@ const Restaurants = () => {
               }}
               onCloseClick={() => setSelected(null)}
             >
-              <div className="restaurants-info-window">
+              <div className="attractions-info-window">
                 <h3>{selected.name}</h3>
                 {selected.rating && <p>Rating: {selected.rating} ⭐</p>}
                 {selected.price_level !== undefined && (
@@ -427,22 +418,22 @@ const Restaurants = () => {
                   <img
                     src={getPhotoUrl(selected.photos[0].photo_reference)}
                     alt={selected.name}
-                    className="restaurants-info-window-image"
+                    className="attractions-info-window-image"
                     loading="lazy"
                   />
                 ) : (
                   <img
-                    src={restaurantImage}
+                    src="https://via.placeholder.com/400"
                     alt="No available"
-                    className="restaurants-info-window-image"
+                    className="attractions-info-window-image"
                     loading="lazy"
                   />
                 )}
                 {selected.reviews && selected.reviews.length > 0 && (
-                  <div className="restaurants-reviews">
+                  <div className="attractions-reviews">
                     <h4>User Reviews</h4>
                     {selected.reviews.slice(0, 3).map((review, index) => (
-                      <div key={index} className="restaurants-review">
+                      <div key={index} className="attractions-review">
                         <p><strong>{review.author_name}</strong></p>
                         <p>{review.text}</p>
                         <p>Rating: {review.rating} ⭐</p>
@@ -451,20 +442,20 @@ const Restaurants = () => {
                   </div>
                 )}
                 {selected.website && (
-                  <a href={selected.website} target="_blank" rel="noopener noreferrer" className="restaurants-website-link">
+                  <a href={selected.website} target="_blank" rel="noopener noreferrer" className="attractions-website-link">
                     Visit Website
                   </a>
                 )}
                 {selected.url && (
-                  <a href={selected.url} target="_blank" rel="noopener noreferrer" className="restaurants-google-maps-link">
+                  <a href={selected.url} target="_blank" rel="noopener noreferrer" className="attractions-google-maps-link">
                     View on Google Maps
                   </a>
                 )}
-                <div className="restaurants-info-buttons">
+                <div className="attractions-info-buttons">
                   <button
                     onClick={() => {
                       const favoriteData = {
-                        type: 'restaurant',
+                        type: 'attraction', // Adjust type based on context or place types
                         placeId: selected.place_id,
                         name: selected.name,
                         address: selected.formatted_address || '',
@@ -474,7 +465,7 @@ const Restaurants = () => {
                       };
                       addFavoriteToDB(favoriteData);
                     }}
-                    className="restaurants-favorite-button"
+                    className="attractions-favorite-button"
                   >
                     Add to Favorites
                   </button>
@@ -485,63 +476,63 @@ const Restaurants = () => {
         </GoogleMap>
       </div>
 
-      {/* Dynamic Restaurants Section */}
-      <div className="restaurants-dynamic-restaurants">
-        <h2>{selectedCategory ? `${selectedCategory} Restaurants` : 'Restaurants'}</h2>
-        {isLoading && <div className="restaurants-spinner">Loading restaurants...</div>}
-        {error && <div className="restaurants-error-message">{error}</div>}
-        <div className="restaurants-grid">
+      {/* Dynamic Attractions Section */}
+      <div className="attractions-dynamic-attractions">
+        <h2>{selectedCategory ? `${selectedCategory} Attractions` : 'Attractions'}</h2>
+        {isLoading && <div className="attractions-spinner">Loading attractions...</div>}
+        {error && <div className="attractions-error-message">{error}</div>}
+        <div className="attractions-grid">
           {markers.length > 0 ? (
-            markers.map((restaurant) => (
-              <div key={restaurant.place_id} className="restaurants-item">
+            markers.map((attraction) => (
+              <div key={attraction.place_id} className="attractions-item">
                 <button
-                  onClick={() => fetchPlaceDetails(restaurant.place_id)}
-                  className="restaurants-image-button"
-                  aria-label={`View details for ${restaurant.name}`}
+                  onClick={() => fetchPlaceDetails(attraction.place_id)}
+                  className="attractions-image-button"
+                  aria-label={`View details for ${attraction.name}`}
                 >
-                  {restaurant.photos && restaurant.photos.length > 0 ? (
+                  {attraction.photos && attraction.photos.length > 0 ? (
                     <img
-                      src={getPhotoUrl(restaurant.photos[0].photo_reference)}
-                      alt={restaurant.name}
-                      className="restaurants-placeholder"
+                      src={getPhotoUrl(attraction.photos[0].photo_reference)}
+                      alt={attraction.name}
+                      className="attractions-placeholder"
                       loading="lazy"
                     />
                   ) : (
                     <img
-                      src={restaurantImage}
+                      src="https://via.placeholder.com/400"
                       alt="No available"
-                      className="restaurants-placeholder"
+                      className="attractions-placeholder"
                       loading="lazy"
                     />
                   )}
                 </button>
-                <div className="restaurants-info">
-                  <h3>{restaurant.name}</h3>
-                  {restaurant.rating && <p>Rating: {restaurant.rating} ⭐</p>}
-                  {restaurant.price_level !== undefined && (
-                    <p>Price Level: {'$'.repeat(restaurant.price_level)}</p>
+                <div className="attractions-info">
+                  <h3>{attraction.name}</h3>
+                  {attraction.rating && <p>Rating: {attraction.rating} ⭐</p>}
+                  {attraction.price_level !== undefined && (
+                    <p>Price Level: {'$'.repeat(attraction.price_level)}</p>
                   )}
-                  <div className="restaurants-actions">
+                  <div className="attractions-actions">
                     <button
-                      onClick={() => fetchPlaceDetails(restaurant.place_id)}
-                      className="restaurants-view-details-button"
+                      onClick={() => fetchPlaceDetails(attraction.place_id)}
+                      className="attractions-view-details-button"
                     >
                       View Details
                     </button>
                     <button
                       onClick={() => {
                         const favoriteData = {
-                          type: 'restaurant',
-                          placeId: restaurant.place_id,
-                          name: restaurant.name,
-                          address: restaurant.vicinity || restaurant.formatted_address || '',
-                          rating: restaurant.rating || null,
-                          priceLevel: restaurant.price_level || null,
-                          photoReference: restaurant.photos && restaurant.photos.length > 0 ? restaurant.photos[0].photo_reference : null
+                          type: 'attraction', // Adjust type based on context or place types
+                          placeId: attraction.place_id,
+                          name: attraction.name,
+                          address: attraction.vicinity || attraction.formatted_address || '',
+                          rating: attraction.rating || null,
+                          priceLevel: attraction.price_level || null,
+                          photoReference: attraction.photos && attraction.photos.length > 0 ? attraction.photos[0].photo_reference : null
                         };
                         addFavoriteToDB(favoriteData);
                       }}
-                      className="restaurants-favorite-button"
+                      className="attractions-favorite-button"
                     >
                       Add to Favorites
                     </button>
@@ -550,58 +541,58 @@ const Restaurants = () => {
               </div>
             ))
           ) : (
-            !isLoading && <p>No restaurants to display.</p>
+            !isLoading && <p>No attractions to display.</p>
           )}
         </div>
       </div>
 
       {/* Favorites Section */}
-      <div className="restaurants-favorites-section">
-        <h2>Your Favorite Restaurants</h2>
+      <div className="attractions-favorites-section">
+        <h2>Your Favorites</h2>
         {favorites.length > 0 ? (
-          <div className="restaurants-favorites-grid">
+          <div className="attractions-favorites-grid">
             {favorites.map((fav) => (
-              <div key={fav.id} className="restaurants-favorite-item">
+              <div key={fav.id} className="attractions-favorite-item">
                 <button
                   onClick={() => fetchPlaceDetails(fav.placeId)}
-                  className="restaurants-favorite-image-button"
+                  className="attractions-favorite-image-button"
                   aria-label={`View details for ${fav.name}`}
                 >
                   {fav.photoReference ? (
                     <img
                       src={getPhotoUrl(fav.photoReference)}
                       alt={fav.name}
-                      className="restaurants-placeholder"
+                      className="attractions-placeholder"
                       loading="lazy"
                     />
                   ) : (
                     <img
-                      src={restaurantImage}
+                      src="https://via.placeholder.com/400"
                       alt="No available"
-                      className="restaurants-placeholder"
+                      className="attractions-placeholder"
                       loading="lazy"
                     />
                   )}
                 </button>
-                <div className="restaurants-info">
+                <div className="attractions-info">
                   <h3>{fav.name}</h3>
                   {fav.rating && <p>Rating: {fav.rating} ⭐</p>}
                   {fav.priceLevel !== undefined && (
                     <p>Price Level: {'$'.repeat(fav.priceLevel)}</p>
                   )}
-                  <div className="restaurants-favorite-actions">
+                  <div className="attractions-favorite-actions">
                     <button
                       onClick={() => {
                         const mapsUrl = `https://www.google.com/maps/place/?q=place_id:${fav.placeId}`;
                         window.open(mapsUrl, '_blank');
                       }}
-                      className="restaurants-google-maps-button"
+                      className="attractions-google-maps-button"
                     >
                       View in Google Maps
                     </button>
                     <button
                       onClick={() => removeFavoriteFromDB(fav.id)}
-                      className="restaurants-delete-favorite-button"
+                      className="attractions-delete-favorite-button"
                     >
                       Delete
                     </button>
@@ -611,11 +602,11 @@ const Restaurants = () => {
             ))}
           </div>
         ) : (
-          <p>You have no favorite restaurants yet.</p>
+          <p>You have no favorite attractions yet.</p>
         )}
       </div>
     </div>
   );
 };
 
-export default Restaurants;
+export default Attractions;

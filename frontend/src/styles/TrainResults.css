@@ -1,0 +1,78 @@
+/* src/styles/TrainResults.css */
+.train-results {
+    padding: 20px;
+  }
+  
+  .train-results h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .train-results ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .train-item {
+    background: #fff;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .train-item h3 {
+    margin-bottom: 10px;
+  }
+  
+  .book-button {
+    background-color: #28a745;
+    color: #fff;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  
+  .book-button:hover {
+    background-color: #218838;
+  }
+  
+  .pagination {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  
+  .pagination button {
+    padding: 10px 15px;
+    border: none;
+    background-color: #007BFF;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .pagination button:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+  }
+  
+  .pagination button:hover:not(:disabled) {
+    background-color: #0056b3;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .train-item {
+      flex-direction: column;
+    }
+  
+    .pagination {
+      flex-direction: column;
+      gap: 5px;
+    }
+  }
+  

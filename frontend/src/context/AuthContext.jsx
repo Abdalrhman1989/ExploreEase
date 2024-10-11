@@ -13,6 +13,7 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null);
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true); // Added loading state
 
   useEffect(() => {
     // Subscribe to Firebase auth state changes
@@ -28,7 +29,7 @@ export const AuthProvider = ({ children }) => {
           // Fetch user role from your backend
           const response = await axios.get('http://localhost:3001/api/protected/dashboard', {
             headers: {
-              'Authorization': `Bearer ${idToken}`,
+              Authorization: `Bearer ${idToken}`,
             },
           });
 
@@ -43,6 +44,7 @@ export const AuthProvider = ({ children }) => {
         setUserRole(null);
         setUser(null);
       }
+      setLoading(false); // Set loading to false after auth state is determined
     });
 
     // Cleanup subscription on unmount
@@ -50,7 +52,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, userRole, user }}>
+    <AuthContext.Provider value={{ isAuthenticated, userRole, user, loading }}>
       {children}
     </AuthContext.Provider>
   );

@@ -171,7 +171,7 @@ const Home = () => {
                 <button className="cta-button">{slide.buttonText}</button>
               </Link>
             </div>
-          </div>
+          </div>      
         ))}
       </div>
 

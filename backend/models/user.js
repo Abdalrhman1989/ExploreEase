@@ -1,10 +1,10 @@
-// backend/models/user.js
 'use strict';
 const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     static associate(models) {
-      // Define associations here if any
+      User.hasMany(models.Favorite, { foreignKey: 'userId', as: 'favorites' });
     }
   }
   User.init({
@@ -57,7 +57,7 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     modelName: 'User',
     tableName: 'Users',
-    timestamps: true, // Sequelize håndterer createdAt og updatedAt
+    timestamps: true,
   });
   return User;
 };

@@ -1,4 +1,4 @@
-// src/pages/Flights.jsx
+// frontend/src/pages/Flights.jsx
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -42,9 +42,14 @@ const Flights = () => {
     departureDate: null,
     returnDate: null,
     adults: 1,
+    youths: 0,
+    children: 0,
+    infants: 0,
     travelClass: 'ECONOMY',
-    max: 10,
-    offset: 0,
+    carryOnBags: 0,
+    checkedBags: 0,
+    max: 50, // Default to 50 results
+    currencyCode: 'USD',
   });
 
   const [error, setError] = useState(null);
@@ -61,7 +66,9 @@ const Flights = () => {
     const { name, value } = event.target;
     setSearchParams((prev) => ({
       ...prev,
-      [name]: name.includes('class') || name.includes('type') ? value : value.toUpperCase(),
+      [name]: name === 'adults' || name === 'youths' || name === 'children' || name === 'infants' || name === 'carryOnBags' || name === 'checkedBags' || name === 'max'
+        ? parseInt(value) || 0
+        : value.toUpperCase(),
     }));
   };
 
@@ -84,22 +91,39 @@ const Flights = () => {
       departureDate,
       returnDate,
       adults,
+      youths,
+      children,
+      infants,
       travelClass,
+      carryOnBags,
+      checkedBags,
+      max,
+      currencyCode,
     } = searchParams;
 
-    // Basic validation
-    if (originLocationCode.length !== 3 || destinationLocationCode.length !== 3) {
-      setError('Please enter valid 3-letter IATA codes for departure and arrival airports.');
+    // Basic client-side validation
+    if (!originLocationCode || originLocationCode.length !== 3) {
+      setError('Please enter a valid 3-letter Origin IATA code.');
+      return;
+    }
+
+    if (!destinationLocationCode || destinationLocationCode.length !== 3) {
+      setError('Please enter a valid 3-letter Destination IATA code.');
       return;
     }
 
     if (!departureDate) {
-      setError('Please select a departure date.');
+      setError('Please select a valid Departure Date.');
       return;
     }
 
     if (tripType === 'roundTrip' && !returnDate) {
-      setError('Please select a return date.');
+      setError('Please select a valid Return Date.');
+      return;
+    }
+
+    if (adults < 1) {
+      setError('Number of adults must be at least 1.');
       return;
     }
 
@@ -107,32 +131,34 @@ const Flights = () => {
       originLocationCode: originLocationCode.toUpperCase(),
       destinationLocationCode: destinationLocationCode.toUpperCase(),
       departureDate: departureDate.toISOString().split('T')[0],
+      returnDate: tripType === 'roundTrip' ? returnDate.toISOString().split('T')[0] : undefined,
       adults,
+      youths,
+      children,
+      infants,
       travelClass,
-      max: 10,
-      offset: 0,
+      carryOnBags,
+      checkedBags,
+      max,
+      currencyCode,
     };
-
-    if (tripType === 'roundTrip') {
-      searchPayload.returnDate = returnDate.toISOString().split('T')[0];
-    }
 
     try {
       setLoading(true);
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/search-flights`, {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/flights/search-flights`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(searchPayload),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        setError(errorData.error || 'An error occurred while fetching flights.');
+        setError(data.errors ? data.errors.map(err => err.msg).join(', ') : 'An error occurred while fetching flights.');
         setLoading(false);
         return;
       }
 
-      const data = await response.json();
       // Navigate to FlightResults page with search data
       navigate('/results', { state: { searchParams: searchPayload, flightData: data } });
     } catch (err) {
@@ -212,18 +238,14 @@ const Flights = () => {
                 label="Departure Date"
                 value={searchParams.departureDate}
                 onChange={(date) => handleDateChange('departureDate', date)}
-                slots={{
-                  textField: (params) => <TextField {...params} required fullWidth margin="normal" />,
-                }}
+                renderInput={(params) => <TextField {...params} required fullWidth margin="normal" />}
               />
               {tripType === 'roundTrip' && (
                 <DatePicker
                   label="Return Date"
                   value={searchParams.returnDate}
                   onChange={(date) => handleDateChange('returnDate', date)}
-                  slots={{
-                    textField: (params) => <TextField {...params} required fullWidth margin="normal" />,
-                  }}
+                  renderInput={(params) => <TextField {...params} required fullWidth margin="normal" />}
                 />
               )}
             </LocalizationProvider>
@@ -231,7 +253,7 @@ const Flights = () => {
 
           <div className="form-row">
             <TextField
-              label="Passengers"
+              label="Adults (18+)"
               name="adults"
               type="number"
               value={searchParams.adults}
@@ -239,8 +261,44 @@ const Flights = () => {
               required
               fullWidth
               margin="normal"
-              inputProps={{ min: 1 }}
+              inputProps={{ min: 1, max: 3 }}
             />
+            <TextField
+              label="Youths (12-17)"
+              name="youths"
+              type="number"
+              value={searchParams.youths}
+              onChange={handleChange}
+              fullWidth
+              margin="normal"
+              inputProps={{ min: 0, max: 3 }}
+            />
+          </div>
+          
+          <div className="form-row">
+            <TextField
+              label="Children (2-11)"
+              name="children"
+              type="number"
+              value={searchParams.children}
+              onChange={handleChange}
+              fullWidth
+              margin="normal"
+              inputProps={{ min: 0, max: 3 }}
+            />
+            <TextField
+              label="Infants (under 2)"
+              name="infants"
+              type="number"
+              value={searchParams.infants}
+              onChange={handleChange}
+              fullWidth
+              margin="normal"
+              inputProps={{ min: 0, max: 3 }}
+            />
+          </div>
+
+          <div className="form-row">
             <FormControl fullWidth margin="normal">
               <InputLabel id="travelClass-label">Class</InputLabel>
               <Select
@@ -255,6 +313,26 @@ const Flights = () => {
                 <MenuItem value="FIRST">First Class</MenuItem>
               </Select>
             </FormControl>
+            <TextField
+              label="Carry-on Bags"
+              name="carryOnBags"
+              type="number"
+              value={searchParams.carryOnBags}
+              onChange={handleChange}
+              fullWidth
+              margin="normal"
+              inputProps={{ min: 0 }}
+            />
+            <TextField
+              label="Checked Bags"
+              name="checkedBags"
+              type="number"
+              value={searchParams.checkedBags}
+              onChange={handleChange}
+              fullWidth
+              margin="normal"
+              inputProps={{ min: 0 }}
+            />
           </div>
 
           <Button
@@ -280,27 +358,14 @@ const Flights = () => {
         </div>
       )}
 
-      {/* Trending Flights Section */}
+      {/* Other sections */}
       <div className="content-wrapper">
         <TrendingSection title="Popular Flights Near You" items={trendingFlights} />
       </div>
-
-      {/* Testimonials Section */}
-      <div className="testimonials-section">
-        <Testimonials />
-      </div>
-
-      {/* How It Works Section */}
-      <div className="how-it-works-section">
-        <HowItWorks />
-      </div>
-
-      {/* Frequently Asked Questions */}
-      <div className="faqs-section">
-        <FAQs />
-      </div>
-
-     
+      <Testimonials />
+      <HowItWorks />
+      <FAQs />
+      <Footer />
     </div>
   );
 };

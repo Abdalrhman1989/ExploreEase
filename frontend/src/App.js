@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { useContext } from 'react'; // Import useContext
 import Home from './pages/Home';
 import Stays from './pages/Stays';
 import Flights from './pages/Flights';
@@ -41,13 +42,18 @@ import NotFound from './pages/NotFound';
 // Importing new pages
 import FAQ from './pages/FAQ';
 import Support from './pages/Support';
+import UserProfile from './pages/UserProfile'; // Import UserProfile
+import Confirmation from './pages/Confirmation.jsx'; // Import Confirmation
 
 import './styles/App.css';
+import { AuthContext } from './context/AuthContext'; // Import AuthContext
 
 function App() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
   const isBusinessRoute = location.pathname.startsWith('/business');
+
+  const { isAuthenticated, loading } = useContext(AuthContext); // Access AuthContext
 
   return (
     <div className="app">
@@ -70,6 +76,22 @@ function App() {
         {/* New Routes */}
         <Route path="/faq" element={<FAQ />} />
         <Route path="/support" element={<Support />} />
+
+        {/* Protected User Profile Route */}
+        <Route
+          path="/profile"
+          element={
+            !loading ? (
+              isAuthenticated ? (
+                <UserProfile />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            ) : (
+              <div className="user-profile">Loading...</div>
+            )
+          }
+        />
 
         {/* Admin Routes */}
         <Route path="/admin/*" element={<AdminDashboard />} />
@@ -108,6 +130,9 @@ function App() {
 
         {/* Add the new /results route */}
         <Route path="/results" element={<FlightResults />} />
+
+        {/* Add the /confirmation route */}
+        <Route path="/confirmation" element={<Confirmation />} />
 
         {/* Fallback Route for Undefined Paths */}
         <Route path="*" element={<NotFound />} />

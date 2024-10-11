@@ -1,7 +1,6 @@
-// backend/app.js
 require('dotenv').config();
 const express = require('express');
-const Amadeus = require('amadeus');
+// const Amadeus = require('amadeus'); // Removed Amadeus SDK import
 const cors = require('cors');
 const nodemailer = require('nodemailer');
 const axios = require('axios');
@@ -14,9 +13,18 @@ const mysql = require('mysql2/promise'); // Flyttet her for klarhed
 const authRoutes = require('./routes/auth');
 const protectedRoutes = require('./routes/protected');
 const adminRoutes = require('./routes/admin');
+const flightRoutes = require('./routes/flight'); 
+const favoritesRouter = require('./routes/favorites'); 
+
+
+
+
+
+
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
 
 
 // Setup Winston logger for logging events and errors
@@ -41,12 +49,15 @@ if (process.env.NODE_ENV !== 'production') {
 // Middleware Configuration
 app.use(express.json()); // To parse JSON bodies
 
+
 // Configure CORS
 app.use(cors({
   origin: 'http://localhost:3000', // Update this to your frontend URL in production
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+
 
 // Rate Limiting to prevent abuse
 const limiter = rateLimit({
@@ -56,11 +67,7 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Initialize Amadeus SDK
-const amadeus = new Amadeus({
-  clientId: process.env.AMADEUS_API_KEY,
-  clientSecret: process.env.AMADEUS_API_SECRET,
-});
+
 
 // Databaseforbindelse
 let db;
@@ -93,74 +100,17 @@ initDB().then(() => {
 app.use('/api/auth', authRoutes);
 app.use('/api/protected', protectedRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/flights', flightRoutes); // Add this line
+app.use('/api/favorites', favoritesRouter);
 
 // Health Check Endpoint
 app.get('/', (req, res) => {
   res.send('Backend is running.');
 });
 
-// Flight Search Endpoint
-app.post('/api/search-flights', async (req, res) => {
-  try {
-    const {
-      originLocationCode,
-      destinationLocationCode,
-      departureDate,
-      returnDate,
-      adults,
-      travelClass,
-      max,
-    } = req.body;
+// Removed Flight Search Endpoint
 
-    const flightOffers = await amadeus.shopping.flightOffersSearch.get({
-      originLocationCode,
-      destinationLocationCode,
-      departureDate,
-      returnDate, // Optional
-      adults,
-      travelClass,
-      max,
-    });
-
-    res.json(flightOffers.data);
-  } catch (error) {
-    logger.error('Error fetching flights:', error.response ? error.response.data : error.message);
-    res.status(500).json({ error: 'Failed to fetch flight data' });
-  }
-});
-
-// Flight Booking Endpoint
-app.post('/api/book-flight', async (req, res) => {
-  try {
-    const { flightOffer, travelers } = req.body;
-
-    // Confirm the price and availability of the selected flight offer
-    const confirmedOffer = await amadeus.shopping.flightOffersPricing.post(
-      JSON.stringify({
-        data: {
-          type: 'flight-order',
-          flightOffers: [flightOffer],
-        },
-      })
-    );
-
-    // Create a flight order (booking)
-    const flightOrder = await amadeus.booking.flightOrders.post(
-      JSON.stringify({
-        data: {
-          type: 'flight-order',
-          flightOffers: [confirmedOffer.data],
-          travelers: travelers, // Traveler info should come from the request body
-        },
-      })
-    );
-
-    res.json(flightOrder.data);
-  } catch (error) {
-    logger.error('Error booking flight:', error.response ? error.response.data : error.message);
-    res.status(500).json({ error: 'Failed to book flight' });
-  }
-});
+// Removed Flight Booking Endpoint
 
 // Newsletter Subscription Endpoint using Mailchimp
 app.post('/api/subscribe',

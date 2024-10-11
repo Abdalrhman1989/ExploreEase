@@ -1,50 +1,159 @@
+/* src/styles/Attractions.css */
 .attractions {
     font-family: 'Poppins', sans-serif;
     color: #333;
     padding-bottom: 50px;
 }
 
-.map-container {
+/* Banner Section */
+.attractions-banner {
     position: relative;
-    margin: 50px auto;
-    width: 90%;
-    max-width: 1200px;
+    height: 400px;
+    background-image: url('../assets/hotel.jpg'); /* Ensure the path is correct */
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    border-radius: 10px;
+}
+
+.attractions-banner::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+}
+
+.attractions-banner-content {
+    position: relative;
+    z-index: 1;
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 40px 20px;
+    border-radius: 10px;
+    text-align: center;
+    color: #fff;
+    max-width: 80%;
+    transition: transform 0.3s ease;
+}
+
+.attractions-banner-content:hover {
+    transform: scale(1.02);
+}
+
+.attractions-banner-content h1 {
+    font-size: 3rem;
+    margin-bottom: 10px;
+}
+
+.attractions-banner-content p {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+}
+
+.attractions-explore-button {
+    padding: 12px 25px;
+    font-size: 1rem;
+    border: none;
+    background-color: #ff9900;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.attractions-explore-button:hover {
+    background-color: #e68a00;
+    transform: translateY(-2px);
+}
+
+/* Categories Section */
+.attractions-categories-section {
+    padding: 20px;
+    background-color: #fff;
     text-align: center;
 }
 
-.map-container h2 {
-    margin-bottom: 30px;
-    font-size: 2.5rem;
+.attractions-categories-section h2 {
+    margin-bottom: 20px;
+    font-size: 2rem;
     color: #003580;
 }
 
-.map-search-bar {
-    position: absolute;
-    top: 15px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 600px;
-    z-index: 1000;
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    padding: 10px;
+.attractions-categories-grid {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
 }
 
-.map-search-bar input {
+.attractions-category-item {
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    width: 150px;
+    padding: 20px;
+    cursor: pointer;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out, background-color 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.attractions-category-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    background-color: #f1f1f1;
+}
+
+.attractions-category-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.attractions-category-item h3 {
+    font-size: 1.2rem;
+    color: #003580;
+}
+
+/* Search Bar Section */
+.attractions-map-search-section {
+    padding: 20px;
+    background-color: #fff;
+    text-align: center;
+}
+
+.attractions-map-search-bar {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+}
+
+.attractions-map-search-bar input {
     width: 70%;
     padding: 12px;
     font-size: 1rem;
     border: 1px solid #ddd;
     border-radius: 5px;
     outline: none;
+    transition: border-color 0.3s ease;
 }
 
-.map-search-bar button {
+.attractions-map-search-bar input:focus {
+    border-color: #007bff;
+}
+
+.attractions-search-button {
     padding: 12px 25px;
     font-size: 1rem;
     border: none;
@@ -52,81 +161,127 @@
     color: white;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin-left: 10px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
-.map-search-bar button:hover {
+.attractions-search-button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+/* Map Section */
+.attractions-map-section {
+    position: relative;
+    margin: 50px auto;
+    width: 90%;
+    max-width: 1200px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.attractions-info-window {
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.attractions-info-window h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.attractions-info-window p {
+    margin: 5px 0;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.attractions-info-window-image {
+    width: 100%;
+    border-radius: 5px;
+    margin-top: 10px;
+    object-fit: cover;
+}
+
+.attractions-reviews {
+    margin-top: 10px;
+    width: 100%;
+    text-align: left;
+}
+
+.attractions-review {
+    background-color: #f9f9f9;
+    padding: 8px;
+    border-radius: 5px;
+    margin-bottom: 8px;
+}
+
+.attractions-website-link,
+.attractions-google-maps-link {
+    margin-top: 10px;
+    padding: 8px 15px;
+    background-color: #007bff;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    display: inline-block;
+}
+
+.attractions-website-link:hover,
+.attractions-google-maps-link:hover {
     background-color: #0056b3;
 }
 
-.featured-categories {
-    padding: 50px 20px;
-    background-color: #f4f4f4;
-    text-align: center;
+.attractions-info-buttons {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
 }
 
-.featured-categories h2 {
-    margin-bottom: 40px;
-    font-size: 2.5rem;
-    color: #003580;
+.attractions-favorite-button {
+    padding: 8px 15px;
+    background-color: #ff9900;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
-.categories-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 25px;
-    max-width: 1200px;
-    margin: 0 auto;
+.attractions-favorite-button:hover {
+    background-color: #e68a00;
+    transform: translateY(-2px);
 }
 
-.category-item {
-    position: relative;
-    overflow: hidden;
-    border-radius: 10px;
-    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-}
-
-.category-item img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    border-radius: 10px;
-    transition: transform 0.3s ease-in-out;
-}
-
-.category-item:hover img {
-    transform: scale(1.05);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-}
-
-.category-item h3 {
-    position: absolute;
-    bottom: 15px;
-    left: 20px;
-    color: white;
-    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
-    font-size: 1.5rem;
-    transition: color 0.3s ease;
-}
-
-.category-item:hover h3 {
-    color: #ff9900;
-}
-
-.trending-destinations {
+/* Dynamic Attractions Section */
+.attractions-dynamic-attractions {
     padding: 50px 20px;
     background-color: #fff;
+    text-align: center;
 }
 
-.trending-destinations h2 {
-    text-align: center;
+.attractions-dynamic-attractions h2 {
     margin-bottom: 40px;
     font-size: 2.5rem;
     color: #003580;
 }
 
-.trending-destinations .destination-grid {
+.attractions-spinner {
+    font-size: 1.2rem;
+    color: #007bff;
+    margin-bottom: 20px;
+}
+
+.attractions-error-message {
+    color: red;
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+}
+
+.attractions-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 20px;
@@ -134,71 +289,324 @@
     margin: 0 auto;
 }
 
-.trending-destinations .destination-item {
-    position: relative;
-    overflow: hidden;
+.attractions-item {
+    background-color: #f9f9f9;
     border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
-.trending-destinations .destination-item img {
+.attractions-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.attractions-image-button {
+    border: none;
+    padding: 0;
+    cursor: pointer;
     width: 100%;
     height: 200px;
+    overflow: hidden;
+}
+
+.attractions-placeholder {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
-    border-radius: 10px;
     transition: transform 0.3s ease-in-out;
 }
 
-.trending-destinations .destination-item:hover img {
+.attractions-image-button:hover .attractions-placeholder {
     transform: scale(1.05);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
 
-.trending-destinations .destination-item h3 {
-    position: absolute;
-    bottom: 15px;
-    left: 20px;
-    color: white;
-    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
+.attractions-info {
+    padding: 15px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.attractions-info h3 {
     font-size: 1.5rem;
-    transition: color 0.3s ease;
+    color: #003580;
+    margin-bottom: 10px;
 }
 
-.trending-destinations .destination-item:hover h3 {
-    color: #ff9900;
+.attractions-info p {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 10px;
 }
 
-/* Additional global styling */
-body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Poppins', sans-serif;
-    background-color: #f9f9f9;
-    color: #333;
-    line-height: 1.6;
+.attractions-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: auto;
 }
 
-h1, h2, h3, h4, h5, h6 {
-    margin: 0;
-    padding: 0;
-    font-weight: 700;
-}
-
-button {
-    cursor: pointer;
-    outline: none;
+.attractions-view-details-button {
+    flex: 1;
+    padding: 8px 0;
+    background-color: #007bff;
+    color: white;
     border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
-img {
-    display: block;
-    max-width: 100%;
-    height: auto;
+.attractions-view-details-button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
 }
 
-.container {
+.attractions-favorite-button {
+    flex: 1;
+    padding: 8px 0;
+    background-color: #ff9900;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.attractions-favorite-button:hover {
+    background-color: #e68a00;
+    transform: translateY(-2px);
+}
+
+/* Favorites Section */
+.attractions-favorites-section {
+    padding: 50px 20px;
+    background-color: #f4f4f4;
+    text-align: center;
+}
+
+.attractions-favorites-section h2 {
+    margin-bottom: 40px;
+    font-size: 2.5rem;
+    color: #003580;
+}
+
+.attractions-favorites-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.attractions-favorite-item {
+    background-color: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.attractions-favorite-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.attractions-favorite-image-button {
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+}
+
+.attractions-favorite-image-button .attractions-placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease-in-out;
+}
+
+.attractions-favorite-image-button:hover .attractions-placeholder {
+    transform: scale(1.05);
+}
+
+.attractions-favorite-item .attractions-info {
+    padding: 15px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.attractions-favorite-item .attractions-info h3 {
+    font-size: 1.5rem;
+    color: #003580;
+    margin-bottom: 10px;
+}
+
+.attractions-favorite-item .attractions-info p {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.attractions-favorite-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: auto;
+}
+
+.attractions-google-maps-button {
+    flex: 1;
+    padding: 8px 0;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.attractions-google-maps-button:hover {
+    background-color: #1e7e34;
+    transform: translateY(-2px);
+}
+
+.attractions-delete-favorite-button {
+    flex: 1;
+    padding: 8px 0;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.attractions-delete-favorite-button:hover {
+    background-color: #c82333;
+    transform: translateY(-2px);
+}
+
+/* Global Styles */
+.attractions-container {
     width: 90%;
     margin: 0 auto;
     max-width: 1200px;
 }
 
+/* Responsive Design */
+@media (max-width: 768px) {
+    .attractions-banner-content h1 {
+        font-size: 2rem;
+    }
+
+    .attractions-banner-content p {
+        font-size: 1rem;
+    }
+
+    .attractions-categories-grid {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .attractions-category-item {
+        width: 80%;
+    }
+
+    .attractions-map-search-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .attractions-map-search-bar input {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .attractions-search-button {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .attractions-item h3,
+    .attractions-favorite-item h3 {
+        font-size: 1.2rem;
+    }
+
+    .attractions-placeholder {
+        height: 180px;
+    }
+
+    .attractions-dynamic-attractions h2,
+    .attractions-favorites-section h2 {
+        font-size: 2rem;
+    }
+
+    .attractions-dynamic-attractions,
+    .attractions-favorites-section {
+        padding: 30px 10px;
+    }
+
+    .attractions-info-window {
+        max-width: 250px;
+    }
+
+    .attractions-favorite-actions {
+        flex-direction: column;
+    }
+
+    .attractions-favorite-actions button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .attractions-banner {
+        height: 300px;
+    }
+
+    .attractions-banner-content h1 {
+        font-size: 1.5rem;
+    }
+
+    .attractions-banner-content p {
+        font-size: 0.9rem;
+    }
+
+    .attractions-dynamic-attractions h2,
+    .attractions-favorites-section h2 {
+        font-size: 1.8rem;
+    }
+
+    .attractions-dynamic-attractions,
+    .attractions-favorites-section {
+        padding: 20px 10px;
+    }
+
+    .attractions-placeholder {
+        height: 150px;
+    }
+}
+
+/* Loading and Error Messages */
+.attractions-loading,
+.attractions-error,
+.attractions-error-message {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-size: 1.5rem;
+    color: #555;
+}

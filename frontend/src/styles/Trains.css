@@ -1,183 +1,570 @@
 /* src/styles/Trains.css */
-.trains {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    color: #333;
-  }
-  
-  .search-bar-container {
-    background-color: #f9f9f9;
-    padding: 40px 20px;
-    display: flex;
-    justify-content: center;
+
+/* Parent Container */
+.trains-component {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  color: #333;
+}
+
+/* Banner Section */
+.trains-component-banner {
+  background-image: url('../assets/train1.jpg'); /* Replace with your banner image */
+  background-size: cover;
+  background-position: center;
+  padding: 0; /* Remove padding to use height for centering */
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400px; /* Adjust as needed */
+}
+
+.trains-component-banner-content {
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  padding: 40px;
+  border-radius: 10px;
+  text-align: center; /* Center text inside content */
+  max-width: 80%; /* Optional: Limit width for better appearance */
+}
+
+.trains-component-banner-content h1 {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.trains-component-banner-content p {
+  font-size: 24px;
+  margin-bottom: 30px;
+}
+
+.trains-component-explore-button {
+  background-color: #007BFF;
+  color: #fff;
+  padding: 15px 25px;
+  border: none;
+  border-radius: 5px;
+  font-size: 18px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  display: inline-block; /* Ensure button doesn't stretch */
+}
+
+.trains-component-explore-button:hover {
+  background-color: #0056b3;
+}
+
+/* Categories Section */
+.trains-component-categories-section {
+  padding: 40px 20px;
+  background-color: #f1f1f1;
+  text-align: center;
+}
+
+.trains-component-categories-section h2 {
+  font-size: 32px;
+  margin-bottom: 20px;
+}
+
+.trains-component-categories-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+
+.trains-component-category-item {
+  background-color: #fff;
+  padding: 20px 30px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.trains-component-category-item:hover,
+.trains-component-category-item.selected {
+  background-color: #007BFF;
+  color: #fff;
+}
+
+.trains-component-category-icon {
+  font-size: 24px;
+}
+
+.trains-component-category-item h3 {
+  font-size: 18px;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Map Search Section */
+.trains-component-map-search-section {
+  background-color: #f9f9f9;
+  padding: 40px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.trains-component-map-search-bar {
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  max-width: 800px;
+  width: 100%;
+}
+
+.trains-component-map-search-bar input {
+  flex: 1 1 200px;
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+  transition: border-color 0.3s;
+}
+
+.trains-component-map-search-bar input:focus {
+  border-color: #007BFF;
+  outline: none;
+}
+
+.trains-component-search-button {
+  background-color: #007BFF;
+  color: #fff;
+  padding: 15px 25px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  align-self: flex-end;
+}
+
+.trains-component-search-button:hover {
+  background-color: #0056b3;
+}
+
+/* Error Message */
+.trains-component-error-message {
+  background-color: #ffe6e6;
+  color: #cc0000;
+  padding: 15px 20px;
+  margin: 20px auto;
+  max-width: 800px;
+  border-left: 5px solid #cc0000;
+  border-radius: 5px;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* Spinner */
+.trains-component-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin: 20px;
+}
+
+.trains-component-spinner .spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007BFF;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: trains-component-spin 1s linear infinite;
+}
+
+@keyframes trains-component-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Map Section */
+.trains-component-map-section {
+  padding: 40px 20px;
+}
+
+.trains-component-info-window {
+  max-width: 300px;
+}
+
+.trains-component-info-window h3 {
+  margin-top: 0;
+}
+
+.trains-component-info-window-image {
+  width: 100%;
+  height: auto;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
+.trains-component-reviews {
+  margin-top: 10px;
+}
+
+.trains-component-review {
+  background-color: #f9f9f9;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+.trains-component-reviews h4 {
+  margin-bottom: 5px;
+}
+
+.trains-component-info-buttons {
+  margin-top: 10px;
+}
+
+.trains-component-favorite-button {
+  background-color: #28a745;
+  color: #fff;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.trains-component-favorite-button:hover {
+  background-color: #218838;
+}
+
+/* Dynamic Trains Section */
+.trains-component-dynamic-trains {
+  padding: 40px 20px;
+}
+
+.trains-component-dynamic-trains h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.trains-component-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+
+.trains-component-item {
+  background: #fff;
+  padding: 20px;
+  width: 250px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.trains-component-image-button {
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 150px;
+  overflow: hidden;
+  border-radius: 5px;
+}
+
+.trains-component-placeholder {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.trains-component-info {
+  margin-top: 10px;
+}
+
+.trains-component-info h3 {
+  margin-bottom: 5px;
+}
+
+.trains-component-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.trains-component-view-details-button {
+  background-color: #007BFF;
+  color: #fff;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.trains-component-view-details-button:hover {
+  background-color: #0056b3;
+}
+
+.trains-component-favorite-button-small {
+  background-color: #28a745;
+  color: #fff;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.trains-component-favorite-button-small:hover {
+  background-color: #218838;
+}
+
+/* Favorites Section */
+.trains-component-favorites-section {
+  padding: 40px 20px;
+  background-color: #f1f1f1;
+  text-align: center;
+}
+
+.trains-component-favorites-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.trains-component-favorite-item {
+  background-color: #fff;
+  padding: 20px;
+  width: 250px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.trains-component-favorite-image-button {
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 150px;
+  overflow: hidden;
+  border-radius: 5px;
+}
+
+.trains-component-favorite-image-button img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.trains-component-favorite-info {
+  margin-top: 10px;
+}
+
+.trains-component-favorite-info h3 {
+  margin-bottom: 5px;
+}
+
+.trains-component-favorite-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.trains-component-google-maps-button {
+  background-color: #007BFF;
+  color: #fff;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.trains-component-google-maps-button:hover {
+  background-color: #0056b3;
+}
+
+.trains-component-delete-favorite-button {
+  background-color: #dc3545;
+  color: #fff;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.trains-component-delete-favorite-button:hover {
+  background-color: #c82333;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .trains-component-categories-grid,
+  .trains-component-grid,
+  .trains-component-favorites-grid {
+    flex-direction: column;
     align-items: center;
   }
-  
-  .search-bar {
-    background: #fff;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    display: flex;
+
+  .trains-component-map-search-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .trains-component-map-search-bar input {
+    flex: 1 1 100%;
+  }
+
+  .trains-component-actions,
+  .trains-component-favorite-actions {
+    flex-direction: column;
+    gap: 5px;
+  }
+}
+
+/* Journey Search Form */
+.trains-component-journey-search-section {
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+.trains-component-journey-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.trains-component-form-group {
+  flex: 1 1 200px;
+  display: flex;
+  flex-direction: column;
+}
+
+.trains-component-form-group label {
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.trains-component-form-group input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.trains-component-search-journey-button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 22px; /* Align with inputs */
+}
+
+.trains-component-search-journey-button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+/* Journeys Section */
+.trains-component-journeys-section {
+  padding: 20px;
+}
+
+.trains-component-journeys-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.trains-component-journey-item {
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background-color: #fff;
+}
+
+.trains-component-journey-item h3 {
+  margin-bottom: 10px;
+}
+
+.trains-component-transit-stops,
+.trains-component-transit-lines,
+.trains-component-schedule {
+  margin-top: 10px;
+}
+
+.trains-component-transit-stops ul,
+.trains-component-transit-lines ul,
+.trains-component-schedule ul {
+  list-style-type: disc;
+  padding-left: 20px;
+}
+
+/* Responsive Design for Journeys */
+@media (min-width: 768px) {
+  .trains-component-journeys-grid {
+    flex-direction: row;
     flex-wrap: wrap;
-    gap: 20px;
-    max-width: 800px;
-    width: 100%;
   }
-  
-  .input-group {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 200px;
+
+  .trains-component-journey-item {
+    flex: 1 1 calc(50% - 40px);
+    margin: 10px;
   }
-  
-  .input-group label {
-    margin-bottom: 8px;
-    font-weight: 600;
-  }
-  
-  .input-group input {
-    padding: 10px 15px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 16px;
-    transition: border-color 0.3s;
-  }
-  
-  .input-group input:focus {
-    border-color: #007BFF;
-    outline: none;
-  }
-  
-  .search-button {
-    background-color: #007BFF;
-    color: #fff;
-    padding: 15px 25px;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    align-self: flex-end;
-  }
-  
-  .search-button:hover {
-    background-color: #0056b3;
-  }
-  
-  .error-message {
-    background-color: #ffe6e6;
-    color: #cc0000;
-    padding: 15px 20px;
-    margin: 20px auto;
-    max-width: 800px;
-    border-left: 5px solid #cc0000;
-    border-radius: 5px;
-    font-weight: 500;
-  }
-  
-  .loading-indicator {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    margin: 20px;
-  }
-  
-  .spinner {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #007BFF;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
-  }
-  
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-  
-  .content-wrapper {
-    padding: 40px 20px;
-  }
-  
-  /* Train Results */
-  .train-results {
-    padding: 20px;
-  }
-  
-  .train-results h2 {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  
-  .train-results ul {
-    list-style: none;
-    padding: 0;
-  }
-  
-  .train-item {
-    background: #fff;
-    padding: 20px;
-    margin-bottom: 15px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  
-  .train-item h3 {
-    margin-bottom: 10px;
-  }
-  
-  .book-button {
-    background-color: #28a745;
-    color: #fff;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .book-button:hover {
-    background-color: #218838;
-  }
-  
-  .pagination {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 20px;
-  }
-  
-  .pagination button {
-    padding: 10px 15px;
-    border: none;
-    background-color: #007BFF;
-    color: #fff;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .pagination button:disabled {
-    background-color: #6c757d;
-    cursor: not-allowed;
-  }
-  
-  .pagination button:hover:not(:disabled) {
-    background-color: #0056b3;
-  }
-  
-  /* Responsive Design */
-  @media (max-width: 768px) {
-    .search-bar {
-      flex-direction: column;
-    }
-  
-    .input-group {
-      flex: 1 1 100%;
-    }
-  
-    .pagination {
-      flex-direction: column;
-      gap: 5px;
-    }
-  }
-  
+}
+
+/* Additional Styles for Info Window */
+.trains-component-info-window {
+  max-width: 300px;
+}
+
+.trains-component-info-window-image {
+  width: 100%;
+  height: auto;
+  margin-top: 10px;
+  border-radius: 4px;
+}
+
+.trains-component-reviews {
+  margin-top: 10px;
+}
+
+.trains-component-review {
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+  margin-top: 10px;
+}
+
+.trains-component-reviews h4 {
+  margin-bottom: 10px;
+}
+
+.trains-component-website-link,
+.trains-component-google-maps-link {
+  display: block;
+  margin-top: 10px;
+  color: #007bff;
+  text-decoration: none;
+}
+
+.trains-component-website-link:hover,
+.trains-component-google-maps-link:hover {
+  text-decoration: underline;
+}
+
+/* Journeys Item Specific Styles */
+.trains-component-journey-item p {
+  margin: 5px 0;
+}
+
+.trains-component-journey-item h3 {
+  color: #333;
+}

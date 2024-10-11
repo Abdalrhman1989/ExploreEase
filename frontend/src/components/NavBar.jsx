@@ -1,18 +1,18 @@
-// src/components/Navbar.jsx
+// src/components/NavBar.jsx
 
 import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
-import axios from 'axios';
 import '../styles/NavBar.css';
 import { AuthContext } from '../context/AuthContext';
+import ReactCountryFlag from 'react-country-flag';
 
 const Navbar = () => {
   const [menuActive, setMenuActive] = useState(false);
   const [languageMenuActive, setLanguageMenuActive] = useState(false);
   
-  const { isAuthenticated, userRole } = useContext(AuthContext);
+  const { isAuthenticated, userRole, user } = useContext(AuthContext);
 
   const toggleMenu = () => {
     setMenuActive(!menuActive);
@@ -31,19 +31,37 @@ const Navbar = () => {
     }
   };
 
+  // Placeholder for language change logic
+  const changeLanguage = (lng) => {
+    // Implement language change logic if needed
+    setLanguageMenuActive(false);
+    console.log(`Language changed to: ${lng}`);
+  };
+
+  // Function to get the first letter of the user's name
+  const getUserInitial = () => {
+    if (user && user.displayName) {
+      return user.displayName.charAt(0).toUpperCase();
+    }
+    return 'U'; // Default initial if name is not available
+  };
+
   return (
     <nav className="navbar">
       <div className="navbar-logo">
         <Link to="/">ExploreEase</Link>
+      </div>
+      <div className={`navbar-menu ${menuActive ? 'active' : ''}`} onClick={toggleMenu}>
+        <span className="menu-icon">&#9776;</span>
       </div>
       <ul className={`navbar-links ${menuActive ? 'active' : ''}`}>
         <li><Link to="/stays" onClick={toggleMenu}>Stays</Link></li>
         <li><Link to="/flights" onClick={toggleMenu}>Flights</Link></li>
         <li><Link to="/car-rentals" onClick={toggleMenu}>Car Rentals</Link></li>
         <li><Link to="/attractions" onClick={toggleMenu}>Attractions</Link></li>
-        <li><Link to="/trains" onClick={toggleMenu}>Trains</Link></li> {/* New Link */}
-        <li><Link to="/buses" onClick={toggleMenu}>Buses</Link></li> {/* New Link */}
-        <li><Link to="/restaurants" onClick={toggleMenu}>Restaurants</Link></li> {/* New Link */}
+        <li><Link to="/trains" onClick={toggleMenu}>Trains</Link></li>
+        <li><Link to="/buses" onClick={toggleMenu}>Buses</Link></li>
+        <li><Link to="/restaurants" onClick={toggleMenu}>Restaurants</Link></li>
         {/* Conditionally render links based on user role */}
         {userRole === 'Admin' && (
           <li><Link to="/admin/dashboard" onClick={toggleMenu}>Admin Dashboard</Link></li>
@@ -51,20 +69,21 @@ const Navbar = () => {
         {userRole === 'BusinessAdministrator' && (
           <li><Link to="/business/dashboard" onClick={toggleMenu}>Business Dashboard</Link></li>
         )}
+        {/* Authentication Buttons for Mobile */}
+        <li className="mobile-auth">
+          {!isAuthenticated ? (
+            <>
+              <Link to="/register" className="auth-button" onClick={toggleMenu}>Register</Link>
+              <Link to="/login" className="auth-button" onClick={toggleMenu}>Sign in</Link>
+            </>
+          ) : (
+            <>
+              <button onClick={() => { handleLogout(); toggleMenu(); }} className="auth-button">Logout</button>
+            </>
+          )}
+        </li>
       </ul>
       <div className="navbar-right">
-        <div className="navbar-language" onClick={toggleLanguageMenu}>
-          <i className="fas fa-globe"></i>
-          <span>English</span>
-          {languageMenuActive && (
-            <ul className="language-dropdown">
-              <li><i className="fas fa-flag-usa"></i> English</li>
-              <li><i className="fas fa-flag"></i> French</li>
-              <li><i className="fas fa-flag"></i> German</li>
-              {/* Add more languages as needed */}
-            </ul>
-          )}
-        </div>
         {!isAuthenticated ? (
           <>
             <Link to="/register" className="auth-button">Register</Link>
@@ -72,12 +91,70 @@ const Navbar = () => {
           </>
         ) : (
           <>
-            <button onClick={handleLogout} className="auth-button">Logout</button>
+            <div className="navbar-language" onClick={toggleLanguageMenu}>
+              <ReactCountryFlag
+                countryCode="US"
+                svg
+                style={{
+                  width: '1.5em',
+                  height: '1.5em',
+                }}
+                title="US"
+              />
+              <span className="language-text">English</span>
+              <span className="dropdown-arrow">&#9662;</span>
+              {languageMenuActive && (
+                <ul className="language-dropdown">
+                  <li onClick={() => changeLanguage('en')}>
+                    <ReactCountryFlag
+                      countryCode="US"
+                      svg
+                      style={{
+                        width: '1.2em',
+                        height: '1.2em',
+                      }}
+                      title="US"
+                    /> English
+                  </li>
+                  <li onClick={() => changeLanguage('fr')}>
+                    <ReactCountryFlag
+                      countryCode="FR"
+                      svg
+                      style={{
+                        width: '1.2em',
+                        height: '1.2em',
+                      }}
+                      title="FR"
+                    /> French
+                  </li>
+                  <li onClick={() => changeLanguage('de')}>
+                    <ReactCountryFlag
+                      countryCode="DE"
+                      svg
+                      style={{
+                        width: '1.2em',
+                        height: '1.2em',
+                      }}
+                      title="DE"
+                    /> German
+                  </li>
+                  {/* Add more languages as needed */}
+                </ul>
+              )}
+            </div>
+            <button onClick={handleLogout} className="auth-button logout-button">Logout</button>
+            {/* User Profile Icon */}
+            <Link to="/profile" className="profile-link" title="Profile">
+              {user && user.photoURL ? (
+                <img src={user.photoURL} alt={`${user.displayName}'s Profile`} className="profile-avatar" />
+              ) : (
+                <div className="profile-initial">
+                  {getUserInitial()}
+                </div>
+              )}
+            </Link>
           </>
         )}
-      </div>
-      <div className="navbar-menu" onClick={toggleMenu}>
-        <span>&#9776;</span>
       </div>
     </nav>
   );

@@ -1,25 +1,34 @@
 /* src/styles/Attractions.css */
-.attractions {
-    font-family: 'Poppins', sans-serif;
-    color: #333;
+
+/* Import Global Variables */
+@import './variables.css';
+
+/* Global Styles */
+.attractions-component {
+    font-family: var(--font-family);
+    color: var(--text-color);
+    background-color: var(--background-color);
+    overflow-x: hidden; /* Prevent horizontal scrollbar */
     padding-bottom: 50px;
 }
 
 /* Banner Section */
-.attractions-banner {
+.attractions-component-banner {
     position: relative;
-    height: 400px;
+    height: 60vh;
     background-image: url('../assets/hotel.jpg'); /* Ensure the path is correct */
     background-size: cover;
     background-position: center;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 20px;
-    border-radius: 10px;
+    padding: 20px;
+    border-radius: var(--border-radius);
+    margin-bottom: 40px;
+    transition: background-image var(--transition-speed);
 }
 
-.attractions-banner::after {
+.attractions-component-banner::after {
     content: '';
     position: absolute;
     top: 0;
@@ -27,586 +36,895 @@
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.4);
-    border-radius: 10px;
+    border-radius: var(--border-radius);
 }
 
-.attractions-banner-content {
+.attractions-component-banner-content {
     position: relative;
     z-index: 1;
-    background-color: rgba(0, 0, 0, 0.6);
-    padding: 40px 20px;
-    border-radius: 10px;
     text-align: center;
-    color: #fff;
-    max-width: 80%;
-    transition: transform 0.3s ease;
+    color: var(--accent-color);
+    max-width: 800px;
 }
 
-.attractions-banner-content:hover {
-    transform: scale(1.02);
-}
-
-.attractions-banner-content h1 {
-    font-size: 3rem;
-    margin-bottom: 10px;
-}
-
-.attractions-banner-content p {
-    font-size: 1.5rem;
+.attractions-component-banner-content h1 {
+    font-size: var(--font-size-xlarge);
     margin-bottom: 20px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
 }
 
-.attractions-explore-button {
-    padding: 12px 25px;
-    font-size: 1rem;
+.attractions-component-banner-content p {
+    font-size: var(--font-size-medium);
+    margin-bottom: 30px;
+    font-weight: 300;
+}
+
+/* Button Styles */
+.attractions-component-explore-button,
+.attractions-component-search-button,
+.attractions-component-view-details-button,
+.attractions-component-favorite-button,
+.attractions-component-google-maps-link,
+.attractions-component-delete-button,
+.attractions-component-favorite-delete-button,
+.attractions-component-favorite-google-maps-button {
+    background: var(--primary-gradient);
     border: none;
-    background-color: #ff9900;
-    color: #fff;
-    border-radius: 5px;
+    color: var(--accent-color);
+    padding: 10px 20px;
+    font-size: 1rem;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.3s ease;
+    transition: background var(--transition-speed), transform var(--transition-speed), box-shadow var(--transition-speed);
+    border-radius: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 500;
+    box-shadow: var(--box-shadow);
+    text-decoration: none;
 }
 
-.attractions-explore-button:hover {
-    background-color: #e68a00;
-    transform: translateY(-2px);
+.attractions-component-explore-button:hover,
+.attractions-component-search-button:hover,
+.attractions-component-view-details-button:hover,
+.attractions-component-favorite-button:hover,
+.attractions-component-google-maps-link:hover,
+.attractions-component-delete-button:hover,
+.attractions-component-favorite-delete-button:hover,
+.attractions-component-favorite-google-maps-button:hover {
+    background: var(--secondary-gradient);
+    transform: scale(1.05);
+    box-shadow: var(--hover-shadow);
 }
 
 /* Categories Section */
-.attractions-categories-section {
-    padding: 20px;
-    background-color: #fff;
+.attractions-component-categories-section {
+    padding: 20px 10px; /* Reduced padding to make section smaller */
+    background: var(--background-color);
     text-align: center;
 }
 
-.attractions-categories-section h2 {
-    margin-bottom: 20px;
-    font-size: 2rem;
-    color: #003580;
+.attractions-component-categories-section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 30px; /* Reduced margin */
+    font-weight: 700;
+    color: var(--text-color);
 }
 
-.attractions-categories-grid {
+.attractions-component-categories-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px; /* Reduced gap */
+}
+
+.attractions-component-category-item {
+    background: var(--card-background);
+    padding: 15px 10px; /* Reduced padding */
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: transform var(--transition-speed), box-shadow var(--transition-speed), background var(--transition-speed);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 150px; /* Reduced width */
+    box-shadow: var(--box-shadow);
+}
+
+.attractions-component-category-item.selected {
+    background: var(--primary-gradient);
+    color: var(--accent-color);
+}
+
+.attractions-component-category-item:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--hover-shadow);
+}
+
+.attractions-component-category-icon {
+    font-size: 2rem; /* Reduced font size */
+    margin-bottom: 10px; /* Reduced margin */
+}
+
+.attractions-component-category-item h3 {
+    font-size: 1.2rem; /* Reduced font size */
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Search Bar Section */
+.attractions-component-map-search-section {
+    padding: 40px 20px;
+    background: var(--accent-color);
     display: flex;
     justify-content: center;
+    align-items: center;
+}
+
+.attractions-component-map-search-bar {
+    background: #ffffff;
+    padding: 25px 35px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    max-width: 800px;
+    width: 100%;
+    display: flex;
     flex-wrap: wrap;
     gap: 20px;
 }
 
-.attractions-category-item {
-    background-color: #f9f9f9;
-    border-radius: 10px;
-    width: 150px;
-    padding: 20px;
-    cursor: pointer;
-    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out, background-color 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.attractions-category-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-    background-color: #f1f1f1;
-}
-
-.attractions-category-icon {
-    font-size: 2rem;
-    margin-bottom: 10px;
-}
-
-.attractions-category-item h3 {
-    font-size: 1.2rem;
-    color: #003580;
-}
-
-/* Search Bar Section */
-.attractions-map-search-section {
-    padding: 20px;
-    background-color: #fff;
-    text-align: center;
-}
-
-.attractions-map-search-bar {
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    transition: all 0.3s ease;
-}
-
-.attractions-map-search-bar input {
-    width: 70%;
-    padding: 12px;
+.attractions-component-map-search-bar input {
+    flex: 1;
+    padding: 12px 16px;
     font-size: 1rem;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    border: 1px solid #bdc3c7;
+    border-radius: var(--border-radius);
+    transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+.attractions-component-map-search-bar input:focus {
+    border-color: var(--primary-color);
     outline: none;
-    transition: border-color 0.3s ease;
+    box-shadow: 0 0 10px rgba(30, 60, 114, 0.5);
 }
 
-.attractions-map-search-bar input:focus {
-    border-color: #007bff;
-}
-
-.attractions-search-button {
-    padding: 12px 25px;
+.attractions-component-search-button {
+    padding: 10px 20px;
     font-size: 1rem;
+    background: var(--primary-gradient);
     border: none;
-    background-color: #007bff;
-    color: white;
-    border-radius: 5px;
+    border-radius: 30px;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.3s ease;
+    color: var(--accent-color);
+    transition: background var(--transition-speed), transform var(--transition-speed), box-shadow var(--transition-speed);
 }
 
-.attractions-search-button:hover {
-    background-color: #0056b3;
-    transform: translateY(-2px);
+.attractions-component-search-button:hover {
+    background: var(--secondary-gradient);
+    transform: scale(1.05);
+    box-shadow: var(--hover-shadow);
 }
 
 /* Map Section */
-.attractions-map-section {
-    position: relative;
-    margin: 50px auto;
-    width: 90%;
-    max-width: 1200px;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+.attractions-component-map-section {
+    padding: 40px 20px;
+    position: relative; /* Ensures the map has a min height to accommodate content */
 }
 
-.attractions-info-window {
-    max-width: 300px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+/* InfoWindow Styling */
+.attractions-component-info-window {
+    max-width: 350px;
+    font-size: 1rem;
+    color: var(--text-color);
 }
 
-.attractions-info-window h3 {
-    margin: 0;
-    font-size: 1.2rem;
+.attractions-component-info-window h3 {
+    margin-top: 0;
+    font-size: 1.6rem;
+    font-weight: 700;
 }
 
-.attractions-info-window p {
-    margin: 5px 0;
-    font-size: 0.9rem;
-    text-align: center;
+.attractions-component-info-window p {
+    margin: 8px 0;
 }
 
-.attractions-info-window-image {
+.attractions-component-info-window-image {
     width: 100%;
-    border-radius: 5px;
-    margin-top: 10px;
+    height: 180px;
+    border-radius: var(--border-radius);
+    margin-top: 15px;
     object-fit: cover;
 }
 
-.attractions-reviews {
-    margin-top: 10px;
-    width: 100%;
-    text-align: left;
+.attractions-component-reviews {
+    margin-top: 20px;
 }
 
-.attractions-review {
-    background-color: #f9f9f9;
-    padding: 8px;
-    border-radius: 5px;
-    margin-bottom: 8px;
+.attractions-component-review {
+    background-color: #f9fafb;
+    padding: 12px;
+    border-radius: var(--border-radius);
+    margin-bottom: 12px;
 }
 
-.attractions-website-link,
-.attractions-google-maps-link {
-    margin-top: 10px;
-    padding: 8px 15px;
-    background-color: #007bff;
-    color: #fff;
-    text-decoration: none;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
-    display: inline-block;
+.attractions-component-reviews h4 {
+    margin-bottom: 10px;
+    font-size: 1.2rem;
 }
 
-.attractions-website-link:hover,
-.attractions-google-maps-link:hover {
-    background-color: #0056b3;
-}
-
-.attractions-info-buttons {
-    margin-top: 10px;
+.attractions-component-info-buttons {
+    margin-top: 25px;
     display: flex;
-    gap: 10px;
-}
-
-.attractions-favorite-button {
-    padding: 8px 15px;
-    background-color: #ff9900;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-.attractions-favorite-button:hover {
-    background-color: #e68a00;
-    transform: translateY(-2px);
+    justify-content: center;
+    gap: 15px;
 }
 
 /* Dynamic Attractions Section */
-.attractions-dynamic-attractions {
-    padding: 50px 20px;
-    background-color: #fff;
+.attractions-component-dynamic-attractions {
+    padding: 60px 20px;
+}
+
+.attractions-component-dynamic-attractions h2 {
     text-align: center;
-}
-
-.attractions-dynamic-attractions h2 {
-    margin-bottom: 40px;
+    margin-bottom: 50px;
     font-size: 2.5rem;
-    color: #003580;
+    font-weight: 700;
+    color: var(--text-color);
 }
 
-.attractions-spinner {
-    font-size: 1.2rem;
-    color: #007bff;
+.attractions-component-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 60px;
+}
+
+.attractions-component-spinner .spinner {
+    border: 6px solid rgba(0, 0, 0, 0.1);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border-left-color: var(--primary-color);
+    animation: spin 1s linear infinite;
     margin-bottom: 20px;
 }
 
-.attractions-error-message {
-    color: red;
-    font-size: 1.2rem;
-    margin-bottom: 20px;
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
-.attractions-grid {
+.attractions-component-error-message {
+    text-align: center;
+    margin: 30px 0;
+    font-size: var(--font-size-medium);
+    color: var(--error-color);
+}
+
+.attractions-component-no-restaurants {
+    text-align: center;
+    font-size: 1rem;
+    color: var(--secondary-text-color);
+    margin-top: 30px;
+}
+
+.attractions-component-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
 }
 
-.attractions-item {
-    background-color: #f9f9f9;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+.attractions-component-item {
+    background: var(--card-background);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    transition: transform var(--transition-speed), box-shadow var(--transition-speed);
     display: flex;
     flex-direction: column;
     height: 100%;
 }
 
-.attractions-item:hover {
+.attractions-component-item:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--hover-shadow);
 }
 
-.attractions-image-button {
+.attractions-component-image-button {
     border: none;
     padding: 0;
     cursor: pointer;
     width: 100%;
-    height: 200px;
+    height: 160px;
     overflow: hidden;
+    border-radius: var(--border-radius);
+    margin-bottom: 15px;
 }
 
-.attractions-placeholder {
+.attractions-component-placeholder {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.3s ease-in-out;
+    transition: transform var(--transition-speed);
 }
 
-.attractions-image-button:hover .attractions-placeholder {
+.attractions-component-image-button:hover .attractions-component-placeholder {
     transform: scale(1.05);
 }
 
-.attractions-info {
-    padding: 15px;
-    flex-grow: 1;
+.attractions-component-info {
+    flex-grow: 1; /* Allows the info section to take up available space */
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
 }
 
-.attractions-info h3 {
-    font-size: 1.5rem;
-    color: #003580;
+.attractions-component-info h3 {
     margin-bottom: 10px;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    /* Ensure consistent height by limiting lines */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;  
+    overflow: hidden;
 }
 
-.attractions-info p {
+.attractions-component-info p {
+    margin: 6px 0;
     font-size: 1rem;
-    color: #555;
-    margin-bottom: 10px;
+    /* Optional: Limit text to 3 lines */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;  
+    overflow: hidden;
 }
 
-.attractions-actions {
+.attractions-component-actions {
     display: flex;
     gap: 10px;
-    margin-top: auto;
+    margin-top: auto; /* Pushes actions to the bottom */
 }
 
-.attractions-view-details-button {
+/* Approved Attractions Section */
+.attractions-component-approved-attractions-section {
+    padding: 60px 20px;
+    background: var(--background-color);
+    text-align: center;
+}
+
+.attractions-component-approved-attractions-section h2 {
+    font-size: 2.5rem;
+    margin-bottom: 40px;
+    font-weight: 700;
+    color: var(--text-color);
+}
+
+.attractions-component-approved-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.attractions-component-approved-item {
+    background: var(--card-background);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.attractions-component-approved-item:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--hover-shadow);
+}
+
+.attractions-component-approved-image {
+    position: relative;
+    overflow: hidden;
+}
+
+.attractions-component-approved-image img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    transition: transform var(--transition-speed);
+}
+
+.attractions-component-approved-item:hover .attractions-component-approved-image img {
+    transform: scale(1.05);
+}
+
+.attractions-component-approved-details {
+    padding: 20px;
     flex: 1;
-    padding: 8px 0;
-    background-color: #007bff;
-    color: white;
+    display: flex;
+    flex-direction: column;
+}
+
+.attractions-component-approved-details h3 {
+    margin-top: 0;
+    font-size: 1.6rem;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.attractions-component-approved-details p {
+    margin: 8px 0;
+    font-size: 1rem;
+    color: var(--secondary-text-color);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.attractions-component-approved-amenities {
+    margin-top: 15px;
+}
+
+.attractions-component-approved-amenities h4 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 1.2rem;
+    color: var(--primary-color);
+}
+
+.attractions-component-approved-amenities ul {
+    list-style-type: disc;
+    padding-left: 20px;
+    color: var(--secondary-text-color);
+}
+
+.attractions-component-approved-amenities ul li {
+    margin-bottom: 5px;
+}
+
+.attractions-component-approved-expand-button {
+    background: none;
     border: none;
-    border-radius: 5px;
+    color: var(--primary-color);
+    font-size: 1rem;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color var(--transition-speed);
+    margin-top: 10px;
 }
 
-.attractions-view-details-button:hover {
-    background-color: #0056b3;
-    transform: translateY(-2px);
+.attractions-component-approved-expand-button:hover {
+    color: var(--secondary-color);
 }
 
-.attractions-favorite-button {
+.attractions-component-approved-actions {
+    margin-top: auto; /* Pushes actions to the bottom */
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.attractions-component-approved-view-details-button,
+.attractions-component-approved-view-calendar-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background var(--transition-speed), transform var(--transition-speed), box-shadow var(--transition-speed);
+    box-shadow: var(--box-shadow);
     flex: 1;
-    padding: 8px 0;
-    background-color: #ff9900;
-    color: white;
-    border: none;
-    border-radius: 5px;
+    text-align: center;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.3s ease;
+    border: none;
+    background: var(--primary-gradient);
+    color: var(--accent-color);
 }
 
-.attractions-favorite-button:hover {
-    background-color: #e68a00;
-    transform: translateY(-2px);
+.attractions-component-approved-view-details-button:hover,
+.attractions-component-approved-view-calendar-button:hover {
+    background: var(--secondary-gradient);
+    transform: scale(1.05);
+    box-shadow: var(--hover-shadow);
+}
+
+.attractions-component-approved-view-details-button svg,
+.attractions-component-approved-view-calendar-button svg {
+    margin-right: 8px;
+    font-size: 1.2rem;
+}
+
+/* Availability Calendar Modal */
+.attractions-component-availability-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--z-index-modal);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--transition-speed), visibility var(--transition-speed);
+}
+
+.attractions-component-availability-modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.attractions-component-availability-modal-content {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: var(--border-radius);
+    width: 90%;
+    max-width: 600px;
+    position: relative;
+    box-shadow: var(--box-shadow);
+    transform: translateY(-50px);
+    transition: transform var(--transition-speed);
+}
+
+.attractions-component-availability-modal-overlay.show .attractions-component-availability-modal-content {
+    transform: translateY(0);
+}
+
+.attractions-component-close-button {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #333333;
+    cursor: pointer;
+    transition: color var(--transition-speed);
+}
+
+.attractions-component-close-button:hover {
+    color: var(--error-color);
+}
+
+.attractions-component-calendar-container {
+    margin-top: 20px;
+}
+
+.available-date {
+    background-color: #4caf50 !important;
+    color: #ffffff !important;
+    border-radius: 50%;
+}
+
+.unavailable-date {
+    background-color: #f44336 !important;
+    color: #ffffff !important;
+    border-radius: 50%;
+}
+
+.attractions-component-calendar-legend {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: 15px;
+    justify-content: center;
+}
+
+.available-dot,
+.unavailable-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.available-dot {
+    background-color: #4caf50;
+}
+
+.unavailable-dot {
+    background-color: #f44336;
 }
 
 /* Favorites Section */
-.attractions-favorites-section {
-    padding: 50px 20px;
-    background-color: #f4f4f4;
+.attractions-component-favorites-section {
+    padding: 60px 20px;
+    background: var(--background-color);
     text-align: center;
 }
 
-.attractions-favorites-section h2 {
-    margin-bottom: 40px;
+.attractions-component-favorites-section h2 {
     font-size: 2.5rem;
-    color: #003580;
+    margin-bottom: 40px;
+    font-weight: 700;
+    color: var(--text-color);
 }
 
-.attractions-favorites-grid {
+.attractions-component-favorites-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
 }
 
-.attractions-favorite-item {
-    background-color: #fff;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+.attractions-component-favorite-item {
+    background: var(--card-background);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    transition: transform var(--transition-speed), box-shadow var(--transition-speed);
     display: flex;
     flex-direction: column;
     height: 100%;
 }
 
-.attractions-favorite-item:hover {
+.attractions-component-favorite-item:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--hover-shadow);
 }
 
-.attractions-favorite-image-button {
+.attractions-component-favorite-image-button {
     border: none;
     padding: 0;
     cursor: pointer;
     width: 100%;
-    height: 200px;
+    height: 160px;
     overflow: hidden;
+    border-radius: var(--border-radius);
+    margin-bottom: 15px;
 }
 
-.attractions-favorite-image-button .attractions-placeholder {
+.attractions-component-favorite-image-button img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.3s ease-in-out;
+    transition: transform var(--transition-speed);
 }
 
-.attractions-favorite-image-button:hover .attractions-placeholder {
+.attractions-component-favorite-image-button:hover img {
     transform: scale(1.05);
 }
 
-.attractions-favorite-item .attractions-info {
-    padding: 15px;
-    flex-grow: 1;
+.attractions-component-favorite-info {
+    flex-grow: 1; /* Allows the info section to take up available space */
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
 }
 
-.attractions-favorite-item .attractions-info h3 {
-    font-size: 1.5rem;
-    color: #003580;
+.attractions-component-favorite-info h3 {
     margin-bottom: 10px;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    /* Ensure consistent height by limiting lines */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;  
+    overflow: hidden;
 }
 
-.attractions-favorite-item .attractions-info p {
+.attractions-component-favorite-info p {
+    margin: 6px 0;
     font-size: 1rem;
-    color: #555;
-    margin-bottom: 10px;
+    /* Optional: Limit text to 3 lines */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;  
+    overflow: hidden;
 }
 
-.attractions-favorite-actions {
+.attractions-component-favorite-actions {
     display: flex;
     gap: 10px;
-    margin-top: auto;
+    margin-top: auto; /* Pushes actions to the bottom */
 }
 
-.attractions-google-maps-button {
-    flex: 1;
-    padding: 8px 0;
-    background-color: #28a745;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-.attractions-google-maps-button:hover {
-    background-color: #1e7e34;
-    transform: translateY(-2px);
-}
-
-.attractions-delete-favorite-button {
-    flex: 1;
-    padding: 8px 0;
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-.attractions-delete-favorite-button:hover {
-    background-color: #c82333;
-    transform: translateY(-2px);
-}
-
-/* Global Styles */
-.attractions-container {
-    width: 90%;
-    margin: 0 auto;
-    max-width: 1200px;
+/* No Favorites Message */
+.attractions-component-no-favorites {
+    text-align: center;
+    font-size: 1rem;
+    color: var(--secondary-text-color);
+    margin-top: 30px;
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
-    .attractions-banner-content h1 {
+
+/* Medium Devices (Tablets, 768px to 1199px) */
+@media (max-width: 1200px) and (min-width: 768px) {
+    .attractions-component-banner {
+        height: 50vh;
+    }
+
+    .attractions-component-banner-content h1 {
         font-size: 2rem;
     }
 
-    .attractions-banner-content p {
+    .attractions-component-banner-content p {
         font-size: 1rem;
     }
 
-    .attractions-categories-grid {
-        flex-direction: column;
-        align-items: center;
+    .attractions-component-categories-section h2,
+    .attractions-component-approved-attractions-section h2,
+    .attractions-component-favorites-section h2 {
+        font-size: 2.2rem;
     }
 
-    .attractions-category-item {
-        width: 80%;
+    .attractions-component-approved-grid,
+    .attractions-component-favorites-grid,
+    .attractions-component-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Small Devices (Mobile Phones, less than 768px) */
+@media (max-width: 767px) {
+    .attractions-component-banner {
+        height: 40vh;
     }
 
-    .attractions-map-search-bar {
+    .attractions-component-banner-content h1 {
+        font-size: 1.5rem;
+    }
+
+    .attractions-component-banner-content p {
+        font-size: 0.9rem;
+    }
+
+    .attractions-component-categories-section {
+        padding: 20px 10px;
+    }
+
+    .attractions-component-categories-grid {
+        gap: 15px;
+    }
+
+    .attractions-component-category-item {
+        width: 100px; /* Smaller width on mobile */
+        padding: 10px;
+    }
+
+    .attractions-component-category-icon {
+        font-size: 1.2rem;
+        margin-bottom: 5px;
+    }
+
+    .attractions-component-category-item h3 {
+        font-size: 0.9rem;
+    }
+
+    .attractions-component-map-search-bar {
         flex-direction: column;
         align-items: stretch;
     }
 
-    .attractions-map-search-bar input {
+    .attractions-component-map-search-bar input {
         width: 100%;
         margin-bottom: 10px;
     }
 
-    .attractions-search-button {
+    .attractions-component-search-button {
         width: 100%;
         margin-left: 0;
     }
 
-    .attractions-item h3,
-    .attractions-favorite-item h3 {
-        font-size: 1.2rem;
+    .attractions-component-grid,
+    .attractions-component-approved-grid,
+    .attractions-component-favorites-grid {
+        grid-template-columns: 1fr;
     }
 
-    .attractions-placeholder {
-        height: 180px;
+    .attractions-component-item,
+    .attractions-component-favorite-item {
+        height: auto;
     }
 
-    .attractions-dynamic-attractions h2,
-    .attractions-favorites-section h2 {
-        font-size: 2rem;
+    .attractions-component-placeholder {
+        height: 150px;
     }
 
-    .attractions-dynamic-attractions,
-    .attractions-favorites-section {
-        padding: 30px 10px;
+    .attractions-component-approved-details h3 {
+        font-size: 1.4rem;
     }
 
-    .attractions-info-window {
-        max-width: 250px;
+    .attractions-component-approved-details p {
+        font-size: 0.95rem;
     }
 
-    .attractions-favorite-actions {
-        flex-direction: column;
+    .attractions-component-approved-amenities h4 {
+        font-size: 1.1rem;
     }
 
-    .attractions-favorite-actions button {
-        width: 100%;
-    }
-}
-
-@media (max-width: 480px) {
-    .attractions-banner {
-        height: 300px;
-    }
-
-    .attractions-banner-content h1 {
-        font-size: 1.5rem;
-    }
-
-    .attractions-banner-content p {
+    .attractions-component-approved-amenities ul li {
         font-size: 0.9rem;
     }
 
-    .attractions-dynamic-attractions h2,
-    .attractions-favorites-section h2 {
-        font-size: 1.8rem;
+    .attractions-component-favorite-info h3 {
+        font-size: 1.3rem;
     }
 
-    .attractions-dynamic-attractions,
-    .attractions-favorites-section {
-        padding: 20px 10px;
+    .attractions-component-favorite-info p {
+        font-size: 0.95rem;
     }
 
-    .attractions-placeholder {
+    /* Modal Adjustments */
+    .attractions-component-availability-modal-content {
+        padding: 20px;
+    }
+
+    .attractions-component-close-button {
+        top: 10px;
+        right: 15px;
+    }
+
+    .attractions-component-availability-modal-content h3 {
+        font-size: 1.4rem;
+    }
+
+    .attractions-component-calendar-container {
+        margin-top: 15px;
+    }
+
+    .attractions-component-calendar-legend {
+        gap: 15px;
+    }
+
+    .available-dot,
+    .unavailable-dot {
+        width: 10px;
+        height: 10px;
+    }
+
+    .available-date,
+    .unavailable-date {
+        width: 30px !important;
+        height: 30px !important;
+    }
+
+    /* Button Size Adjustments */
+    .attractions-component-view-details-button,
+    .attractions-component-favorite-button,
+    .attractions-component-approved-view-details-button,
+    .attractions-component-approved-view-calendar-button,
+    .attractions-component-favorite-google-maps-button,
+    .attractions-component-favorite-delete-button {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+    }
+
+    /* Heading Sizes */
+    .attractions-component-dynamic-attractions h2,
+    .attractions-component-approved-attractions-section h2,
+    .attractions-component-favorites-section h2 {
+        font-size: 2rem;
+    }
+
+    /* Image Heights */
+    .attractions-component-approved-image img,
+    .attractions-component-favorite-image-button img,
+    .attractions-component-info-window-image {
         height: 150px;
     }
+
+    /* Reduce gaps for smaller screens */
+    .attractions-component-grid,
+    .attractions-component-approved-grid,
+    .attractions-component-favorites-grid {
+        gap: 20px;
+    }
 }
 
-/* Loading and Error Messages */
-.attractions-loading,
-.attractions-error,
-.attractions-error-message {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    font-size: 1.5rem;
-    color: #555;
-}
+/* Extra Small Devices (Very Small Phones, less than 480px) */
+/* Further adjustments can be made within the above media queries */

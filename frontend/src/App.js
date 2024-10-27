@@ -1,8 +1,6 @@
-// frontend/src/App.js
-
 import React from 'react';
-import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
-import { useContext } from 'react'; // Import useContext
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useContext } from 'react';
 import Home from './pages/Home';
 import Stays from './pages/Stays';
 import Flights from './pages/Flights';
@@ -21,32 +19,26 @@ import Destination from './pages/Destination';
 import Booking from './pages/Booking';
 import FlightResults from './pages/FlightResults';
 import StaysResults from './pages/StaysResults';
-import CarRentalsResults from './pages/CarRentalsResults';
-import AttractionsResults from './pages/AttractionsResults';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import GDPR from './pages/GDPR';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import HotelForm from './components/HotelForm';
-import FlightForm from './components/FlightForm';
-import CarRentalForm from './components/CarRentalForm';
-import TrainForm from './components/TrainForm';
-import BusForm from './components/BusForm';
 import RestaurantForm from './components/RestaurantForm';
 import AttractionForm from './components/AttractionForm';
-import Users from './components/Users';
-import Settings from './components/Settings';
 import BusinessOverview from './components/BusinessOverview';
 import NotFound from './pages/NotFound';
-
-// Importing new pages
+import AdminConfirmOffers from './components/AdminConfirmOffers';
 import FAQ from './pages/FAQ';
 import Support from './pages/Support';
-import UserProfile from './pages/UserProfile'; // Import UserProfile
-import Confirmation from './pages/Confirmation.jsx'; // Import Confirmation
-
+import UserProfile from './pages/UserProfile';
+import Confirmation from './pages/Confirmation.jsx';
+import ApprovedHotels from './components/ApprovedHotels.jsx';
+import HotelDetails from './pages/HotelDetails.jsx';
+import HotelBook from './pages/HotelBook.jsx'; 
 import './styles/App.css';
-import { AuthContext } from './context/AuthContext'; // Import AuthContext
+import { AuthContext } from './context/AuthContext'; 
+import AttractionDetails from './components/AttractionDetails';
 
 function App() {
   const location = useLocation();
@@ -67,13 +59,13 @@ function App() {
         <Route path="/flights" element={<Flights />} />
         <Route path="/car-rentals" element={<CarRentals />} />
         <Route path="/attractions" element={<Attractions />} />
+        <Route path="/attractions/:id" element={<AttractionDetails />} />
+
         <Route path="/trains" element={<Trains />} />
         <Route path="/buses" element={<Buses />} />
         <Route path="/restaurants" element={<Restaurants />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-
-        {/* New Routes */}
         <Route path="/faq" element={<FAQ />} />
         <Route path="/support" element={<Support />} />
 
@@ -103,32 +95,29 @@ function App() {
           {/* Specific Routes */}
           <Route path="dashboard" element={<BusinessOverview />} />
           <Route path="hotels" element={<HotelForm />} />
-          <Route path="flights" element={<FlightForm />} />
-          <Route path="car-rentals" element={<CarRentalForm />} />
-          <Route path="trains" element={<TrainForm />} />
-          <Route path="buses" element={<BusForm />} />
           <Route path="restaurants" element={<RestaurantForm />} />
           <Route path="attractions" element={<AttractionForm />} />
-          <Route path="users" element={<Users />} />
-          <Route path="settings" element={<Settings />} />
+          
         </Route>
-
-        {/* Redirect any unknown business routes to dashboard */}
-        <Route path="/business/*" element={<Navigate to="/business/dashboard" />} />
 
         {/* General Routes */}
         <Route path="/destination/:destinationName" element={<Destination />} />
         <Route path="/booking" element={<Booking />} />
         <Route path="/search-flights" element={<FlightResults />} />
         <Route path="/search-stays" element={<StaysResults />} />
-        <Route path="/search-car-rentals" element={<CarRentalsResults />} />
-        <Route path="/search-attractions" element={<AttractionsResults />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/gdpr" element={<GDPR />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
-        {/* Add the new /results route */}
+        {/* Featured Hotels and Hotel Details Routes */}
+        <Route path="/featured-hotels" element={<ApprovedHotels />} />
+        <Route path="/hotels/:id" element={<HotelDetails />} />
+
+        {/* Booking Route */}
+        <Route path="/hotels/:id/book" element={<HotelBook />} />
+
+        {/* Add the /results route */}
         <Route path="/results" element={<FlightResults />} />
 
         {/* Add the /confirmation route */}

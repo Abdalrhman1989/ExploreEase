@@ -1,0 +1,126 @@
+/* AdminConfirmAttractionOffers.css */
+
+/* Container Styling */
+.admin-confirm-attraction-offers {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+  }
+  
+  /* Heading */
+  .admin-confirm-attraction-offers h2 {
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 24px;
+    text-align: center;
+  }
+  
+  /* Error Message Styling */
+  .error-message {
+    color: #e74c3c;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  /* Success Message Styling (if needed) */
+  .success-message {
+    color: #2ecc71;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  /* Table Styling */
+  .attractions-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  
+  .attractions-table th,
+  .attractions-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: center;
+  }
+  
+  .attractions-table th {
+    background-color: #4CAF50;
+    color: white;
+    font-weight: bold;
+  }
+  
+  .attractions-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  
+  .attractions-table tr:hover {
+    background-color: #ddd;
+  }
+  
+  /* Button Styling */
+  .approve-button,
+  .reject-button {
+    padding: 8px 16px;
+    margin: 0 5px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    color: white;
+    font-size: 14px;
+  }
+  
+  .approve-button {
+    background-color: #2ecc71; /* Green */
+    transition: background-color 0.3s ease;
+  }
+  
+  .approve-button:hover {
+    background-color: #27ae60;
+  }
+  
+  .reject-button {
+    background-color: #e74c3c; /* Red */
+    transition: background-color 0.3s ease;
+  }
+  
+  .reject-button:hover {
+    background-color: #c0392b;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .attractions-table th,
+    .attractions-table td {
+      padding: 8px;
+      font-size: 14px;
+    }
+  
+    .approve-button,
+    .reject-button {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+  }
+  
+  /* Additional Styling (Optional) */
+  
+  /* No Pending Attractions Message */
+  .admin-confirm-attraction-offers p {
+    font-size: 16px;
+    color: #555;
+    text-align: center;
+  }
+  
+  /* Table Container for Overflow */
+  .attractions-table-container {
+    overflow-x: auto;
+  }
+  

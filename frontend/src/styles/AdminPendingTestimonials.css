@@ -1,0 +1,235 @@
+/* src/styles/AdminPendingTestimonials.css */
+
+:root {
+    /* Color Palette */
+    --primary-color: #1e3c72; /* Deep Blue */
+    --secondary-color: #2a5298; /* Medium Blue */
+    --accent-color: #ffffff; /* White */
+    --background-color: #f4f6f8; /* Light Gray */
+    --card-background: #ffffff; /* White */
+    --text-color: #333333; /* Dark Gray */
+    --secondary-text-color: #555555; /* Medium Gray */
+    --error-color: #dc3545; /* Red for errors */
+    --success-color: #28a745; /* Green for success messages */
+  
+    /* Gradients */
+    --primary-gradient: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    --secondary-gradient: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+  
+    /* Shadows */
+    --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    --hover-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  
+    /* Border Radius */
+    --border-radius: 12px;
+  
+    /* Transitions */
+    --transition-speed: 0.3s;
+  
+    /* Font Sizes */
+    --font-size-small: 0.9rem;
+    --font-size-medium: 1rem;
+    --font-size-large: 1.5rem;
+    --font-size-xlarge: 2.5rem;
+  
+    /* Z-Index for layering */
+    --z-index-modal: 1000;
+  
+    /* Typography */
+    --font-family: 'Roboto', sans-serif;
+}
+
+/* Container Styling */
+.admin-pending-testimonials {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: var(--card-background);
+  box-shadow: var(--box-shadow);
+  border-radius: var(--border-radius);
+  font-family: var(--font-family);
+}
+
+/* Heading */
+.admin-pending-testimonials h2 {
+  font-size: var(--font-size-large);
+  color: var(--primary-color);
+  margin-bottom: 20px;
+  text-align: center;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 10px;
+}
+
+/* Error Message */
+.error-message {
+  background-color: #ffe6e6;
+  color: var(--error-color);
+  padding: 10px 20px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  border: 1px solid var(--error-color);
+  text-align: center;
+}
+
+/* Testimonials List */
+.testimonials-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Individual Testimonial Item */
+.testimonial-item {
+  display: flex;
+  align-items: flex-start;
+  background-color: #f9f9f9;
+  border-left: 5px solid var(--primary-color);
+  padding: 20px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  transition: background-color var(--transition-speed), border-left-color var(--transition-speed);
+}
+
+.testimonial-item:hover {
+  border-left-color: var(--secondary-color);
+  background-color: #f0f8ff;
+}
+
+/* User Info Container */
+.user-info {
+  flex-shrink: 0;
+  margin-right: 20px;
+}
+
+/* User Profile Picture */
+.user-profile-picture {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--primary-color);
+}
+
+/* User Initials Fallback */
+.user-initials {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--primary-gradient);
+  color: var(--accent-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* Testimonial Content Container */
+.testimonial-content {
+  flex: 1;
+}
+
+/* Testimonial Content */
+.content {
+  margin: 0 0 10px 0;
+  line-height: 1.6;
+  color: var(--text-color);
+  font-style: italic;
+  position: relative;
+  padding-left: 20px;
+}
+
+.content::before {
+  content: "“";
+  font-size: 2rem;
+  position: absolute;
+  left: 0;
+  top: -5px;
+  color: var(--primary-color);
+}
+
+/* User Details */
+.user-details {
+  color: var(--secondary-text-color);
+  margin-bottom: 10px;
+}
+
+/* Action Buttons Container */
+.testimonial-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* Approve Button */
+.approve-btn {
+  background-color: var(--success-color);
+  color: var(--accent-color);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color var(--transition-speed), transform var(--transition-speed);
+  font-size: var(--font-size-medium);
+}
+
+.approve-btn:hover {
+  background-color: #218838;
+}
+
+.approve-btn:active {
+  transform: scale(0.98);
+}
+
+/* Reject Button */
+.reject-btn {
+  background-color: var(--error-color);
+  color: var(--accent-color);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color var(--transition-speed), transform var(--transition-speed);
+  font-size: var(--font-size-medium);
+}
+
+.reject-btn:hover {
+  background-color: #c82333;
+}
+
+.reject-btn:active {
+  transform: scale(0.98);
+}
+
+/* No Testimonials Message */
+.admin-pending-testimonials p {
+  text-align: center;
+  color: var(--secondary-text-color);
+  font-size: var(--font-size-medium);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .testimonial-item {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .user-info {
+    margin-right: 0;
+    margin-bottom: 15px;
+  }
+
+  .testimonial-actions {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .approve-btn,
+  .reject-btn {
+    width: 100%;
+  }
+}

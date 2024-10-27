@@ -1,22 +1,43 @@
-import React, { useState } from 'react';
+// src/components/HotelForm.jsx
+
+import React, { useState, useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
+import axios from 'axios';
 import '../styles/HotelForm.css';
+import { DateRange } from 'react-date-range';
+import 'react-date-range/dist/styles.css'; // Main style file
+import 'react-date-range/dist/theme/default.css'; // Theme CSS
+import { format } from 'date-fns';
 
 const HotelForm = () => {
+  const { user } = useContext(AuthContext); // Access user from context
   const [hotelDetails, setHotelDetails] = useState({
     name: '',
     location: '',
     basePrice: '',
     description: '',
-    images: [],
     roomTypes: [{ type: '', price: '', availability: 'Available' }],
-    amenities: [],
     seasonalPricing: [{ startDate: '', endDate: '', price: '' }],
+    amenities: [],
   });
+  const [images, setImages] = useState([]);
+  const [availability, setAvailability] = useState([]); // Array of date strings
+  const [message, setMessage] = useState(null);
+  const [error, setError] = useState(null);
+  const [dateRange, setDateRange] = useState([
+    {
+      startDate: new Date(),
+      endDate: new Date(),
+      key: 'selection',
+    },
+  ]);
 
+  // Handle form field changes
   const handleChange = (e) => {
     setHotelDetails({ ...hotelDetails, [e.target.name]: e.target.value });
   };
 
+  // Handle Room Type changes
   const handleRoomTypeChange = (index, e) => {
     const newRoomTypes = hotelDetails.roomTypes.map((roomType, i) =>
       index === i ? { ...roomType, [e.target.name]: e.target.value } : roomType
@@ -24,6 +45,7 @@ const HotelForm = () => {
     setHotelDetails({ ...hotelDetails, roomTypes: newRoomTypes });
   };
 
+  // Add a new Room Type
   const addRoomType = () => {
     setHotelDetails({
       ...hotelDetails,
@@ -31,6 +53,7 @@ const HotelForm = () => {
     });
   };
 
+  // Handle Seasonal Pricing changes
   const handleSeasonalPricingChange = (index, e) => {
     const newSeasonalPricing = hotelDetails.seasonalPricing.map((season, i) =>
       index === i ? { ...season, [e.target.name]: e.target.value } : season
@@ -38,6 +61,7 @@ const HotelForm = () => {
     setHotelDetails({ ...hotelDetails, seasonalPricing: newSeasonalPricing });
   };
 
+  // Add a new Seasonal Pricing
   const addSeasonalPricing = () => {
     setHotelDetails({
       ...hotelDetails,
@@ -45,6 +69,7 @@ const HotelForm = () => {
     });
   };
 
+  // Handle Amenity changes
   const handleAmenityChange = (e) => {
     const { value, checked } = e.target;
     const newAmenities = checked
@@ -53,20 +78,140 @@ const HotelForm = () => {
     setHotelDetails({ ...hotelDetails, amenities: newAmenities });
   };
 
+  // Handle Image Upload and Conversion to Base64
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
-    setHotelDetails({ ...hotelDetails, images: files });
+    convertFilesToBase64(files)
+      .then((base64Images) => {
+        setImages(base64Images);
+      })
+      .catch((err) => {
+        console.error('Error converting images:', err);
+        setError('Failed to process images.');
+      });
   };
 
-  const handleSubmit = (e) => {
+  // Utility function to convert files to Base64
+  const convertFilesToBase64 = (files) => {
+    return Promise.all(
+      files.map((file) => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = (error) => reject(error);
+        });
+      })
+    );
+  };
+
+  // Handle Date Range Selection
+  const handleSelect = (ranges) => {
+    const { selection } = ranges;
+    setDateRange([selection]);
+
+    const { startDate, endDate } = selection;
+
+    // Generate all dates within the selected range
+    const datesInRange = [];
+    let currentDate = new Date(startDate);
+    while (currentDate <= endDate) {
+      datesInRange.push(format(currentDate, 'yyyy-MM-dd'));
+      currentDate = new Date(currentDate.setDate(currentDate.getDate() + 1));
+    }
+
+    setAvailability(datesInRange);
+  };
+
+  // Remove a selected date
+  const removeDate = (dateToRemove) => {
+    setAvailability(availability.filter((date) => date !== dateToRemove));
+  };
+
+  // Handle Form Submission
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Hotel details submitted:', hotelDetails);
-    // Handle submission to backend here
+    setMessage(null);
+    setError(null);
+
+    // Convert availability array to JSON object
+    const availabilityObj = {};
+    availability.forEach((date) => {
+      availabilityObj[date] = true; // Mark as available
+    });
+
+    // Construct the payload
+    const payload = {
+      name: hotelDetails.name,
+      location: hotelDetails.location,
+      basePrice: hotelDetails.basePrice,
+      description: hotelDetails.description,
+      roomTypes: JSON.stringify(hotelDetails.roomTypes),
+      seasonalPricing: JSON.stringify(hotelDetails.seasonalPricing),
+      amenities: JSON.stringify(hotelDetails.amenities),
+      images: images, // Array of Base64 strings
+      availability: availabilityObj, // Date-wise availability
+    };
+
+    try {
+      if (!user) {
+        setError('Authentication required. Please log in.');
+        return;
+      }
+
+      const idToken = await user.getIdToken();
+
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
+
+      const response = await axios.post(`${backendUrl}/api/hotels`, payload, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`, // Include the token
+        },
+      });
+
+      setMessage(response.data.message);
+      // Reset form fields
+      setHotelDetails({
+        name: '',
+        location: '',
+        basePrice: '',
+        description: '',
+        roomTypes: [{ type: '', price: '', availability: 'Available' }],
+        seasonalPricing: [{ startDate: '', endDate: '', price: '' }],
+        amenities: [],
+      });
+      setImages([]);
+      setAvailability([]);
+      setDateRange([
+        {
+          startDate: new Date(),
+          endDate: new Date(),
+          key: 'selection',
+        },
+      ]);
+    } catch (err) {
+      console.error('Error submitting hotel:', err);
+      if (err.response && err.response.data) {
+        // Display validation errors
+        if (err.response.data.errors) {
+          const validationErrors = err.response.data.errors.map((error) => error.msg).join(' | ');
+          setError(validationErrors);
+        } else {
+          setError(err.response.data.message || 'Failed to submit hotel');
+        }
+      } else {
+        setError('Failed to submit hotel');
+      }
+    }
   };
 
   return (
     <form className="hotel-form" onSubmit={handleSubmit}>
       <h2>Add New Hotel</h2>
+      {message && <p className="success-message">{message}</p>}
+      {error && <p className="error-message">{error}</p>}
+
       <input
         type="text"
         name="name"
@@ -75,6 +220,7 @@ const HotelForm = () => {
         onChange={handleChange}
         required
       />
+
       <input
         type="text"
         name="location"
@@ -83,6 +229,7 @@ const HotelForm = () => {
         onChange={handleChange}
         required
       />
+
       <input
         type="number"
         name="basePrice"
@@ -91,6 +238,7 @@ const HotelForm = () => {
         onChange={handleChange}
         required
       />
+
       <textarea
         name="description"
         placeholder="Description"
@@ -99,6 +247,7 @@ const HotelForm = () => {
         required
       />
 
+      {/* Room Types */}
       <div className="room-types">
         <h3>Room Types</h3>
         {hotelDetails.roomTypes.map((roomType, index) => (
@@ -130,11 +279,12 @@ const HotelForm = () => {
             </select>
           </div>
         ))}
-        <button type="button" onClick={addRoomType}>
+        <button type="button" onClick={addRoomType} className="add-button">
           Add Another Room Type
         </button>
       </div>
 
+      {/* Seasonal Pricing */}
       <div className="seasonal-pricing">
         <h3>Seasonal Pricing</h3>
         {hotelDetails.seasonalPricing.map((season, index) => (
@@ -163,11 +313,12 @@ const HotelForm = () => {
             />
           </div>
         ))}
-        <button type="button" onClick={addSeasonalPricing}>
+        <button type="button" onClick={addSeasonalPricing} className="add-button">
           Add Seasonal Pricing
         </button>
       </div>
 
+      {/* Amenities */}
       <div className="amenities">
         <h3>Amenities</h3>
         <label>
@@ -175,6 +326,7 @@ const HotelForm = () => {
             type="checkbox"
             value="WiFi"
             onChange={handleAmenityChange}
+            checked={hotelDetails.amenities.includes('WiFi')}
           />
           WiFi
         </label>
@@ -183,6 +335,7 @@ const HotelForm = () => {
             type="checkbox"
             value="Swimming Pool"
             onChange={handleAmenityChange}
+            checked={hotelDetails.amenities.includes('Swimming Pool')}
           />
           Swimming Pool
         </label>
@@ -191,6 +344,7 @@ const HotelForm = () => {
             type="checkbox"
             value="Parking"
             onChange={handleAmenityChange}
+            checked={hotelDetails.amenities.includes('Parking')}
           />
           Parking
         </label>
@@ -199,6 +353,7 @@ const HotelForm = () => {
             type="checkbox"
             value="Gym"
             onChange={handleAmenityChange}
+            checked={hotelDetails.amenities.includes('Gym')}
           />
           Gym
         </label>
@@ -207,6 +362,7 @@ const HotelForm = () => {
             type="checkbox"
             value="Spa"
             onChange={handleAmenityChange}
+            checked={hotelDetails.amenities.includes('Spa')}
           />
           Spa
         </label>
@@ -215,22 +371,61 @@ const HotelForm = () => {
             type="checkbox"
             value="Bar"
             onChange={handleAmenityChange}
+            checked={hotelDetails.amenities.includes('Bar')}
           />
           Bar
         </label>
       </div>
 
-      <div className="image-upload">
-        <h3>Hotel Images</h3>
-        <input
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={handleImageUpload}
+      {/* Availability */}
+      <div className="availability">
+        <h3>Availability Dates</h3>
+        <DateRange
+          editableDateInputs={true}
+          onChange={handleSelect}
+          moveRangeOnFirstSelection={false}
+          ranges={dateRange}
+          maxDate={new Date(new Date().setFullYear(new Date().getFullYear() + 1))}
+          className="date-range-picker"
         />
+        {availability.length > 0 && (
+          <div className="selected-dates">
+            <h4>Selected Dates:</h4>
+            <ul>
+              {availability.map((date, index) => (
+                <li key={index}>
+                  {date}
+                  <button type="button" onClick={() => removeDate(date)} className="remove-date-button">
+                    &times;
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
-      <button type="submit">Add Hotel</button>
+      {/* Image Upload */}
+      <div className="image-upload">
+        <h3>Hotel Images</h3>
+        <input type="file" accept="image/*" multiple onChange={handleImageUpload} />
+        {images.length > 0 && (
+          <div className="image-previews">
+            {images.map((base64, index) => (
+              <img
+                key={index}
+                src={base64}
+                alt={`Hotel Image ${index + 1}`}
+                className="preview-image"
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      <button type="submit" className="submit-button">
+        Add Hotel
+      </button>
     </form>
   );
 };

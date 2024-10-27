@@ -1,40 +1,56 @@
-'use strict';
-const { Model } = require('sequelize');
+// backend/models/favorite.js
 
 module.exports = (sequelize, DataTypes) => {
-  class Favorite extends Model {
-    static associate(models) {
-      Favorite.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
-    }
-  }
-  Favorite.init({
+  const Favorite = sequelize.define('Favorite', {
+    id: { // Use 'id' as the primary key
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
     userId: {
-      type: DataTypes.INTEGER, // Ensure this matches UserID in User model
-      allowNull: false
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     type: {
       type: DataTypes.STRING,
       allowNull: false,
-      validate: {
-        isIn: [['attraction', 'flight', 'hotel', 'restaurant', 'train_station', 'subway_station', 'bus_station', 'transit_station']]
-      }
     },
     placeId: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true
     },
     name: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
-    address: DataTypes.STRING,
-    rating: DataTypes.FLOAT,
-    priceLevel: DataTypes.INTEGER,
-    photoReference: DataTypes.STRING
+    address: {
+      type: DataTypes.STRING,
+    },
+    rating: {
+      type: DataTypes.FLOAT,
+    },
+    priceLevel: {
+      type: DataTypes.INTEGER,
+    },
+    photoReference: {
+      type: DataTypes.STRING,
+    },
+    createdAt: { // Ensure timestamps are correctly defined
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
   }, {
-    sequelize,
-    modelName: 'Favorite',
+    tableName: 'Favorites',
+    timestamps: true, // Ensure Sequelize manages timestamps
   });
+
+  Favorite.associate = (models) => {
+    Favorite.belongsTo(models.User, { foreignKey: 'userId' });
+  };
+
   return Favorite;
 };

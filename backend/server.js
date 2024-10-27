@@ -1,31 +1,29 @@
+// backend/server.js
 require('dotenv').config();
 const express = require('express');
-// const Amadeus = require('amadeus'); // Removed Amadeus SDK import
 const cors = require('cors');
 const nodemailer = require('nodemailer');
 const axios = require('axios');
 const { body, validationResult } = require('express-validator');
 const rateLimit = require('express-rate-limit');
 const winston = require('winston');
-const mysql = require('mysql2/promise'); // Flyttet her for klarhed
+const mysql = require('mysql2/promise'); 
 
-// Ruter
-const authRoutes = require('./routes/auth');
-const protectedRoutes = require('./routes/protected');
+// Import Routes
+const authRoutes = require('./routes/auth'); 
+const protectedRoutes = require('./routes/protected'); 
 const adminRoutes = require('./routes/admin');
 const flightRoutes = require('./routes/flight'); 
 const favoritesRouter = require('./routes/favorites'); 
-
-
-
-
-
+const tripsRouter = require('./routes/trips'); 
+const testimonialRoutes = require('./routes/testimonials'); 
+const hotelRoutes = require('./routes/hotels'); 
+const restaurantRoutes = require('./routes/restaurants'); 
+const attractionRoutes = require('./routes/attraction');
 
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-
-
 
 // Setup Winston logger for logging events and errors
 const logger = winston.createLogger({
@@ -49,15 +47,12 @@ if (process.env.NODE_ENV !== 'production') {
 // Middleware Configuration
 app.use(express.json()); // To parse JSON bodies
 
-
 // Configure CORS
 app.use(cors({
   origin: 'http://localhost:3000', // Update this to your frontend URL in production
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-
-
 
 // Rate Limiting to prevent abuse
 const limiter = rateLimit({
@@ -67,50 +62,62 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
+// Database Connection using Sequelize
+const { Sequelize } = require('sequelize');
+const User = require('./models/user'); 
+
+const sequelize = new Sequelize(process.env.DB_NAME_DEVELOPMENT, process.env.DB_USERNAME, process.env.DB_PASSWORD, {
+  host: process.env.DB_HOST,
+  dialect: 'mysql',
+  logging: false, 
+});
 
 
-// Databaseforbindelse
-let db;
+
+// Test Database Connection and Sync Models
 const initDB = async () => {
   try {
-    db = await mysql.createConnection({
-      host: process.env.DB_HOST,
-      user: process.env.DB_USERNAME, // Opdateret til DB_USERNAME
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME_DEVELOPMENT, // Opdateret til DB_NAME_DEVELOPMENT
-    });
-    console.log('Forbundet til MySQL');
-    logger.info('Forbundet til MySQL');
+    await sequelize.authenticate();
+    console.log('Connected to MySQL');
+    logger.info('Connected to MySQL');
+
+    // Sync models (Optional: use migrations in production)
+    await sequelize.sync(); // { force: true } to drop and recreate tables
+    console.log('Database synchronized');
+    logger.info('Database synchronized');
   } catch (error) {
-    console.error('Fejl ved forbindelse til MySQL:', error);
-    logger.error('Fejl ved forbindelse til MySQL:', error);
+    console.error('Error connecting to MySQL:', error);
+    logger.error('Error connecting to MySQL:', error);
     process.exit(1);
   }
 };
 
-// Initialiser DB og start server
+// Initialize DB and start server
 initDB().then(() => {
   app.listen(PORT, () => {
-    console.log(`Server kører på port ${PORT}`);
-    logger.info(`Server startet på port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
+    logger.info(`Server started on port ${PORT}`);
   });
 });
 
-// Brug ruter
+// Use Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/protected', protectedRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/flights', flightRoutes); // Add this line
+app.use('/api/flights', flightRoutes);
 app.use('/api/favorites', favoritesRouter);
+app.use('/api/trips', tripsRouter);
+app.use('/api/testimonials', testimonialRoutes);
+app.use('/api/hotels', hotelRoutes); 
+app.use('/api/restaurants', restaurantRoutes);
+app.use('/api/attractions', attractionRoutes);
+
+
 
 // Health Check Endpoint
 app.get('/', (req, res) => {
   res.send('Backend is running.');
 });
-
-// Removed Flight Search Endpoint
-
-// Removed Flight Booking Endpoint
 
 // Newsletter Subscription Endpoint using Mailchimp
 app.post('/api/subscribe',
@@ -280,7 +287,12 @@ app.post('/api/contact',
       from: `"${name}" <${email}>`, // Sender address
       to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER, // Site owner's email
       subject: 'New Contact Form Submission',
-      text: `You have a new contact form submission:\n\nName: ${name}\nEmail: ${email}\nMessage:\n${message}`,
+      text: `You have a new contact form submission:
+
+Name: ${name}
+Email: ${email}
+Message:
+${message}`,
       html: `
         <h2>New Contact Form Submission</h2>
         <p><strong>Name:</strong> ${name}</p>

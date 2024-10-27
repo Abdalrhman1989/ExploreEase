@@ -1,0 +1,89 @@
+/* src/styles/HotelDetails.css */
+
+.hotel-details-container {
+    padding: 40px 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+  }
+  
+  .hotel-title {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: var(--font-size-xlarge);
+    color: var(--primary-color);
+  }
+  
+  /* Carousel */
+  .hotel-carousel {
+    margin-bottom: 30px;
+  }
+  
+  .carousel .slide img {
+    border-radius: var(--border-radius);
+    object-fit: cover;
+    width: 100%; /* Set image width to fit the carousel */
+    height: 300px; /* Adjust height for proper scaling */
+  }
+  
+  @media (max-width: 768px) {
+    .carousel .slide img {
+      height: 200px; /* Reduce height for smaller screens */
+    }
+  }
+  
+  /* Hotel Information */
+  .hotel-info p {
+    margin: 12px 0;
+    font-size: var(--font-size-medium);
+    color: var(--secondary-text-color);
+  }
+  
+  .room-types, .seasonal-pricing, .amenities {
+    margin-top: 20px;
+  }
+  
+  .room-types ul, .seasonal-pricing ul, .amenities ul {
+    list-style-type: disc;
+    padding-left: 20px;
+  }
+  
+  .hotel-actions {
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+  }
+  
+  .book-now-button {
+    background: var(--primary-gradient);
+    color: var(--accent-color);
+    padding: 12px 25px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background var(--transition-speed), transform var(--transition-speed);
+  }
+  
+  .book-now-button:hover {
+    background: var(--secondary-gradient);
+    transform: scale(1.05);
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .hotel-details-container {
+      padding: 30px 15px;
+    }
+  
+    .hotel-title {
+      font-size: var(--font-size-large);
+    }
+  
+    .book-now-button {
+      padding: 10px 20px;
+      font-size: var(--font-size-small);
+    }
+  }
+  

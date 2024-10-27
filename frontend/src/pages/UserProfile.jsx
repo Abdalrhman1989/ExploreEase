@@ -30,8 +30,15 @@ import {
   DialogActions,
   Avatar,
   Snackbar,
+  useMediaQuery,
+  useTheme,
+  Tooltip,
+  Stack,
 } from '@mui/material';
-import { Edit, Delete, Add, PhotoCamera, Close } from '@mui/icons-material';
+import { Edit, Delete, Add, PhotoCamera } from '@mui/icons-material';
+import TripPlanner from '../components/TripPlanner';
+import '../styles/UserProfile.css'; // Ensure this is imported
+
 
 // Utility component for Tab Panels
 const TabPanel = (props) => {
@@ -45,11 +52,7 @@ const TabPanel = (props) => {
       aria-labelledby={`profile-tab-${index}`}
       {...other}
     >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          {children}
-        </Box>
-      )}
+      {value === index && <Box sx={{ p: { xs: 2, sm: 3 } }}>{children}</Box>}
     </div>
   );
 };
@@ -63,7 +66,7 @@ const a11yProps = (index) => {
 };
 
 const UserProfile = () => {
-  const { isAuthenticated, userRole, user, idToken, loading } = useContext(AuthContext);
+  const { isAuthenticated, user, idToken, loading } = useContext(AuthContext);
   const [profileData, setProfileData] = useState(null);
   const [fetchingProfile, setFetchingProfile] = useState(true);
   const [profileError, setProfileError] = useState(null);
@@ -90,38 +93,31 @@ const UserProfile = () => {
   const [favLoading, setFavLoading] = useState(true);
   const [favError, setFavError] = useState(null);
 
-  // States for Order History
-  const [orders, setOrders] = useState([]);
-  const [ordersLoading, setOrdersLoading] = useState(true);
-  const [ordersError, setOrdersError] = useState(null);
-
   // States for Trip History
   const [trips, setTrips] = useState([]);
   const [tripsLoading, setTripsLoading] = useState(true);
   const [tripsError, setTripsError] = useState(null);
 
-  // States for Payment History
-  const [payments, setPayments] = useState([]);
-  const [paymentsLoading, setPaymentsLoading] = useState(true);
-  const [paymentsError, setPaymentsError] = useState(null);
-
   // States for Profile Picture Upload
-  const [profilePic, setProfilePic] = useState(null);
   const [uploadingPic, setUploadingPic] = useState(false);
   const [uploadPicError, setUploadPicError] = useState(null);
-  const [uploadPicSuccess, setUploadPicSuccess] = useState(false);
 
   // States for Snackbar Notifications
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMsg, setSnackbarMsg] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success'); // 'success' | 'error' | 'warning' | 'info'
 
+  const API_BASE_URL = process.env.REACT_APP_BACKEND_URL;
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   // Fetch Profile Data
   useEffect(() => {
     const fetchProfile = async () => {
       if (user && idToken) {
         try {
-          const response = await axios.get('http://localhost:3001/api/protected/dashboard', {
+          const response = await axios.get(`${API_BASE_URL}/api/protected/dashboard`, {
             headers: {
               Authorization: `Bearer ${idToken}`,
             },
@@ -135,7 +131,7 @@ const UserProfile = () => {
           });
           setFetchingProfile(false);
         } catch (error) {
-          console.error('Error fetching profile data:', error);
+          console.error('Error fetching profile data:', error.response ? error.response.data : error.message);
           setProfileError('Failed to load profile data.');
           setFetchingProfile(false);
         }
@@ -143,7 +139,7 @@ const UserProfile = () => {
     };
 
     fetchProfile();
-  }, [user, idToken]);
+  }, [user, idToken, API_BASE_URL]);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -170,7 +166,7 @@ const UserProfile = () => {
     setUserInfoLoading(true);
     setUserInfoError(null);
     try {
-      const response = await axios.put('http://localhost:3001/api/user/profile', userInfo, {
+      const response = await axios.put(`${API_BASE_URL}/api/user/profile`, userInfo, {
         headers: {
           Authorization: `Bearer ${idToken}`,
         },
@@ -181,7 +177,7 @@ const UserProfile = () => {
       setSnackbarSeverity('success');
       setSnackbarOpen(true);
     } catch (error) {
-      console.error('Error updating user info:', error);
+      console.error('Error updating user info:', error.response ? error.response.data : error.message);
       setUserInfoError('Failed to update profile.');
       setSnackbarMsg('Failed to update profile.');
       setSnackbarSeverity('error');
@@ -195,14 +191,14 @@ const UserProfile = () => {
   useEffect(() => {
     const fetchFavorites = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/api/user/favorites', {
+        const response = await axios.get(`${API_BASE_URL}/api/favorites`, { // Corrected
           headers: {
             Authorization: `Bearer ${idToken}`,
           },
         });
         setFavPlaces(response.data.favorites);
       } catch (error) {
-        console.error('Error fetching favorite places:', error);
+        console.error('Error fetching favorite places:', error.response ? error.response.data : error.message);
         setFavError('Failed to load favorite places.');
       } finally {
         setFavLoading(false);
@@ -210,7 +206,7 @@ const UserProfile = () => {
     };
 
     fetchFavorites();
-  }, [idToken]);
+  }, [idToken, API_BASE_URL]);
 
   // Handle Add Favorite Place
   const handleAddFavPlace = () => {
@@ -223,7 +219,7 @@ const UserProfile = () => {
   // Handle Edit Favorite Place
   const handleEditFavPlace = (place) => {
     setFavDialogMode('edit');
-    setFavPlaceName(place.PlaceName);
+    setFavPlaceName(place.name);
     setCurrentFavId(place.FavoritePlaceID);
     setFavDialogOpen(true);
   };
@@ -231,17 +227,17 @@ const UserProfile = () => {
   // Handle Delete Favorite Place
   const handleDeleteFavPlace = async (id) => {
     try {
-      await axios.delete(`http://localhost:3001/api/user/favorites/${id}`, {
+      await axios.delete(`${API_BASE_URL}/api/favorites/${id}`, { // Corrected
         headers: {
           Authorization: `Bearer ${idToken}`,
         },
       });
-      setFavPlaces(favPlaces.filter(place => place.FavoritePlaceID !== id));
+      setFavPlaces(favPlaces.filter((place) => place.FavoritePlaceID !== id));
       setSnackbarMsg('Favorite place deleted successfully!');
       setSnackbarSeverity('success');
       setSnackbarOpen(true);
     } catch (error) {
-      console.error('Error deleting favorite place:', error);
+      console.error('Error deleting favorite place:', error.response ? error.response.data : error.message);
       setFavError('Failed to delete favorite place.');
       setSnackbarMsg('Failed to delete favorite place.');
       setSnackbarSeverity('error');
@@ -258,22 +254,45 @@ const UserProfile = () => {
 
     try {
       if (favDialogMode === 'add') {
-        const response = await axios.post('http://localhost:3001/api/user/favorites', { PlaceName: favPlaceName }, {
-          headers: {
-            Authorization: `Bearer ${idToken}`,
+        const response = await axios.post(
+          `${API_BASE_URL}/favorites`, // Corrected
+          {
+            type: 'attraction', // Adjust as needed or make dynamic
+            placeId: `place_${Date.now()}`, // Example unique placeId
+            name: favPlaceName,
+            address: '', // Collect from user if needed
+            rating: 0, // Default rating or collect from user
+            priceLevel: 1, // Default or collect
+            photoReference: '', // Collect if needed
           },
-        });
+          {
+            headers: {
+              Authorization: `Bearer ${idToken}`,
+            },
+          }
+        );
         setFavPlaces([...favPlaces, response.data.favorite]);
         setSnackbarMsg('Favorite place added successfully!');
         setSnackbarSeverity('success');
         setSnackbarOpen(true);
       } else if (favDialogMode === 'edit') {
-        const response = await axios.put(`http://localhost:3001/api/user/favorites/${currentFavId}`, { PlaceName: favPlaceName }, {
-          headers: {
-            Authorization: `Bearer ${idToken}`,
+        const response = await axios.put(
+          `${API_BASE_URL}/favorites/${currentFavId}`, // Corrected
+          {
+            name: favPlaceName,
+            // Include other fields if necessary
           },
-        });
-        setFavPlaces(favPlaces.map(place => place.FavoritePlaceID === currentFavId ? response.data.favorite : place));
+          {
+            headers: {
+              Authorization: `Bearer ${idToken}`,
+            },
+          }
+        );
+        setFavPlaces(
+          favPlaces.map((place) =>
+            place.FavoritePlaceID === currentFavId ? response.data.favorite : place
+          )
+        );
         setSnackbarMsg('Favorite place updated successfully!');
         setSnackbarSeverity('success');
         setSnackbarOpen(true);
@@ -281,7 +300,7 @@ const UserProfile = () => {
       setFavDialogOpen(false);
       setFavError(null);
     } catch (error) {
-      console.error('Error saving favorite place:', error);
+      console.error('Error saving favorite place:', error.response ? error.response.data : error.message);
       setFavError('Failed to save favorite place.');
       setSnackbarMsg('Failed to save favorite place.');
       setSnackbarSeverity('error');
@@ -289,39 +308,18 @@ const UserProfile = () => {
     }
   };
 
-  // Fetch Order History
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const response = await axios.get('http://localhost:3001/api/user/orders', {
-          headers: {
-            Authorization: `Bearer ${idToken}`,
-          },
-        });
-        setOrders(response.data.orders);
-      } catch (error) {
-        console.error('Error fetching orders:', error);
-        setOrdersError('Failed to load order history.');
-      } finally {
-        setOrdersLoading(false);
-      }
-    };
-
-    fetchOrders();
-  }, [idToken]);
-
   // Fetch Trip History
   useEffect(() => {
     const fetchTrips = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/api/user/trips', {
+        const response = await axios.get(`${API_BASE_URL}/api/trips`, { // Corrected
           headers: {
             Authorization: `Bearer ${idToken}`,
           },
         });
-        setTrips(response.data.trips);
+        setTrips(response.data);
       } catch (error) {
-        console.error('Error fetching trips:', error);
+        console.error('Error fetching trips:', error.response ? error.response.data : error.message);
         setTripsError('Failed to load trip history.');
       } finally {
         setTripsLoading(false);
@@ -329,34 +327,12 @@ const UserProfile = () => {
     };
 
     fetchTrips();
-  }, [idToken]);
-
-  // Fetch Payment History
-  useEffect(() => {
-    const fetchPayments = async () => {
-      try {
-        const response = await axios.get('http://localhost:3001/api/user/payments', {
-          headers: {
-            Authorization: `Bearer ${idToken}`,
-          },
-        });
-        setPayments(response.data.payments);
-      } catch (error) {
-        console.error('Error fetching payments:', error);
-        setPaymentsError('Failed to load payment history.');
-      } finally {
-        setPaymentsLoading(false);
-      }
-    };
-
-    fetchPayments();
-  }, [idToken]);
+  }, [idToken, API_BASE_URL]);
 
   // Handle Profile Picture Upload
   const handleProfilePicChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      setProfilePic(file);
       setUploadingPic(true);
       setUploadPicError(null);
 
@@ -364,18 +340,22 @@ const UserProfile = () => {
       formData.append('profilePicture', file);
 
       try {
-        const response = await axios.post('http://localhost:3001/api/user/profile-picture', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${idToken}`,
-          },
-        });
+        const response = await axios.post(
+          `${API_BASE_URL}/user/profile-picture`,
+          formData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              Authorization: `Bearer ${idToken}`,
+            },
+          }
+        );
         setProfileData(response.data.user);
-        setSnackbarMsg('Profile picture updated successfully!');
+        setSnackbarMsg('Profile picture uploaded successfully!');
         setSnackbarSeverity('success');
         setSnackbarOpen(true);
       } catch (error) {
-        console.error('Error uploading profile picture:', error);
+        console.error('Error uploading profile picture:', error.response ? error.response.data : error.message);
         setUploadPicError('Failed to upload profile picture.');
         setSnackbarMsg('Failed to upload profile picture.');
         setSnackbarSeverity('error');
@@ -401,16 +381,16 @@ const UserProfile = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Container maxWidth="lg" sx={{ mt: { xs: 2, sm: 4 }, mb: { xs: 2, sm: 4 } }}>
       {/* Welcome Message */}
       {profileData && (
-        <Typography variant="h4" gutterBottom>
+        <Typography variant={isMobile ? 'h5' : 'h4'} gutterBottom align="center">
           Welcome, {profileData.FirstName}!
         </Typography>
       )}
 
       {/* Tabs Navigation */}
-      <Paper elevation={3}>
+      <Paper elevation={3} sx={{ mb: 4 }}>
         <Tabs
           value={tabValue}
           onChange={handleTabChange}
@@ -418,311 +398,359 @@ const UserProfile = () => {
           textColor="primary"
           variant="scrollable"
           scrollButtons="auto"
+          aria-label="User Profile Tabs"
         >
           <Tab label="User Info" {...a11yProps(0)} />
-          <Tab label="Order History" {...a11yProps(1)} />
-          <Tab label="Trip History" {...a11yProps(2)} />
-          <Tab label="Payment History" {...a11yProps(3)} />
-          <Tab label="Favorite Places" {...a11yProps(4)} />
+          <Tab label="Trip History" {...a11yProps(1)} />
+          <Tab label="Favorite Places" {...a11yProps(2)} />
+          <Tab label="Trip Planner" {...a11yProps(3)} />
         </Tabs>
       </Paper>
 
       {/* Tab Panels */}
       <TabPanel value={tabValue} index={0}>
         {/* User Information */}
-        <Grid container spacing={2}>
-          {/* Profile Picture */}
-          <Grid item xs={12} sm={4} md={3}>
-            <Paper elevation={2} sx={{ p: 2, textAlign: 'center' }}>
-              <Avatar
-                alt="Profile Picture"
-                src={profileData && profileData.ProfilePicture ? `http://localhost:3001/${profileData.ProfilePicture}` : '/default-profile.png'}
-                sx={{ width: 120, height: 120, margin: 'auto' }}
-              />
-              <Box sx={{ mt: 2 }}>
-                <label htmlFor="profile-pic-upload">
-                  <input
-                    accept="image/*"
-                    id="profile-pic-upload"
-                    type="file"
-                    style={{ display: 'none' }}
-                    onChange={handleProfilePicChange}
+        {fetchingProfile ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+            <CircularProgress />
+          </Box>
+        ) : profileError ? (
+          <Alert severity="error">{profileError}</Alert>
+        ) : (
+          <Paper elevation={1} sx={{ p: { xs: 2, sm: 3 } }}>
+            <Grid container spacing={4}>
+              {/* Profile Picture Section */}
+              <Grid item xs={12} sm={4} md={3}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <Avatar
+                    alt={`${userInfo.FirstName} ${userInfo.LastName}`}
+                    src={profileData && profileData.ProfilePicture}
+                    sx={{
+                      width: { xs: 80, sm: 100, md: 120 },
+                      height: { xs: 80, sm: 100, md: 120 },
+                      mb: 2,
+                      border: `2px solid ${theme.palette.primary.main}`,
+                      transition: 'transform 0.3s',
+                      '&:hover': {
+                        transform: 'scale(1.05)',
+                      },
+                    }}
                   />
-                  <Button variant="contained" component="span" startIcon={<PhotoCamera />} disabled={uploadingPic}>
-                    {uploadingPic ? 'Uploading...' : 'Change Picture'}
-                  </Button>
-                </label>
-                {uploadPicError && <Alert severity="error" sx={{ mt: 2 }}>{uploadPicError}</Alert>}
-              </Box>
-            </Paper>
-          </Grid>
+                  <label htmlFor="profile-pic-upload">
+                    <input
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                      id="profile-pic-upload"
+                      type="file"
+                      onChange={handleProfilePicChange}
+                    />
+                    <Tooltip title="Upload New Profile Picture">
+                      <Button
+                        variant="contained"
+                        component="span"
+                        startIcon={<PhotoCamera />}
+                        disabled={uploadingPic}
+                        sx={{
+                          textTransform: 'none',
+                          transition: 'background-color 0.3s',
+                          '&:hover': {
+                            backgroundColor: theme.palette.primary.dark,
+                          },
+                        }}
+                        size={isMobile ? 'small' : 'medium'}
+                      >
+                        Upload
+                      </Button>
+                    </Tooltip>
+                  </label>
+                  {uploadPicError && <Alert severity="error" sx={{ mt: 2 }}>{uploadPicError}</Alert>}
+                </Box>
+              </Grid>
 
-          {/* User Details */}
-          <Grid item xs={12} sm={8} md={9}>
-            <Typography variant="h6" gutterBottom>
-              User Information
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="First Name"
-                  name="FirstName"
-                  value={userInfo.FirstName}
-                  onChange={handleUserInfoChange}
-                  fullWidth
-                  disabled={!editMode}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Last Name"
-                  name="LastName"
-                  value={userInfo.LastName}
-                  onChange={handleUserInfoChange}
-                  fullWidth
-                  disabled={!editMode}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Email"
-                  name="Email"
-                  value={userInfo.Email}
-                  onChange={handleUserInfoChange}
-                  fullWidth
-                  disabled
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Phone Number"
-                  name="PhoneNumber"
-                  value={userInfo.PhoneNumber}
-                  onChange={handleUserInfoChange}
-                  fullWidth
-                  disabled={!editMode}
-                />
+              {/* User Details Section */}
+              <Grid item xs={12} sm={8} md={9}>
+                {!editMode ? (
+                  <Box>
+                    <Typography variant="h6" sx={{ mb: 1 }}>
+                      Name: {`${userInfo.FirstName} ${userInfo.LastName}`}
+                    </Typography>
+                    <Typography variant="h6" sx={{ mb: 1 }}>
+                      Email: {userInfo.Email}
+                    </Typography>
+                    <Typography variant="h6" sx={{ mb: 2 }}>
+                      Phone: {userInfo.PhoneNumber}
+                    </Typography>
+                    <Button
+                      variant="outlined"
+                      startIcon={<Edit />}
+                      onClick={() => setEditMode(true)}
+                      sx={{
+                        textTransform: 'none',
+                        transition: 'background-color 0.3s, color 0.3s',
+                        '&:hover': {
+                          backgroundColor: theme.palette.primary.main,
+                          color: 'white',
+                        },
+                      }}
+                      size={isMobile ? 'small' : 'medium'}
+                    >
+                      Edit Profile
+                    </Button>
+                  </Box>
+                ) : (
+                  <Box component="form" noValidate autoComplete="off">
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          margin="dense"
+                          label="First Name"
+                          name="FirstName"
+                          type="text"
+                          fullWidth
+                          variant="standard"
+                          value={userInfo.FirstName}
+                          onChange={handleUserInfoChange}
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          margin="dense"
+                          label="Last Name"
+                          name="LastName"
+                          type="text"
+                          fullWidth
+                          variant="standard"
+                          value={userInfo.LastName}
+                          onChange={handleUserInfoChange}
+                        />
+                      </Grid>
+                    </Grid>
+                    <TextField
+                      margin="dense"
+                      label="Email"
+                      name="Email"
+                      type="email"
+                      fullWidth
+                      variant="standard"
+                      value={userInfo.Email}
+                      onChange={handleUserInfoChange}
+                    />
+                    <TextField
+                      margin="dense"
+                      label="Phone Number"
+                      name="PhoneNumber"
+                      type="tel"
+                      fullWidth
+                      variant="standard"
+                      value={userInfo.PhoneNumber}
+                      onChange={handleUserInfoChange}
+                    />
+                    {userInfoError && <Alert severity="error" sx={{ mt: 2 }}>{userInfoError}</Alert>}
+                    <Box sx={{ mt: 3, display: 'flex', alignItems: 'center' }}>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleSaveUserInfo}
+                        disabled={userInfoLoading}
+                        sx={{
+                          textTransform: 'none',
+                          mr: 2,
+                          transition: 'background-color 0.3s',
+                          '&:hover': {
+                            backgroundColor: theme.palette.primary.dark,
+                          },
+                        }}
+                        size={isMobile ? 'small' : 'medium'}
+                      >
+                        {userInfoLoading ? <CircularProgress size={24} /> : 'Save'}
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        onClick={() => setEditMode(false)}
+                        sx={{
+                          textTransform: 'none',
+                          transition: 'background-color 0.3s, color 0.3s',
+                          '&:hover': {
+                            backgroundColor: theme.palette.grey[300],
+                          },
+                        }}
+                        size={isMobile ? 'small' : 'medium'}
+                      >
+                        Cancel
+                      </Button>
+                    </Box>
+                  </Box>
+                )}
               </Grid>
             </Grid>
-            {userInfoError && <Alert severity="error" sx={{ mt: 2 }}>{userInfoError}</Alert>}
-            <Box sx={{ mt: 2 }}>
-              {!editMode ? (
-                <Button variant="contained" color="primary" onClick={() => setEditMode(true)}>
-                  Edit Profile
-                </Button>
-              ) : (
-                <>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleSaveUserInfo}
-                    disabled={userInfoLoading}
-                  >
-                    {userInfoLoading ? <CircularProgress size={24} /> : 'Save Changes'}
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    color="secondary"
-                    onClick={() => {
-                      setEditMode(false);
-                      setUserInfo({
-                        FirstName: profileData.FirstName || '',
-                        LastName: profileData.LastName || '',
-                        Email: profileData.Email || '',
-                        PhoneNumber: profileData.PhoneNumber || '',
-                      });
-                      setUserInfoError(null);
-                    }}
-                    sx={{ ml: 2 }}
-                  >
-                    Cancel
-                  </Button>
-                </>
-              )}
-            </Box>
-          </Grid>
-        </Grid>
-      </TabPanel>
-
-      <TabPanel value={tabValue} index={1}>
-        {/* Order History */}
-        <Typography variant="h6" gutterBottom>
-          Order History
-        </Typography>
-        {ordersLoading ? (
-          <CircularProgress />
-        ) : ordersError ? (
-          <Alert severity="error">{ordersError}</Alert>
-        ) : orders.length === 0 ? (
-          <Typography>No orders found.</Typography>
-        ) : (
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Order ID</TableCell>
-                <TableCell>Trip</TableCell>
-                <TableCell>Amount</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Date</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {orders.map(order => (
-                <TableRow key={order.OrderID}>
-                  <TableCell>{order.OrderID}</TableCell>
-                  <TableCell>{order.TripName}</TableCell>
-                  <TableCell>${order.Amount}</TableCell>
-                  <TableCell>{order.Status}</TableCell>
-                  <TableCell>{new Date(order.OrderDate).toLocaleDateString()}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          </Paper>
         )}
       </TabPanel>
 
-      <TabPanel value={tabValue} index={2}>
+      <TabPanel value={tabValue} index={1}>
         {/* Trip History */}
-        <Typography variant="h6" gutterBottom>
-          Trip History
-        </Typography>
         {tripsLoading ? (
-          <CircularProgress />
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+            <CircularProgress />
+          </Box>
         ) : tripsError ? (
           <Alert severity="error">{tripsError}</Alert>
         ) : trips.length === 0 ? (
           <Typography>No trips found.</Typography>
         ) : (
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Trip ID</TableCell>
-                <TableCell>Destination</TableCell>
-                <TableCell>Date</TableCell>
-                <TableCell>Status</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {trips.map(trip => (
-                <TableRow key={trip.TripID}>
-                  <TableCell>{trip.TripID}</TableCell>
-                  <TableCell>{trip.Destination}</TableCell>
-                  <TableCell>{new Date(trip.TripDate).toLocaleDateString()}</TableCell>
-                  <TableCell>{trip.Status}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <Paper elevation={1} sx={{ p: { xs: 2, sm: 3 } }}>
+            <Box sx={{ overflowX: 'auto' }}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Trip ID</TableCell>
+                    <TableCell>Type</TableCell>
+                    <TableCell>Origin</TableCell>
+                    <TableCell>Destination</TableCell>
+                    <TableCell>Departure Time</TableCell>
+                    <TableCell>Arrival Time</TableCell>
+                    <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Duration (mins)</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {trips.map((trip) => (
+                    <TableRow key={trip.id}>
+                      <TableCell>{trip.id}</TableCell>
+                      <TableCell>{trip.type.charAt(0).toUpperCase() + trip.type.slice(1)}</TableCell>
+                      <TableCell>{trip.origin}</TableCell>
+                      <TableCell>{trip.destination}</TableCell>
+                      <TableCell>{new Date(trip.departureTime).toLocaleString()}</TableCell>
+                      <TableCell>{new Date(trip.arrivalTime).toLocaleString()}</TableCell>
+                      <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>{trip.duration}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Box>
+          </Paper>
         )}
       </TabPanel>
 
-      <TabPanel value={tabValue} index={3}>
-        {/* Payment History */}
-        <Typography variant="h6" gutterBottom>
-          Payment History
-        </Typography>
-        {paymentsLoading ? (
-          <CircularProgress />
-        ) : paymentsError ? (
-          <Alert severity="error">{paymentsError}</Alert>
-        ) : payments.length === 0 ? (
-          <Typography>No payments found.</Typography>
-        ) : (
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Payment ID</TableCell>
-                <TableCell>Amount</TableCell>
-                <TableCell>Method</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Date</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {payments.map(payment => (
-                <TableRow key={payment.PaymentID}>
-                  <TableCell>{payment.PaymentID}</TableCell>
-                  <TableCell>${payment.Amount}</TableCell>
-                  <TableCell>{payment.Method}</TableCell>
-                  <TableCell>{payment.Status}</TableCell>
-                  <TableCell>{new Date(payment.PaymentDate).toLocaleDateString()}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </TabPanel>
-
-      <TabPanel value={tabValue} index={4}>
+      <TabPanel value={tabValue} index={2}>
         {/* Favorite Places */}
-        <Typography variant="h6" gutterBottom>
-          Favorite Places
-        </Typography>
-        {favLoading ? (
-          <CircularProgress />
-        ) : favError ? (
-          <Alert severity="error">{favError}</Alert>
-        ) : (
-          <>
+        <Paper elevation={1} sx={{ p: { xs: 2, sm: 3 } }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography variant="h6">Favorite Places</Typography>
             <Button
               variant="contained"
-              color="primary"
               startIcon={<Add />}
               onClick={handleAddFavPlace}
-              sx={{ mb: 2 }}
+              sx={{
+                textTransform: 'none',
+                transition: 'background-color 0.3s',
+                '&:hover': {
+                  backgroundColor: theme.palette.primary.dark,
+                },
+              }}
+              size={isMobile ? 'small' : 'medium'}
             >
-              Add Favorite Place
+              Add
             </Button>
-            {favPlaces.length === 0 ? (
-              <Typography>No favorite places found.</Typography>
-            ) : (
-              <List>
-                {favPlaces.map(place => (
-                  <ListItem
-                    key={place.FavoritePlaceID}
-                    secondaryAction={
-                      <>
+          </Box>
+          {favLoading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '30vh' }}>
+              <CircularProgress />
+            </Box>
+          ) : favError ? (
+            <Alert severity="error">{favError}</Alert>
+          ) : favPlaces.length === 0 ? (
+            <Typography>No favorite places found.</Typography>
+          ) : (
+            <List>
+              {favPlaces.map((place) => (
+                <ListItem
+                  key={place.FavoritePlaceID} // Ensure unique key
+                  secondaryAction={
+                    <Box>
+                      <Tooltip title="Edit">
                         <IconButton edge="end" aria-label="edit" onClick={() => handleEditFavPlace(place)}>
                           <Edit />
                         </IconButton>
-                        <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteFavPlace(place.FavoritePlaceID)}>
+                      </Tooltip>
+                      <Tooltip title="Delete">
+                        <IconButton
+                          edge="end"
+                          aria-label="delete"
+                          onClick={() => handleDeleteFavPlace(place.FavoritePlaceID)}
+                        >
                           <Delete />
                         </IconButton>
-                      </>
-                    }
-                  >
-                    <ListItemText primary={place.PlaceName} />
-                  </ListItem>
-                ))}
-              </List>
-            )}
-          </>
-        )}
-
-        {/* Dialog for Adding/Editing Favorite Places */}
-        <Dialog open={favDialogOpen} onClose={handleFavDialogClose}>
-          <DialogTitle>{favDialogMode === 'add' ? 'Add Favorite Place' : 'Edit Favorite Place'}</DialogTitle>
-          <DialogContent>
-            <TextField
-              autoFocus
-              margin="dense"
-              label="Place Name"
-              type="text"
-              fullWidth
-              variant="standard"
-              value={favPlaceName}
-              onChange={(e) => setFavPlaceName(e.target.value)}
-            />
-            {favError && <Alert severity="error" sx={{ mt: 2 }}>{favError}</Alert>}
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleFavDialogClose}>Cancel</Button>
-            <Button onClick={handleSaveFavPlace} variant="contained" color="primary">
-              {favDialogMode === 'add' ? 'Add' : 'Update'}
-            </Button>
-          </DialogActions>
-        </Dialog>
+                      </Tooltip>
+                    </Box>
+                  }
+                  sx={{
+                    '&:hover': {
+                      backgroundColor: theme.palette.action.hover,
+                    },
+                    transition: 'background-color 0.3s',
+                  }}
+                >
+                  <ListItemText primary={place.name} secondary={place.type} />
+                </ListItem>
+              ))}
+            </List>
+          )}
+        </Paper>
       </TabPanel>
+
+      <TabPanel value={tabValue} index={3}>
+        {/* Trip Planner */}
+        <TripPlanner idToken={idToken} />
+      </TabPanel>
+
+      {/* Favorite Place Dialog */}
+      <Dialog open={favDialogOpen} onClose={handleFavDialogClose} fullWidth maxWidth="sm">
+        <DialogTitle>{favDialogMode === 'add' ? 'Add Favorite Place' : 'Edit Favorite Place'}</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Place Name"
+            type="text"
+            fullWidth
+            variant="standard"
+            value={favPlaceName}
+            onChange={(e) => setFavPlaceName(e.target.value)}
+          />
+          {/* Add more fields as necessary */}
+          {favError && <Alert severity="error" sx={{ mt: 2 }}>{favError}</Alert>}
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleFavDialogClose}
+            sx={{
+              textTransform: 'none',
+              transition: 'background-color 0.3s, color 0.3s',
+              '&:hover': {
+                backgroundColor: theme.palette.grey[300],
+              },
+            }}
+            size={isMobile ? 'small' : 'medium'}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSaveFavPlace}
+            variant="contained"
+            color="primary"
+            sx={{
+              textTransform: 'none',
+              transition: 'background-color 0.3s',
+              '&:hover': {
+                backgroundColor: theme.palette.primary.dark,
+              },
+            }}
+            size={isMobile ? 'small' : 'medium'}
+          >
+            {favDialogMode === 'add' ? 'Add' : 'Update'}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Snackbar for Notifications */}
       <Snackbar
@@ -735,9 +763,6 @@ const UserProfile = () => {
           {snackbarMsg}
         </Alert>
       </Snackbar>
-
-      {/* Profile Picture Upload Error Alert */}
-      {uploadPicError && <Alert severity="error" sx={{ mt: 2 }}>{uploadPicError}</Alert>}
     </Container>
   );
 };

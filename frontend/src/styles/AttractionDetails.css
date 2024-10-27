@@ -1,0 +1,226 @@
+/* frontend/src/styles/AttractionDetails.css */
+
+/* Import Variables */
+@import './variables.css';
+
+/* Container */
+.attraction-details-container {
+  max-width: 1000px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: var(--background-color);
+  box-shadow: var(--box-shadow);
+  border-radius: var(--border-radius);
+  font-family: var(--font-family);
+}
+
+/* Back Button and Explore Buttons */
+.attractions-component-explore-button,
+.attraction-details-back-button {
+  background: var(--primary-gradient);
+  border: none;
+  color: var(--accent-color);
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 30px;
+  transition: background var(--transition-speed), transform var(--transition-speed), box-shadow var(--transition-speed);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 500;
+  box-shadow: var(--box-shadow);
+  text-decoration: none;
+  margin-bottom: 20px;
+}
+
+.attractions-component-explore-button:hover,
+.attraction-details-back-button:hover {
+  background: var(--secondary-gradient);
+  transform: scale(1.05);
+  box-shadow: var(--hover-shadow);
+}
+
+/* Title */
+.attractions-component-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--text-color);
+}
+
+/* Map */
+.attractions-component-map {
+  margin-bottom: 20px;
+}
+
+.attractions-component-info-window {
+  max-width: 350px;
+  font-size: 1rem;
+  color: var(--text-color);
+}
+
+.attractions-component-info-window h3 {
+  margin-top: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.attractions-component-info-window p {
+  margin: 8px 0;
+}
+
+/* Info Section */
+.attractions-component-info {
+  line-height: 1.6;
+  color: var(--text-color);
+}
+
+.attractions-component-info p {
+  margin: 10px 0;
+}
+
+.attractions-component-info strong {
+  color: var(--primary-color);
+}
+
+/* Images */
+.attractions-component-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.attractions-component-image {
+  width: calc(50% - 10px);
+  height: 200px;
+  object-fit: cover;
+  border-radius: var(--border-radius);
+  transition: transform 0.3s;
+}
+
+.attractions-component-image:hover {
+  transform: scale(1.05);
+}
+
+/* Links */
+.attractions-component-links {
+  margin: 20px 0;
+  display: flex;
+  gap: 15px;
+}
+
+.attractions-component-links a {
+  background: var(--primary-gradient);
+  border: none;
+  color: var(--accent-color);
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 30px;
+  transition: background var(--transition-speed), transform var(--transition-speed), box-shadow var(--transition-speed);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 500;
+  box-shadow: var(--box-shadow);
+  text-decoration: none;
+}
+
+.attractions-component-links a:hover {
+  background: var(--secondary-gradient);
+  transform: scale(1.05);
+  box-shadow: var(--hover-shadow);
+}
+
+/* Favorite Button */
+.attractions-component-favorite-button {
+  background: var(--primary-gradient);
+  color: var(--accent-color);
+  border: none;
+  padding: 12px 25px;
+  cursor: pointer;
+  border-radius: 25px;
+  font-size: 1rem;
+  transition: background var(--transition-speed), transform var(--transition-speed), box-shadow var(--transition-speed);
+  margin-top: 20px;
+  box-shadow: var(--box-shadow);
+}
+
+.attractions-component-favorite-button:hover {
+  background: var(--secondary-gradient);
+  transform: scale(1.05);
+  box-shadow: var(--hover-shadow);
+}
+
+/* Error, Loading, No Data */
+.attraction-details-error,
+.attraction-details-loading,
+.attraction-details-no-data {
+  text-align: center;
+  margin-top: 50px;
+  font-size: 1.2rem;
+  color: var(--error-color);
+}
+
+.attraction-details-no-data {
+  color: var(--secondary-text-color);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) and (min-width: 768px) {
+  .attractions-component-image {
+    height: 180px;
+  }
+
+  .attractions-component-title {
+    font-size: 1.8rem;
+  }
+
+  .attractions-component-info p {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .attraction-details-container {
+    padding: 15px;
+  }
+
+  .attractions-component-explore-button,
+  .attractions-component-favorite-button,
+  .attractions-component-links a {
+    width: 100%;
+    text-align: center;
+  }
+
+  .attractions-component-images {
+    flex-direction: column;
+  }
+
+  .attractions-component-image {
+    width: 100%;
+    height: 150px;
+  }
+
+  .attractions-component-title {
+    font-size: 1.5rem;
+  }
+
+  .attractions-component-info p {
+    font-size: 0.9rem;
+  }
+
+  .attractions-component-favorite-button {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+
+  .attractions-component-links {
+    flex-direction: column;
+    gap: 10px;
+  }
+}

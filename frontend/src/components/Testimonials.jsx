@@ -1,25 +1,25 @@
-// src/components/Testimonials.jsx
+/* src/components/Testimonials.jsx */
 
 import React, { useContext, useEffect, useState } from 'react';
 import Slider from 'react-slick';
-import '../styles/Home.css'; // Ensure this path is correct
+import '../styles/Testimonials.css';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 
 const Testimonials = () => {
-  const { isAuthenticated, user } = useContext(AuthContext);
+  const { isAuthenticated, user, idToken } = useContext(AuthContext);
   const [testimonialsData, setTestimonialsData] = useState([]);
-  const [newTestimonial, setNewTestimonial] = useState({
-    quote: '',
-  });
+  const [newTestimonial, setNewTestimonial] = useState({ content: '' });
   const [submissionStatus, setSubmissionStatus] = useState('');
 
+  // Fetch testimonials on component mount
   useEffect(() => {
     fetchTestimonials();
   }, []);
 
+  // Fetch testimonials from API
   const fetchTestimonials = async () => {
     try {
       const response = await axios.get('http://localhost:3001/api/testimonials');
@@ -29,6 +29,7 @@ const Testimonials = () => {
     }
   };
 
+  // Handle input changes in the form
   const handleInputChange = (e) => {
     setNewTestimonial({
       ...newTestimonial,
@@ -36,44 +37,52 @@ const Testimonials = () => {
     });
   };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (newTestimonial.quote.trim() === '') {
-      setSubmissionStatus('Please enter a comment.');
+    const content = newTestimonial.content.trim();
+
+    if (!content) {
+      setSubmissionStatus({ message: 'Please enter your testimonial.', type: 'error' });
       return;
     }
 
-    setSubmissionStatus('Submitting...');
+    setSubmissionStatus({ message: 'Submitting...', type: 'info' });
 
     try {
-      const idToken = await user.getIdToken();
+      if (!idToken) {
+        setSubmissionStatus({ message: 'Authentication token missing. Please log in.', type: 'error' });
+        return;
+      }
+
       const response = await axios.post(
         'http://localhost:3001/api/testimonials',
-        {
-          quote: newTestimonial.quote,
-          userId: user.uid, // Assuming you want to associate the testimonial with the user
-        },
+        { content },
         {
           headers: {
-            'Authorization': `Bearer ${idToken}`,
+            Authorization: `Bearer ${idToken}`,
           },
         }
       );
 
       if (response.data.success) {
-        setSubmissionStatus('Thank you for your feedback!');
-        setNewTestimonial({ quote: '' });
-        fetchTestimonials(); // Refresh testimonials
+        setSubmissionStatus({ message: 'Thank you for your testimonial!', type: 'success' });
+        setNewTestimonial({ content: '' });
+        fetchTestimonials();
       } else {
-        setSubmissionStatus(response.data.message || 'Failed to submit testimonial.');
+        setSubmissionStatus({ message: response.data.message || 'Failed to submit testimonial.', type: 'error' });
       }
     } catch (error) {
       console.error('Error submitting testimonial:', error);
-      setSubmissionStatus('An error occurred. Please try again later.');
+      if (error.response && error.response.status === 401) {
+        setSubmissionStatus({ message: 'Unauthorized. Please log in again.', type: 'error' });
+      } else {
+        setSubmissionStatus({ message: 'An error occurred. Please try again later.', type: 'error' });
+      }
     }
   };
 
-  // Testimonials Slider Settings
+  // Slider settings
   const testimonialSettings = {
     dots: true,
     infinite: true,
@@ -98,35 +107,66 @@ const Testimonials = () => {
     ],
   };
 
+  // Get user's initial
+  const getInitial = (firstName, lastName) => {
+    if (firstName && firstName.length > 0) {
+      return firstName.charAt(0).toUpperCase();
+    } else if (lastName && lastName.length > 0) {
+      return lastName.charAt(0).toUpperCase();
+    }
+    return 'A'; // Default initial
+  };
+
+  // Construct image URL
+  const getImageUrl = (path) => {
+    const baseURL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
+    return `${baseURL}${path}`;
+  };
+
   return (
     <section className="testimonials">
       <h2>What Our Customers Say</h2>
       <Slider {...testimonialSettings} className="testimonials-slider">
         {testimonialsData.map((testimonial, index) => (
           <div className="testimonial-card" key={index}>
-            <img
-              src={testimonial.image || '/default-avatar.png'} // Provide a default avatar if not available
-              alt={testimonial.name || 'Anonymous'}
-              className="testimonial-image"
-              loading="lazy"
-            />
+            {/* Conditionally render image or initial */}
+            {testimonial.user.ProfilePicture ? (
+              <img
+                src={getImageUrl(testimonial.user.ProfilePicture)}
+                alt={`${testimonial.user.UserName || 'Anonymous'}`}
+                className="testimonial-image"
+                loading="lazy"
+                onError={(e) => {
+                  console.error(`Error loading image for ${testimonial.user.UserName}`);
+                  e.target.onerror = null; // Prevent infinite loop
+                  e.target.src = '/default-avatar.png'; // Fallback image
+                }}
+              />
+            ) : (
+              <div className="testimonial-initial" aria-label="User Initial">
+                {getInitial(testimonial.user.FirstName, testimonial.user.LastName)}
+              </div>
+            )}
             <div className="testimonial-content">
-              <p>"{testimonial.quote}"</p>
-              <h4>{testimonial.name || 'Anonymous'}</h4>
+              <p>"{testimonial.content}"</p>
+              <h4>
+                {testimonial.user.FirstName} {testimonial.user.LastName}
+              </h4>
+              <small>{testimonial.user.Email}</small>
             </div>
           </div>
         ))}
       </Slider>
 
-      {/* Comment Form for Authenticated Users */}
+      {/* Testimonial Submission Form for Authenticated Users */}
       {isAuthenticated && (
         <div className="testimonial-form-container">
           <h3>Share Your Experience</h3>
           <form className="testimonial-form" onSubmit={handleSubmit}>
             <div className="form-group">
               <textarea
-                name="quote"
-                value={newTestimonial.quote}
+                name="content"
+                value={newTestimonial.content}
                 onChange={handleInputChange}
                 placeholder="Write your testimonial here..."
                 required
@@ -137,7 +177,15 @@ const Testimonials = () => {
               Submit Testimonial
             </button>
           </form>
-          {submissionStatus && <p className={`form-status ${submissionStatus.includes('error') ? 'error' : ''}`}>{submissionStatus}</p>}
+          {submissionStatus && (
+            <p
+              className={`form-status ${submissionStatus.type}`}
+              role="alert"
+              aria-live="polite"
+            >
+              {submissionStatus.message}
+            </p>
+          )}
         </div>
       )}
     </section>

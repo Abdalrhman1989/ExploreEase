@@ -1,190 +1,326 @@
 /* src/styles/Trains.css */
 
-/* Parent Container */
+/* Root Variables for Consistent Styling */
+:root {
+  /* Color Palette */
+  --primary-color: #1e3c72; /* Deep Blue */
+  --secondary-color: #2a5298; /* Medium Blue */
+  --accent-color: #ffffff; /* White */
+  --background-color: #f4f6f8; /* Light Gray */
+  --card-background: #ffffff; /* White */
+  --text-color: #333333; /* Dark Gray */
+  --secondary-text-color: #555555; /* Medium Gray */
+  --error-color: #dc3545; /* Red for errors */
+  --success-color: #28a745; /* Green for success messages */
+
+  /* Gradients */
+  --primary-gradient: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  --secondary-gradient: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+
+  /* Shadows */
+  --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  --hover-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+
+  /* Border Radius */
+  --border-radius: 12px;
+
+  /* Transitions */
+  --transition-speed: 0.3s;
+
+  /* Font Sizes */
+  --font-size-small: 0.9rem;
+  --font-size-medium: 1rem;
+  --font-size-large: 1.5rem;
+  --font-size-xlarge: 2.5rem;
+
+  /* Z-Index for layering */
+  --z-index-modal: 1000;
+
+  /* Typography */
+  --font-family: 'Roboto', sans-serif;
+}
+
+/* Global Styles */
 .trains-component {
-  font-family: 'Helvetica Neue', Arial, sans-serif;
-  color: #333;
+  font-family: var(--font-family);
+  color: var(--text-color);
+  background-color: var(--background-color);
+  overflow-x: hidden; /* Prevent horizontal scrollbar */
 }
 
 /* Banner Section */
 .trains-component-banner {
-  background-image: url('../assets/train1.jpg'); /* Replace with your banner image */
+  background-image: url('../assets/train1.jpg'); /* Ensure the path is correct */
   background-size: cover;
   background-position: center;
-  padding: 0; /* Remove padding to use height for centering */
   position: relative;
+  height: 60vh;
   display: flex;
-  justify-content: center;
   align-items: center;
-  height: 400px; /* Adjust as needed */
+  justify-content: center;
+  padding: 20px;
+  border-radius: var(--border-radius);
+  margin-bottom: 40px;
+}
+
+.trains-component-banner::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(30, 60, 114, 0.6), rgba(30, 60, 114, 0));
+  border-radius: var(--border-radius);
 }
 
 .trains-component-banner-content {
-  background: rgba(0, 0, 0, 0.5);
-  color: #fff;
-  padding: 40px;
-  border-radius: 10px;
-  text-align: center; /* Center text inside content */
-  max-width: 80%; /* Optional: Limit width for better appearance */
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  color: var(--accent-color);
+  max-width: 800px;
 }
 
 .trains-component-banner-content h1 {
-  font-size: 48px;
+  font-size: var(--font-size-xlarge);
   margin-bottom: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
 }
 
 .trains-component-banner-content p {
-  font-size: 24px;
+  font-size: var(--font-size-medium);
   margin-bottom: 30px;
+  font-weight: 300;
 }
 
+/* Improved Button Styles */
 .trains-component-explore-button {
-  background-color: #007BFF;
-  color: #fff;
-  padding: 15px 25px;
+  background: var(--primary-gradient);
   border: none;
-  border-radius: 5px;
-  font-size: 18px;
+  color: var(--accent-color);
+  padding: 14px 36px;
+  font-size: 1.1rem;
   cursor: pointer;
-  transition: background-color 0.3s;
-  display: inline-block; /* Ensure button doesn't stretch */
+  transition: background var(--transition-speed), transform var(--transition-speed);
+  border-radius: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  max-width: 240px;
+  font-weight: 600;
+  box-shadow: var(--box-shadow);
 }
 
 .trains-component-explore-button:hover {
-  background-color: #0056b3;
+  background: var(--secondary-gradient);
+  transform: scale(1.05);
+  box-shadow: var(--hover-shadow);
+}
+
+/* Journey Search Form */
+.trains-component-map-search-section {
+  padding: 40px 20px;
+  background: var(--accent-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.trains-component-journey-form {
+  background: var(--accent-color);
+  padding: 40px 50px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  max-width: 900px;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 25px;
+}
+
+.trains-component-journey-form .trains-component-form-group {
+  flex: 1 1 220px;
+  display: flex;
+  flex-direction: column;
+}
+
+.trains-component-journey-form label {
+  margin-bottom: 10px;
+  font-weight: 600;
+  font-size: var(--font-size-medium);
+  color: var(--primary-color);
+}
+
+.trains-component-journey-form input {
+  padding: 14px 20px;
+  border: 1px solid #bdc3c7;
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-medium);
+  transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+.trains-component-journey-form input:focus {
+  border-color: var(--primary-color);
+  outline: none;
+  box-shadow: 0 0 10px rgba(30, 60, 114, 0.5);
+}
+
+.error-message {
+  color: var(--error-color);
+  font-size: 0.9rem;
+  margin-top: 5px;
+}
+
+.trains-component-search-journey-button {
+  background: var(--primary-gradient);
+  color: var(--accent-color);
+  padding: 14px 30px;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-medium);
+  cursor: pointer;
+  transition: background var(--transition-speed), transform var(--transition-speed);
+  flex: 1 1 100%;
+  max-width: 240px;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 600;
+  box-shadow: var(--box-shadow);
+}
+
+.trains-component-search-journey-button:hover {
+  background: var(--secondary-gradient);
+  transform: translateY(-3px);
+  box-shadow: var(--hover-shadow);
 }
 
 /* Categories Section */
 .trains-component-categories-section {
-  padding: 40px 20px;
-  background-color: #f1f1f1;
+  padding: 60px 20px;
+  background: var(--background-color);
   text-align: center;
 }
 
 .trains-component-categories-section h2 {
-  font-size: 32px;
-  margin-bottom: 20px;
+  font-size: 2.8rem;
+  margin-bottom: 40px;
+  font-weight: 700;
+  color: var(--text-color);
 }
 
 .trains-component-categories-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 40px;
+  align-items: stretch; /* Ensures all grid items stretch to the same height */
+}
+
+/* Ensure grid containers have uniform row heights */
+.trains-component-categories-grid {
+  grid-auto-rows: 1fr; /* Can be adjusted as needed */
 }
 
 .trains-component-category-item {
-  background-color: #fff;
-  padding: 20px 30px;
-  border-radius: 10px;
+  background: var(--card-background);
+  padding: 40px 30px;
+  border-radius: var(--border-radius);
   cursor: pointer;
-  transition: background-color 0.3s, color 0.3s;
+  transition: transform var(--transition-speed), box-shadow var(--transition-speed), background var(--transition-speed);
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%; /* Make it responsive within grid */
+  box-shadow: var(--box-shadow);
 }
 
 .trains-component-category-item:hover,
 .trains-component-category-item.selected {
-  background-color: #007BFF;
-  color: #fff;
+  background: var(--primary-gradient);
+  color: var(--accent-color);
+  transform: translateY(-10px);
+  box-shadow: var(--hover-shadow);
 }
 
 .trains-component-category-icon {
-  font-size: 24px;
+  font-size: 4rem;
+  margin-bottom: 20px;
 }
 
 .trains-component-category-item h3 {
-  font-size: 18px;
-  font-weight: 500;
+  font-size: 1.5rem;
+  font-weight: 600;
   margin: 0;
 }
 
-/* Map Search Section */
-.trains-component-map-search-section {
-  background-color: #f9f9f9;
-  padding: 40px 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
+/* Search Bar Section */
 .trains-component-map-search-bar {
-  background: #fff;
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
+  align-items: center;
+  justify-content: center;
   max-width: 800px;
-  width: 100%;
+  margin: 0 auto 40px auto;
+  padding: 15px 25px;
+  background: #ffffff;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  transition: box-shadow var(--transition-speed);
 }
 
-.trains-component-map-search-bar input {
-  flex: 1 1 200px;
-  padding: 10px 15px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 16px;
-  transition: border-color 0.3s;
+.trains-component-map-search-bar:hover {
+  box-shadow: var(--hover-shadow);
 }
 
-.trains-component-map-search-bar input:focus {
-  border-color: #007BFF;
+.search-icon {
+  color: var(--primary-color);
+  margin-right: 15px;
+  font-size: 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-input {
+  flex: 1;
+  padding: 14px 20px;
+  border: none;
+  font-size: 1.1rem;
   outline: none;
+  color: #333333;
+}
+
+.search-input::placeholder {
+  color: #999999;
 }
 
 .trains-component-search-button {
-  background-color: #007BFF;
-  color: #fff;
-  padding: 15px 25px;
+  background: var(--primary-gradient);
+  color: var(--accent-color);
+  padding: 14px 30px;
   border: none;
-  border-radius: 5px;
-  font-size: 16px;
+  border-radius: var(--border-radius);
   cursor: pointer;
-  transition: background-color 0.3s;
-  align-self: flex-end;
+  transition: background var(--transition-speed), transform var(--transition-speed);
+  font-size: var(--font-size-medium);
+  margin-left: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 600;
+  box-shadow: var(--box-shadow);
 }
 
 .trains-component-search-button:hover {
-  background-color: #0056b3;
-}
-
-/* Error Message */
-.trains-component-error-message {
-  background-color: #ffe6e6;
-  color: #cc0000;
-  padding: 15px 20px;
-  margin: 20px auto;
-  max-width: 800px;
-  border-left: 5px solid #cc0000;
-  border-radius: 5px;
-  font-weight: 500;
-  text-align: center;
-}
-
-/* Spinner */
-.trains-component-spinner {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  margin: 20px;
-}
-
-.trains-component-spinner .spinner {
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #007BFF;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: trains-component-spin 1s linear infinite;
-}
-
-@keyframes trains-component-spin {
-  to { transform: rotate(360deg); }
+  background: var(--secondary-gradient);
+  transform: translateY(-3px);
+  box-shadow: var(--hover-shadow);
 }
 
 /* Map Section */
@@ -193,76 +329,102 @@
 }
 
 .trains-component-info-window {
-  max-width: 300px;
+  max-width: 350px;
+  font-size: 1rem;
+  color: var(--text-color);
 }
 
 .trains-component-info-window h3 {
   margin-top: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.trains-component-info-window p {
+  margin: 8px 0;
 }
 
 .trains-component-info-window-image {
   width: 100%;
-  height: auto;
-  border-radius: 5px;
-  margin-top: 10px;
+  height: 200px;
+  border-radius: var(--border-radius);
+  margin-top: 15px;
+  object-fit: cover;
 }
 
 .trains-component-reviews {
-  margin-top: 10px;
+  margin-top: 20px;
 }
 
 .trains-component-review {
-  background-color: #f9f9f9;
-  padding: 10px;
-  border-radius: 5px;
-  margin-bottom: 10px;
+  background-color: #f9fafb;
+  padding: 12px;
+  border-radius: var(--border-radius);
+  margin-bottom: 12px;
 }
 
 .trains-component-reviews h4 {
-  margin-bottom: 5px;
+  margin-bottom: 10px;
+  font-size: 1.2rem;
 }
 
 .trains-component-info-buttons {
-  margin-top: 10px;
+  margin-top: 25px;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .trains-component-favorite-button {
-  background-color: #28a745;
-  color: #fff;
-  padding: 10px 15px;
+  background: var(--primary-gradient);
+  color: var(--accent-color);
+  padding: 12px 25px;
   border: none;
-  border-radius: 5px;
+  border-radius: 50px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background var(--transition-speed), transform var(--transition-speed);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--font-size-medium);
+  font-weight: 600;
+  box-shadow: var(--box-shadow);
 }
 
 .trains-component-favorite-button:hover {
-  background-color: #218838;
+  background: var(--secondary-gradient);
+  transform: scale(1.05);
+  box-shadow: var(--hover-shadow);
 }
 
 /* Dynamic Trains Section */
 .trains-component-dynamic-trains {
-  padding: 40px 20px;
+  padding: 60px 20px;
 }
 
 .trains-component-dynamic-trains h2 {
   text-align: center;
-  margin-bottom: 20px;
-}
-
-.trains-component-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 20px;
+  margin-bottom: 50px;
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--text-color);
 }
 
 .trains-component-item {
-  background: #fff;
-  padding: 20px;
-  width: 250px;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: var(--card-background);
+  padding: 25px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.trains-component-item:hover {
+  transform: translateY(-10px);
+  box-shadow: var(--hover-shadow);
 }
 
 .trains-component-image-button {
@@ -270,80 +432,352 @@
   padding: 0;
   cursor: pointer;
   width: 100%;
-  height: 150px;
+  height: 200px;
   overflow: hidden;
-  border-radius: 5px;
+  border-radius: var(--border-radius);
+  margin-bottom: 20px;
 }
 
 .trains-component-placeholder {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform var(--transition-speed);
+}
+
+.trains-component-image-button:hover .trains-component-placeholder {
+  transform: scale(1.1);
 }
 
 .trains-component-info {
-  margin-top: 10px;
+  flex-grow: 1;
 }
 
 .trains-component-info h3 {
-  margin-bottom: 5px;
+  margin-bottom: 10px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.trains-component-info p {
+  margin: 6px 0;
+  font-size: var(--font-size-medium);
 }
 
 .trains-component-actions {
   display: flex;
   justify-content: space-between;
-  margin-top: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
-.trains-component-view-details-button {
-  background-color: #007BFF;
-  color: #fff;
-  padding: 5px 10px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.trains-component-view-details-button:hover {
-  background-color: #0056b3;
-}
-
+.trains-component-view-details-button,
 .trains-component-favorite-button-small {
-  background-color: #28a745;
-  color: #fff;
-  padding: 5px 10px;
+  background: var(--primary-gradient);
+  color: var(--accent-color);
+  padding: 10px 20px;
   border: none;
-  border-radius: 5px;
+  border-radius: 50px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background var(--transition-speed), transform var(--transition-speed);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  box-shadow: var(--box-shadow);
 }
 
+.trains-component-view-details-button:hover,
 .trains-component-favorite-button-small:hover {
-  background-color: #218838;
+  background: var(--secondary-gradient);
+  transform: scale(1.05);
+  box-shadow: var(--hover-shadow);
+}
+
+/* Journeys Section */
+.trains-component-journeys-section {
+  padding: 60px 20px;
+  background: var(--background-color);
+}
+
+.trains-component-journeys-section h2 {
+  text-align: center;
+  margin-bottom: 50px;
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+.trains-component-journey-item {
+  background: var(--card-background);
+  padding: 35px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 400px; /* Ensures uniform height */
+}
+
+.trains-component-journey-item:hover {
+  transform: translateY(-7px);
+  box-shadow: var(--hover-shadow);
+}
+
+/* New class for content */
+.trains-component-journey-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.trains-component-journey-item h3 {
+  margin-bottom: 20px;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.trains-component-journey-item p {
+  margin: 10px 0;
+  font-size: var(--font-size-medium);
+  color: var(--text-color);
+}
+
+.trains-component-transit-stops ul,
+.trains-component-schedule ul {
+  list-style-type: disc;
+  padding-left: 25px;
+  margin-top: 5px;
+}
+
+.trains-component-schedule li,
+.trains-component-transit-stops li {
+  margin-bottom: 6px;
+}
+
+/* New class for actions */
+.trains-component-journey-actions {
+  margin-top: auto; /* Pushes the actions to the bottom */
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.trains-component-view-details-button,
+.trains-component-buy-ticket-button,
+.trains-component-save-trip-button {
+  background: var(--primary-gradient);
+  color: var(--accent-color);
+  padding: 12px 25px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: background var(--transition-speed), transform var(--transition-speed);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  margin-right: 15px;
+  box-shadow: var(--box-shadow);
+}
+
+.trains-component-view-details-button:hover,
+.trains-component-buy-ticket-button:hover,
+.trains-component-save-trip-button:hover {
+  background: var(--secondary-gradient);
+  transform: scale(1.05);
+  box-shadow: var(--hover-shadow);
+}
+
+/* Saved Trips Section */
+.trains-component-saved-trips-section {
+  padding: 60px 20px;
+}
+
+.trains-component-saved-trips-section h2 {
+  text-align: center;
+  margin-bottom: 50px;
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+.trains-component-saved-trips-filter {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 25px;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+
+.trains-component-saved-trips-filter span {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--primary-color);
+}
+
+.trains-component-saved-trips-filter input {
+  padding: 12px 20px;
+  border: 1px solid #cccccc;
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-medium);
+  transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+.trains-component-saved-trips-filter input:focus {
+  border-color: var(--primary-color);
+  outline: none;
+  box-shadow: 0 0 10px rgba(30, 60, 114, 0.5);
+}
+
+.trains-component-clear-filter-button {
+  background: var(--primary-gradient);
+  color: var(--accent-color);
+  padding: 12px 25px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: background var(--transition-speed), transform var(--transition-speed);
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  box-shadow: var(--box-shadow);
+}
+
+.trains-component-clear-filter-button:hover {
+  background: var(--secondary-gradient);
+  transform: scale(1.05);
+  box-shadow: var(--hover-shadow);
+}
+
+.trains-component-saved-trip-item {
+  background: var(--card-background);
+  padding: 35px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 400px; /* Ensures uniform height */
+}
+
+.trains-component-saved-trip-item:hover {
+  transform: translateY(-7px);
+  box-shadow: var(--hover-shadow);
+}
+
+/* New class for content */
+.trains-component-saved-trip-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.trains-component-saved-trip-item h3 {
+  margin-bottom: 20px;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.trains-component-saved-trip-item p {
+  margin: 10px 0;
+  font-size: var(--font-size-medium);
+  color: var(--text-color);
+}
+
+.trains-component-saved-trip-item a {
+  color: var(--secondary-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.trains-component-saved-trip-item a:hover {
+  text-decoration: underline;
+}
+
+/* New class for actions */
+.trains-component-saved-trip-actions {
+  margin-top: auto; /* Pushes the actions to the bottom */
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.trains-component-delete-trip-button {
+  background: var(--secondary-gradient);
+  color: var(--accent-color);
+  padding: 12px 25px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: background var(--transition-speed), transform var(--transition-speed);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  box-shadow: var(--box-shadow);
+}
+
+.trains-component-delete-trip-button:hover {
+  background: var(--primary-gradient);
+  transform: scale(1.05);
+  box-shadow: var(--hover-shadow);
+}
+
+.no-saved-trips-message,
+.no-favorites-message {
+  text-align: center;
+  font-size: 1.4rem;
+  margin-top: 50px;
+  color: var(--secondary-text-color);
 }
 
 /* Favorites Section */
 .trains-component-favorites-section {
-  padding: 40px 20px;
-  background-color: #f1f1f1;
+  padding: 60px 20px;
+  background: var(--accent-color);
+}
+
+.trains-component-favorites-section h2 {
   text-align: center;
+  margin-bottom: 50px;
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--text-color);
 }
 
 .trains-component-favorites-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 20px;
-  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 40px;
+  align-items: stretch; /* Ensures all grid items stretch to the same height */
+  grid-auto-rows: minmax(400px, auto); /* Ensures all grid items have at least 400px height */
 }
 
 .trains-component-favorite-item {
-  background-color: #fff;
-  padding: 20px;
-  width: 250px;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: var(--card-background);
+  padding: 25px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 400px; /* Ensures uniform height */
+}
+
+.trains-component-favorite-item:hover {
+  transform: translateY(-10px);
+  box-shadow: var(--hover-shadow);
 }
 
 .trains-component-favorite-image-button {
@@ -351,220 +785,347 @@
   padding: 0;
   cursor: pointer;
   width: 100%;
-  height: 150px;
+  height: 200px;
   overflow: hidden;
-  border-radius: 5px;
+  border-radius: var(--border-radius);
+  margin-bottom: 20px;
 }
 
 .trains-component-favorite-image-button img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform var(--transition-speed);
+}
+
+.trains-component-favorite-image-button:hover img {
+  transform: scale(1.1);
 }
 
 .trains-component-favorite-info {
-  margin-top: 10px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .trains-component-favorite-info h3 {
-  margin-bottom: 5px;
+  margin-bottom: 10px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.trains-component-favorite-info p {
+  margin: 6px 0;
+  font-size: var(--font-size-medium);
+  color: var(--text-color);
 }
 
 .trains-component-favorite-actions {
+  margin-top: auto; /* Pushes the actions to the bottom */
   display: flex;
   justify-content: space-between;
-  margin-top: 10px;
+  gap: 12px;
 }
 
-.trains-component-google-maps-button {
-  background-color: #007BFF;
-  color: #fff;
-  padding: 5px 10px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.trains-component-google-maps-button:hover {
-  background-color: #0056b3;
-}
-
+.trains-component-google-maps-button,
 .trains-component-delete-favorite-button {
-  background-color: #dc3545;
-  color: #fff;
-  padding: 5px 10px;
+  background: var(--primary-gradient);
+  color: var(--accent-color);
+  padding: 10px 20px;
   border: none;
-  border-radius: 5px;
+  border-radius: 50px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background var(--transition-speed), transform var(--transition-speed);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  box-shadow: var(--box-shadow);
 }
 
+.trains-component-google-maps-button:hover,
 .trains-component-delete-favorite-button:hover {
-  background-color: #c82333;
+  background: var(--secondary-gradient);
+  transform: scale(1.05);
+  box-shadow: var(--hover-shadow);
+}
+
+/* Error and Success Messages */
+.trains-component-error-message {
+  color: var(--error-color);
+  font-size: 1.1rem;
+  text-align: center;
+  margin-top: 25px;
+}
+
+.trains-component-success-message {
+  color: var(--success-color);
+  font-size: 1.1rem;
+  text-align: center;
+  margin-top: 25px;
+}
+
+/* Loading Spinners */
+.trains-component-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 40px;
+}
+
+.trains-component-spinner .spinner {
+  border: 5px solid rgba(0, 0, 0, 0.1);
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border-left-color: var(--primary-color);
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Info Window Styles */
+.trains-component-info-window a {
+  color: var(--secondary-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.trains-component-info-window a:hover {
+  text-decoration: underline;
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+
+/* Large Devices (Desktops, 1200px and up) */
+@media (min-width: 1201px) {
+  /* No additional styles needed as the default styles cater to large screens */
+}
+
+/* Medium Devices (Tablets, 768px to 1200px) */
+@media (max-width: 1200px) and (min-width: 768px) {
+  .trains-component-journey-form {
+    padding: 35px 45px;
+    gap: 20px;
+  }
+
+  .trains-component-category-item {
+    width: 220px;
+  }
+
+  .trains-component-banner-content h1 {
+    font-size: 2.4rem;
+  }
+
+  .trains-component-banner-content p {
+    font-size: 1.1rem;
+  }
+
+  /* Ensure grid containers maintain uniform row heights */
   .trains-component-categories-grid,
-  .trains-component-grid,
-  .trains-component-favorites-grid {
-    flex-direction: column;
-    align-items: center;
+  .trains-component-favorites-grid,
+  .trains-component-dynamic-trains .MuiGrid-container,
+  .trains-component-saved-trips-section .MuiGrid-container {
+    grid-auto-rows: minmax(400px, auto);
+  }
+}
+
+/* Small Devices (Mobile Phones, less than 768px) */
+@media (max-width: 767px) {
+  .trains-component-banner {
+    height: 50vh;
+  }
+
+  .trains-component-banner-content h1 {
+    font-size: 2rem;
+  }
+
+  .trains-component-banner-content p {
+    font-size: 1rem;
+  }
+
+  .trains-component-journey-form {
+    padding: 30px 20px;
+    gap: 15px;
+  }
+
+  .trains-component-journey-form .trains-component-form-group {
+    flex: 1 1 100%;
+  }
+
+  .trains-component-search-journey-button,
+  .trains-component-clear-filter-button {
+    max-width: 200px;
   }
 
   .trains-component-map-search-bar {
-    flex-direction: column;
-    align-items: stretch;
+    padding: 15px 20px;
   }
 
-  .trains-component-map-search-bar input {
-    flex: 1 1 100%;
+  .trains-component-map-search-bar .search-input {
+    margin-bottom: 15px;
   }
 
   .trains-component-actions,
   .trains-component-favorite-actions {
     flex-direction: column;
-    gap: 5px;
+    align-items: stretch;
+  }
+
+  .trains-component-saved-trips-filter {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  /* Adjust search journey section padding */
+  .trains-component-map-search-section {
+    padding: 35px 15px;
+  }
+
+  /* Reduce search form gap on mobile */
+  .trains-component-journey-form {
+    gap: 12px;
+  }
+
+  /* Adjust button sizes on mobile */
+  .trains-component-search-journey-button {
+    padding: 12px 22px;
+    font-size: var(--font-size-small);
+    max-width: 200px;
+  }
+
+  .trains-component-explore-button {
+    padding: 10px 20px;
+    font-size: var(--font-size-small);
+  }
+
+  /* Ensure the grid stacks on smaller screens */
+  .trains-component-categories-grid,
+  .trains-component-favorites-grid,
+  .trains-component-dynamic-trains .MuiGrid-container,
+  .trains-component-saved-trips-section .MuiGrid-container {
+    grid-template-columns: 1fr;
+    grid-auto-rows: minmax(400px, auto); /* Maintain uniform row heights */
+  }
+
+  /* Reduce gaps for smaller screens */
+  .trains-component-categories-grid,
+  .trains-component-favorites-grid,
+  .trains-component-dynamic-trains .MuiGrid-container,
+  .trains-component-saved-trips-section .MuiGrid-container {
+    gap: 30px;
   }
 }
 
-/* Journey Search Form */
-.trains-component-journey-search-section {
-  padding: 20px;
-  background-color: #f9f9f9;
+/* Extra Small Devices (Very Small Phones, less than 480px) */
+@media (max-width: 479px) {
+  .trains-component-banner {
+    height: 40vh;
+  }
+
+  .trains-component-banner-content h1 {
+    font-size: 1.8rem;
+  }
+
+  .trains-component-banner-content p {
+    font-size: 0.85rem;
+  }
+
+  .trains-component-journey-form {
+    padding: 20px;
+    gap: 10px;
+  }
+
+  .trains-component-category-item {
+    width: 100%;
+  }
+
+  .trains-component-favorites-grid,
+  .trains-component-dynamic-trains .MuiGrid-container,
+  .trains-component-saved-trips-section .MuiGrid-container {
+    grid-template-columns: 1fr;
+    grid-auto-rows: minmax(400px, auto); /* Maintain uniform row heights */
+  }
+
+  .trains-component-saved-trips-filter span {
+    font-size: 1rem;
+  }
+
+  .trains-component-saved-trips-filter input {
+    font-size: 0.95rem;
+  }
+
+  /* Adjust button sizes on mobile */
+  .trains-component-view-details-button,
+  .trains-component-favorite-button-small,
+  .trains-component-google-maps-button,
+  .trains-component-delete-favorite-button,
+  .trains-component-delete-trip-button,
+  .trains-component-buy-ticket-button,
+  .trains-component-save-trip-button {
+    padding: 8px 16px;
+    font-size: var(--font-size-small);
+  }
+
+  /* Ensure images fit within very small screens */
+  .trains-component-placeholder,
+  .trains-component-info-window-image,
+  .trains-component-favorite-image-button img {
+    height: 150px;
+  }
 }
 
-.trains-component-journey-form {
+/* Ensure Journey, Saved Trip, and Favorite Items are Flex Containers */
+.trains-component-journey-item,
+.trains-component-saved-trip-item,
+.trains-component-favorite-item {
   display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
+  flex-direction: column;
+  height: 100%; /* Makes the card stretch to fill the grid cell */
+  min-height: 400px; /* Ensures uniform height */
 }
 
-.trains-component-form-group {
-  flex: 1 1 200px;
+/* Make Content Areas Flexible */
+.trains-component-journey-content,
+.trains-component-saved-trip-content,
+.trains-component-favorite-info {
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
 }
 
-.trains-component-form-group label {
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.trains-component-form-group input {
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.trains-component-search-journey-button {
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: 22px; /* Align with inputs */
-}
-
-.trains-component-search-journey-button:disabled {
-  background-color: #6c757d;
-  cursor: not-allowed;
-}
-
-/* Journeys Section */
-.trains-component-journeys-section {
-  padding: 20px;
-}
-
-.trains-component-journeys-grid {
+/* Align Action Buttons at the Bottom */
+.trains-component-journey-actions,
+.trains-component-saved-trip-actions,
+.trains-component-favorite-actions {
+  margin-top: auto; /* Pushes the actions to the bottom */
   display: flex;
-  flex-direction: column;
-  gap: 20px;
+  justify-content: space-between;
+  gap: 12px;
 }
 
-.trains-component-journey-item {
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  background-color: #fff;
+/* Ensure Consistent Button Heights */
+.trains-component-view-details-button,
+.trains-component-buy-ticket-button,
+.trains-component-save-trip-button,
+.trains-component-delete-trip-button,
+.trains-component-google-maps-button,
+.trains-component-delete-favorite-button {
+  padding: 12px 25px;
+  font-size: var(--font-size-small);
+  min-height: 45px; /* Ensures all buttons have the same height */
 }
 
-.trains-component-journey-item h3 {
-  margin-bottom: 10px;
-}
-
-.trains-component-transit-stops,
-.trains-component-transit-lines,
-.trains-component-schedule {
-  margin-top: 10px;
-}
-
-.trains-component-transit-stops ul,
-.trains-component-transit-lines ul,
-.trains-component-schedule ul {
-  list-style-type: disc;
-  padding-left: 20px;
-}
-
-/* Responsive Design for Journeys */
-@media (min-width: 768px) {
-  .trains-component-journeys-grid {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-
-  .trains-component-journey-item {
-    flex: 1 1 calc(50% - 40px);
-    margin: 10px;
-  }
-}
-
-/* Additional Styles for Info Window */
-.trains-component-info-window {
-  max-width: 300px;
-}
-
-.trains-component-info-window-image {
-  width: 100%;
-  height: auto;
-  margin-top: 10px;
-  border-radius: 4px;
-}
-
-.trains-component-reviews {
-  margin-top: 10px;
-}
-
-.trains-component-review {
-  border-top: 1px solid #eee;
-  padding-top: 10px;
-  margin-top: 10px;
-}
-
-.trains-component-reviews h4 {
-  margin-bottom: 10px;
-}
-
-.trains-component-website-link,
-.trains-component-google-maps-link {
-  display: block;
-  margin-top: 10px;
-  color: #007bff;
-  text-decoration: none;
-}
-
-.trains-component-website-link:hover,
-.trains-component-google-maps-link:hover {
-  text-decoration: underline;
-}
-
-/* Journeys Item Specific Styles */
-.trains-component-journey-item p {
-  margin: 5px 0;
-}
-
-.trains-component-journey-item h3 {
-  color: #333;
+/* Optional: Set a Minimum Height for Cards */
+.trains-component-journey-item,
+.trains-component-saved-trip-item,
+.trains-component-favorite-item {
+  min-height: 400px; /* Adjust as needed based on your design */
 }

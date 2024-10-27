@@ -1,3 +1,5 @@
+// routes/favorites.js
+
 const express = require('express');
 const router = express.Router();
 const { Favorite, User } = require('../models');
@@ -11,7 +13,17 @@ router.post(
   '/',
   authenticate,
   [
-    body('type').isIn(['attraction', 'flight', 'hotel', 'restaurant', 'train_station', 'subway_station', 'bus_station', 'transit_station']).withMessage('Invalid favorite type'),
+    body('type').isIn([
+      'car_rental',        // Added 'car_rental'
+      'attraction',
+      'flight',
+      'hotel',
+      'restaurant',
+      'train_station',
+      'subway_station',
+      'bus_station',
+      'transit_station'
+    ]).withMessage('Invalid favorite type'),
     body('placeId').notEmpty().withMessage('placeId is required'),
     body('name').notEmpty().withMessage('Name is required'),
   ],
@@ -62,6 +74,8 @@ router.post(
     }
   }
 );
+
+// ... (other routes remain unchanged)
 
 // @route   GET /api/favorites
 // @desc    Get all favorites for the authenticated user

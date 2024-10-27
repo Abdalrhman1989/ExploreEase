@@ -3,8 +3,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/Home.css';
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
+// Removed unused slick-carousel imports since we're handling the slider manually
+// import 'slick-carousel/slick/slick.css';
+// import 'slick-carousel/slick/slick-theme.css';
 
 import { FaHotel, FaPlane, FaCar, FaTrain, FaBus, FaUtensils } from 'react-icons/fa';
 import axios from 'axios';
@@ -153,26 +154,23 @@ const Home = () => {
   return (
     <div className="home">
       {/* Hero Slider Section */}
-      <div className="hero-slider">
-        {slides.map((slide, index) => (
-          <div
-            key={index}
-            className={`slide ${index === currentSlide ? 'active' : ''}`}
-            style={{
-              backgroundImage: `url(${slide.imageUrl})`,
-            }}
-            aria-hidden={index !== currentSlide}
-          >
-            <div className="slide-overlay"></div>
-            <div className="slide-content">
-              <h1>{slide.title}</h1>
-              <p>{slide.subtitle}</p>
-              <Link to={slide.link}>
-                <button className="cta-button">{slide.buttonText}</button>
-              </Link>
-            </div>
-          </div>      
-        ))}
+      <div className="hero-slider" role="region" aria-label="Hero Slider">
+        {/* Render only the active slide */}
+        <div
+          className="slide active"
+          style={{ backgroundImage: `url(${slides[currentSlide].imageUrl})` }}
+          aria-hidden="false"
+        >
+          <div className="slide-overlay"></div>
+          <div className="slide-content">
+            <h1>{slides[currentSlide].title}</h1>
+            <p>{slides[currentSlide].subtitle}</p>
+            {/* Styled Link as Button */}
+            <Link to={slides[currentSlide].link} className="cta-button" aria-label={slides[currentSlide].buttonText}>
+              {slides[currentSlide].buttonText}
+            </Link>
+          </div>
+        </div>
       </div>
 
       {/* Featured Services Section */}
@@ -185,8 +183,9 @@ const Home = () => {
               <div className="service-content">
                 <h3>{service.title}</h3>
                 <p>{service.subtitle}</p>
-                <Link to={service.link}>
-                  <button className="service-button">{service.buttonText}</button>
+                {/* Styled Link as Button */}
+                <Link to={service.link} className="service-button" aria-label={service.buttonText}>
+                  {service.buttonText}
                 </Link>
               </div>
             </div>
@@ -232,8 +231,9 @@ const Home = () => {
               <img src={dest.imageUrl} alt={`View of ${dest.name}`} loading="lazy" />
               <div className="destination-info">
                 <h3>{dest.name}</h3>
-                <Link to={`/destination/${dest.name.toLowerCase()}`}>
-                  <button className="explore-button">Explore {dest.name}</button>
+                {/* Styled Link as Button */}
+                <Link to={`/destination/${dest.name.toLowerCase()}`} className="explore-button" aria-label={`Explore ${dest.name}`}>
+                  Explore {dest.name}
                 </Link>
               </div>
             </div>
@@ -287,7 +287,11 @@ const Home = () => {
             Send Message
           </button>
         </form>
-        {contactFormStatus && <p className="form-status">{contactFormStatus}</p>}
+        {contactFormStatus && (
+          <p className={`form-status ${contactFormStatus.toLowerCase().includes('error') ? 'error' : ''}`}>
+            {contactFormStatus}
+          </p>
+        )}
       </section>
 
       {/* Newsletter Subscription Section */}
@@ -307,7 +311,11 @@ const Home = () => {
             Subscribe
           </button>
         </form>
-        {newsletterStatus && <p className="form-status">{newsletterStatus}</p>}
+        {newsletterStatus && (
+          <p className={`form-status ${newsletterStatus.toLowerCase().includes('error') ? 'error' : ''}`}>
+            {newsletterStatus}
+          </p>
+        )}
       </section>
     </div>
   );

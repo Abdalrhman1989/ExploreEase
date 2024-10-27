@@ -1,18 +1,46 @@
 // src/pages/Trains.jsx
+
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import {
   GoogleMap,
   useLoadScript,
   MarkerClusterer,
+  Marker,
   InfoWindow,
   TransitLayer,
   DirectionsRenderer,
 } from '@react-google-maps/api';
-import { AuthContext } from '../context/AuthContext'; // Import AuthContext
+import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
-import '../styles/Trains.css';
+import moment from 'moment-timezone';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { FaTrain } from 'react-icons/fa';
+import { Formik, Form, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
+
+// Import MUI components
+import {
+  Card,
+  CardContent,
+  CardActions,
+  Typography,
+  Button,
+  Grid,
+  Container,
+  Box,
+  CircularProgress,
+  IconButton,
+  Paper,
+} from '@mui/material';
+import {
+  FavoriteBorder,
+  Delete,
+  Directions,
+  Search as SearchIcon,
+} from '@mui/icons-material';
+
+import '../styles/Trains.css'; // Ensure this path is correct
 
 const libraries = ['places'];
 
@@ -28,39 +56,99 @@ const options = {
 
 // Define categories specific to Trains
 const categories = [
-  { name: 'Train Stations', type: 'train_station', icon: '🚉' },
-  { name: 'Subway Stations', type: 'subway_station', icon: '🚇' },
-  { name: 'Bus Stations', type: 'bus_station', icon: '🚌' },
-  { name: 'Transit Stations', type: 'transit_station', icon: '🚏' },
-  // Add more categories as needed
+  { name: 'Train Stations', type: 'train_station', icon: <FaTrain size={30} /> },
 ];
 
 const Trains = () => {
-  const { user, isAuthenticated, loading: authLoading } = useContext(AuthContext); // Access AuthContext
-  const [mapCenter, setMapCenter] = useState({ lat: 48.8566, lng: 2.3522 }); // Default to Paris center
+  const { user, isAuthenticated, loading: authLoading } = useContext(AuthContext);
+  const [mapCenter, setMapCenter] = useState({ lat: 55.4038, lng: 10.4024 }); // Default to Odense center
   const [mapZoom, setMapZoom] = useState(12);
   const [markers, setMarkers] = useState([]);
   const [selected, setSelected] = useState(null);
-  const [favorites, setFavorites] = useState([]); // Initialize favorites as empty array
+  const [favorites, setFavorites] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const mapRef = useRef(null);
 
-  // New States for Journey Planning
-  const [journeys, setJourneys] = useState([]); // Stores fetched journeys
+  // States for Journey Planning
+  const [journeys, setJourneys] = useState([]);
   const [directionsResponse, setDirectionsResponse] = useState(null);
   const [journeyLoading, setJourneyLoading] = useState(false);
   const [journeyError, setJourneyError] = useState(null);
 
-  const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
+  // States for Saved Trips
+  const [savedTrips, setSavedTrips] = useState([]);
+  const [filteredSavedTrips, setFilteredSavedTrips] = useState([]);
+  const [filterDate, setFilterDate] = useState(null);
 
+  // API Keys from Environment Variables
+  const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
+  const GOOGLE_TIMEZONE_API_KEY = process.env.REACT_APP_GOOGLE_TIMEZONE_API_KEY;
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
+
+  // Load Google Maps Script
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: GOOGLE_MAPS_API_KEY,
     libraries,
   });
 
+  const mapRef = useRef(null);
+
   const onMapLoad = (map) => {
     mapRef.current = map;
+    console.log('Map loaded:', map);
+  };
+
+  // Helper function to validate URLs
+  const isValidUrl = (url) => {
+    try {
+      new URL(url);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  };
+
+  // Helper function to format time as ISO 8601
+  const formatTime = (unixTimestamp, timeZoneId) => {
+    if (!unixTimestamp) return '';
+    const timestamp = Number(unixTimestamp);
+    if (isNaN(timestamp)) {
+      console.warn('Invalid Unix Timestamp:', unixTimestamp);
+      return 'Invalid Time';
+    }
+    return moment.unix(timestamp).tz(timeZoneId).format('YYYY-MM-DD HH:mm');
+  };
+
+  // Helper function to format duration
+  const formatDuration = (durationInMinutes) => {
+    if (!durationInMinutes || isNaN(durationInMinutes)) return 'N/A';
+    const hours = Math.floor(durationInMinutes / 60);
+    const minutes = durationInMinutes % 60;
+    return `${hours}h ${minutes}m`;
+  };
+
+  // Function to get timezone of a location using Google Time Zone API
+  const getTimezone = async (lat, lng, timestamp) => {
+    try {
+      const response = await axios.get(
+        `https://maps.googleapis.com/maps/api/timezone/json?location=${lat},${lng}&timestamp=${timestamp}&key=${GOOGLE_TIMEZONE_API_KEY}`
+      );
+      console.log('Timezone API Response:', response.data);
+      if (response.data.status === 'OK') {
+        return response.data.timeZoneId;
+      } else {
+        console.error('Time Zone API Error:', response.data);
+        throw new Error(
+          `Failed to fetch timezone: ${response.data.status} - ${
+            response.data.errorMessage || 'No error message provided.'
+          }`
+        );
+      }
+    } catch (error) {
+      console.error('Error fetching timezone:', error);
+      toast.error('Failed to fetch timezone information.');
+      return null;
+    }
   };
 
   // Function to fetch favorites from backend
@@ -69,12 +157,17 @@ const Trains = () => {
 
     try {
       const idToken = await user.getIdToken();
-      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/favorites`, {
+      const response = await axios.get(`${BACKEND_URL}/api/favorites`, {
         headers: {
           Authorization: `Bearer ${idToken}`,
         },
       });
-      setFavorites(response.data.favorites);
+      console.log('Favorites API Response:', response.data);
+      // Filter favorites to only include 'train_station'
+      const trainFavorites = response.data.favorites.filter(
+        (fav) => fav.type === 'train_station'
+      );
+      setFavorites(trainFavorites);
     } catch (err) {
       console.error('Error fetching favorites:', err.response ? err.response.data : err.message);
       toast.error('Failed to fetch favorites.');
@@ -90,24 +183,21 @@ const Trains = () => {
 
     try {
       const idToken = await user.getIdToken();
-      const response = await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/api/favorites`,
-        favoriteData,
-        {
-          headers: {
-            Authorization: `Bearer ${idToken}`,
-          },
-        }
-      );
-      // Update favorites state with the new favorite
+      const response = await axios.post(`${BACKEND_URL}/api/favorites`, favoriteData, {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      console.log('Add Favorite API Response:', response.data);
       setFavorites((prevFavorites) => [...prevFavorites, response.data.favorite]);
       toast.success('Favorite added successfully!');
     } catch (err) {
       console.error('Error adding favorite:', err.response ? err.response.data : err.message);
       if (err.response && err.response.data && err.response.data.errors) {
-        // Display validation errors
-        const messages = err.response.data.errors.map((error) => error.msg).join('\n');
-        toast.error(`Error: ${messages}`);
+        err.response.data.errors.forEach((error) => {
+          toast.error(`Error: ${error.msg}`);
+        });
       } else if (err.response && err.response.data && err.response.data.message) {
         toast.error(`Error: ${err.response.data.message}`);
       } else {
@@ -125,12 +215,12 @@ const Trains = () => {
 
     try {
       const idToken = await user.getIdToken();
-      await axios.delete(`${process.env.REACT_APP_BACKEND_URL}/api/favorites/${favoriteId}`, {
+      await axios.delete(`${BACKEND_URL}/api/favorites/${favoriteId}`, {
         headers: {
           Authorization: `Bearer ${idToken}`,
         },
       });
-      // Update favorites state by removing the deleted favorite
+      console.log(`Favorite with ID ${favoriteId} removed.`);
       setFavorites((prevFavorites) => prevFavorites.filter((fav) => fav.id !== favoriteId));
       toast.success('Favorite removed successfully!');
     } catch (err) {
@@ -139,9 +229,334 @@ const Trains = () => {
     }
   };
 
+  // Function to fetch saved trips from backend
+  const fetchSavedTrips = async () => {
+    if (!isAuthenticated || !user) return;
+
+    try {
+      const idToken = await user.getIdToken();
+      const response = await axios.get(`${BACKEND_URL}/api/trips`, {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+      console.log('Saved Trips API Response:', response.data);
+      if (Array.isArray(response.data)) {
+        setSavedTrips(response.data);
+        setFilteredSavedTrips(response.data);
+      } else if (response.data && Array.isArray(response.data.trips)) {
+        setSavedTrips(response.data.trips);
+        setFilteredSavedTrips(response.data.trips);
+      } else {
+        console.error('Unexpected response structure:', response.data);
+        setSavedTrips([]);
+        setFilteredSavedTrips([]);
+        toast.error('Unexpected response from server.');
+      }
+    } catch (err) {
+      console.error('Error fetching saved trips:', err.response ? err.response.data : err.message);
+      toast.error('Failed to fetch saved trips.');
+    }
+  };
+
+  // Function to save a trip via backend
+  const saveTripToDB = async (tripData) => {
+    if (!isAuthenticated || !user) {
+      toast.error('Please log in to save trips.');
+      return;
+    }
+
+    const requiredFields = ['type', 'origin', 'destination', 'departureTime', 'arrivalTime', 'duration'];
+    const missingFields = requiredFields.filter((field) => !tripData[field]);
+
+    if (missingFields.length > 0) {
+      toast.error(`Missing required fields: ${missingFields.join(', ')}`);
+      return;
+    }
+
+    if (tripData.ticket_provider_url && !isValidUrl(tripData.ticket_provider_url)) {
+      toast.error('Invalid Ticket Provider URL.');
+      return;
+    }
+
+    console.log('Attempting to save trip with data:', tripData); // Detailed logging
+
+    try {
+      // Convert departureTime and arrivalTime to ISO strings if they aren't already
+      const departureDate = new Date(tripData.departureTime);
+      const arrivalDate = new Date(tripData.arrivalTime);
+
+      if (isNaN(departureDate.getTime()) || isNaN(arrivalDate.getTime())) {
+        throw new Error('Invalid departure or arrival date.');
+      }
+
+      const tripDataToSend = {
+        ...tripData,
+        departureTime: departureDate.toISOString(),
+        arrivalTime: arrivalDate.toISOString(),
+      };
+
+      console.log('Trip Data to Send:', tripDataToSend); // Detailed logging
+
+      const idToken = await user.getIdToken();
+      const response = await axios.post(`${BACKEND_URL}/api/trips`, tripDataToSend, {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      console.log('Save Trip API Response:', response.data); // Detailed logging
+
+      if (response.data && (response.status === 201 || response.status === 200)) {
+        setSavedTrips((prevTrips) => [...prevTrips, response.data]);
+        setFilteredSavedTrips((prevTrips) => [...prevTrips, response.data]);
+        toast.success('Trip saved successfully!');
+      } else {
+        console.error('Unexpected response structure:', response);
+        toast.error('Failed to save trip. Unexpected response from server.');
+      }
+    } catch (err) {
+      console.error('Error saving trip:', err.response ? err.response.data : err.message);
+      if (err.response && err.response.data && err.response.data.errors) {
+        const messages = err.response.data.errors.map((error) => error.msg).join('\n');
+        console.error('Validation Errors:', messages);
+        toast.error(`Error: ${messages}`);
+      } else if (err.response && err.response.data && err.response.data.message) {
+        toast.error(`Error: ${err.response.data.message}`);
+      } else {
+        toast.error('Failed to save trip.');
+      }
+    }
+  };
+
+  // Function to remove a saved trip via backend
+  const removeTripFromDB = async (tripId) => {
+    if (!isAuthenticated || !user) {
+      toast.error('Please log in to remove trips.');
+      return;
+    }
+
+    try {
+      const idToken = await user.getIdToken();
+      await axios.delete(`${BACKEND_URL}/api/trips/${tripId}`, {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+      console.log(`Trip with ID ${tripId} removed.`);
+      setSavedTrips((prevTrips) => prevTrips.filter((trip) => trip.id !== tripId));
+      setFilteredSavedTrips((prevTrips) => prevTrips.filter((trip) => trip.id !== tripId));
+      toast.success('Trip removed successfully!');
+    } catch (err) {
+      console.error('Error removing trip:', err.response ? err.response.data : err.message);
+      toast.error('Failed to remove trip.');
+    }
+  };
+
+  // Handler for journey search form submission with timezone handling
+  const handleJourneySearch = async (values) => {
+    const { origin, destination, date, time } = values;
+
+    console.log('Formik Values:', values); // Debugging
+
+    // Combine date and time into a single Date object in local time
+    const departureDateTime = new Date(`${date}T${time}:00`);
+
+    console.log('Constructed departureDateTime:', departureDateTime); // Debugging
+
+    // Validate departure time
+    const now = new Date();
+    if (departureDateTime < now) {
+      toast.error('Please select a future date and time for your journey.');
+      return;
+    }
+
+    setDirectionsResponse(null);
+    setJourneyLoading(true);
+    setJourneyError(null);
+    setJourneys([]);
+
+    try {
+      // Geocode the origin to get latitude and longitude
+      const geocoder = new window.google.maps.Geocoder();
+      geocoder.geocode({ address: origin }, async (results, status) => {
+        console.log('Geocode Results for Journey:', results);
+        console.log('Geocode Status for Journey:', status);
+        if (status === 'OK' && results.length > 0) {
+          const originLocation = results[0].geometry.location;
+          let lat = originLocation.lat();
+          let lng = originLocation.lng();
+
+          // Get the timezone of the origin location
+          let timestamp = Math.floor(departureDateTime.getTime() / 1000);
+          const timeZoneId = await getTimezone(lat, lng, timestamp);
+          if (!timeZoneId) {
+            setJourneyLoading(false);
+            return;
+          }
+
+          // Create a moment object in the origin's timezone
+          const departureInOriginTZ = moment.tz(departureDateTime, timeZoneId);
+
+          // Convert departure time to ISO string
+          const departureISO = departureInOriginTZ.toISOString();
+
+          // Update the map center to the origin
+          setMapCenter({ lat, lng });
+          setMapZoom(12);
+
+          // DirectionsService request with corrected transitOptions
+          const directionsService = new window.google.maps.DirectionsService();
+          directionsService.route(
+            {
+              origin: origin,
+              destination: destination,
+              travelMode: window.google.maps.TravelMode.TRANSIT,
+              transitOptions: {
+                departureTime: departureInOriginTZ.toDate(), // Correctly pass Date object
+                modes: ['TRAIN'],
+              },
+              provideRouteAlternatives: true, // Enable multiple routes
+            },
+            (result, status) => {
+              console.log('Directions Service Result:', result);
+              console.log('Directions Service Status:', status);
+              if (status === window.google.maps.DirectionsStatus.OK) {
+                setDirectionsResponse(result);
+
+                // Extract journey details
+                const fetchedJourneys = result.routes.map((route, routeIndex) => {
+                  const leg = route.legs[0];
+                  const steps = leg.steps;
+                  const transitSteps = steps.filter(
+                    (step) => step.travel_mode === 'TRANSIT' && step.transit.line
+                  );
+
+                  const transitLines = transitSteps.map(
+                    (step) => step.transit.line.name || 'Unknown Line'
+                  );
+                  const transitStops = transitSteps.map(
+                    (step) =>
+                      step.transit.line.short_name || step.transit.line.name || 'Unknown Stop'
+                  );
+
+                  const schedule = transitSteps.map((step, idx) => ({
+                    segment: step.transit.line.name || `Segment ${idx + 1}`,
+                    departure: step.transit.departure_time
+                      ? formatTime(step.transit.departure_time.value, timeZoneId)
+                      : 'N/A',
+                    arrival: step.transit.arrival_time
+                      ? formatTime(step.transit.arrival_time.value, timeZoneId)
+                      : 'N/A',
+                  })).filter(seg => seg.departure !== 'N/A' && seg.arrival !== 'N/A'); // Exclude invalid segments
+
+                  // Correct Timestamp Conversion
+                  const departureUnix = Number(leg.departure_time.value);
+                  const arrivalUnix = Number(leg.arrival_time.value);
+
+                  if (isNaN(departureUnix) || isNaN(arrivalUnix)) {
+                    console.error('Invalid departure or arrival timestamp:', departureUnix, arrivalUnix);
+                    toast.error('Invalid departure or arrival timestamp received.');
+                    return null; // Exclude this journey
+                  }
+
+                  const departure = new Date(departureUnix * 1000);
+                  const arrival = new Date(arrivalUnix * 1000);
+
+                  // Validate Date Objects
+                  if (isNaN(departure.getTime()) || isNaN(arrival.getTime())) {
+                    console.error('Invalid departure or arrival date:', departure, arrival);
+                    toast.error('Invalid departure or arrival date.');
+                    return null; // Exclude this journey
+                  }
+
+                  // Calculate duration in minutes
+                  const durationInMinutes = Math.round(
+                    (arrival - departure) / 60000
+                  ); // Difference in minutes
+
+                  console.log('leg.departure_time.value:', leg.departure_time.value);
+                  console.log('departure.toISOString():', departure.toISOString());
+                  console.log('leg.arrival_time.value:', leg.arrival_time.value);
+                  console.log('arrival.toISOString():', arrival.toISOString());
+
+                  // Generate ticketProviderUrl
+                  const ticketProviderUrl = generateTicketProviderUrl(
+                    leg.start_address,
+                    leg.end_address,
+                    leg.departure_time.value
+                  );
+
+                  return {
+                    departureTime: departure.toISOString(),
+                    arrivalTime: arrival.toISOString(),
+                    origin: leg.start_address,
+                    destination: leg.end_address,
+                    transit_stops: transitStops,
+                    transit_lines: transitLines,
+                    schedule: schedule,
+                    ticket_provider_url: ticketProviderUrl,
+                    type: 'train',
+                    duration: durationInMinutes,
+                  };
+                }).filter(journey => journey !== null); // Exclude invalid journeys
+
+                // Set fetched journeys
+                setJourneys(fetchedJourneys);
+              } else {
+                console.error('Directions request failed due to ' + status);
+                setJourneyError(
+                  'Failed to fetch journey details. Please ensure your inputs are correct.'
+                );
+                toast.error(
+                  'Failed to fetch journey details. Please ensure your inputs are correct.'
+                );
+              }
+              setJourneyLoading(false);
+            }
+          );
+        } else {
+          console.error('Geocoding failed:', status);
+          setJourneyError('Location not found. Please try a different search.');
+          setMapCenter({ lat: 55.4038, lng: 10.4024 }); // Reset to Odense
+          setMapZoom(12);
+          setMarkers([]);
+          setIsLoading(false);
+          setJourneyLoading(false);
+          toast.error('Origin location not found.');
+        }
+      });
+    } catch (error) {
+      console.error('Error during journey search:', error);
+      setJourneyError('An unexpected error occurred.');
+      toast.error('An unexpected error occurred.');
+      setJourneyLoading(false);
+    }
+  };
+
+  // Helper function to generate Ticket Provider URL
+  const generateTicketProviderUrl = (origin, destination, departureUnix) => {
+    const baseUrl = 'https://www.dsb.dk/en'; // Danish State Railways as an example
+    const departureDateISO = new Date(departureUnix * 1000).toISOString();
+    const params = new URLSearchParams({
+      origin: origin,
+      destination: destination,
+      departure: departureDateISO,
+    });
+    return `${baseUrl}?${params.toString()}`;
+  };
+
   const [selectedCategory, setSelectedCategory] = useState(null);
 
   const handleCategoryClick = (category) => {
+    if (selectedCategory === category.name) {
+      // Deselect if already selected
+      setSelectedCategory(null);
+      setMarkers([]);
+      setError(null);
+      return;
+    }
     setSelectedCategory(category.name);
     setError(null);
     setIsLoading(true);
@@ -160,11 +575,13 @@ const Trains = () => {
     const service = new window.google.maps.places.PlacesService(mapRef.current);
     const request = {
       location: mapCenter,
-      radius: '10000',
-      type: type,
+      radius: '10000', // 10 km radius
+      type: [type],
     };
 
     service.nearbySearch(request, (results, status) => {
+      console.log('Nearby Search Results:', results);
+      console.log('Nearby Search Status:', status);
       if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
         setMarkers(results);
         setIsLoading(false);
@@ -186,6 +603,8 @@ const Trains = () => {
     const geocoder = new window.google.maps.Geocoder();
 
     geocoder.geocode({ address: query }, (results, status) => {
+      console.log('Geocode Results:', results);
+      console.log('Geocode Status:', status);
       if (status === 'OK' && results.length > 0) {
         const location = results[0].geometry.location;
         setMapCenter({ lat: location.lat(), lng: location.lng() });
@@ -196,11 +615,13 @@ const Trains = () => {
         const request = {
           location: location,
           radius: '10000',
-          type: ['train_station', 'subway_station', 'bus_station', 'transit_station'],
+          type: ['train_station'],
           keyword: query,
         };
 
         service.nearbySearch(request, (results, status) => {
+          console.log('Nearby Search by Query Results:', results);
+          console.log('Nearby Search by Query Status:', status);
           if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
             setMarkers(results);
             setIsLoading(false);
@@ -212,7 +633,7 @@ const Trains = () => {
         });
       } else {
         setError('Location not found. Please try a different search.');
-        setMapCenter({ lat: 48.8566, lng: 2.3522 }); // Reset to Paris
+        setMapCenter({ lat: 55.4038, lng: 10.4024 }); // Reset to Odense
         setMapZoom(12);
         setMarkers([]);
         setIsLoading(false);
@@ -224,22 +645,49 @@ const Trains = () => {
     if (photoReference) {
       return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photoReference}&key=${GOOGLE_MAPS_API_KEY}`;
     }
-    return 'https://via.placeholder.com/400'; // Fallback image if no photo reference
+    // Return a dynamic placeholder image from Unsplash
+    return `https://source.unsplash.com/collection/190727/400x300?train`;
   };
 
   // Fetch detailed place information
   const fetchPlaceDetails = (placeId) => {
-    if (!window.google || !mapRef.current) return;
+    console.log('Fetching details for Place ID:', placeId);
+    if (!window.google || !mapRef.current) {
+      console.error('Google Maps is not loaded properly or mapRef is undefined.');
+      return;
+    }
 
     const service = new window.google.maps.places.PlacesService(mapRef.current);
     service.getDetails(
       {
         placeId: placeId,
-        fields: ['name', 'rating', 'price_level', 'formatted_address', 'photos', 'reviews', 'website', 'url', 'geometry'],
+        fields: [
+          'name',
+          'rating',
+          'formatted_address',
+          'photos',
+          'reviews',
+          'website',
+          'url',
+          'geometry',
+          'types',
+        ],
       },
       (place, status) => {
-        if (status === window.google.maps.places.PlacesServiceStatus.OK && place && place.geometry && place.geometry.location) {
+        console.log('Place Details:', place);
+        console.log('Place Details Status:', status);
+        if (
+          status === window.google.maps.places.PlacesServiceStatus.OK &&
+          place &&
+          place.geometry &&
+          place.geometry.location
+        ) {
           setSelected(place);
+          setMapCenter({
+            lat: place.geometry.location.lat(),
+            lng: place.geometry.location.lng(),
+          });
+          setMapZoom(15);
         } else {
           setError('Failed to fetch place details.');
           toast.error('Failed to fetch place details.');
@@ -247,77 +695,6 @@ const Trains = () => {
       }
     );
   };
-
-  // Define addAdvancedMarker to add markers using google.maps.Marker
-  const addAdvancedMarker = (position, place) => {
-    if (!window.google || !mapRef.current) return;
-
-    const marker = new window.google.maps.Marker({
-      map: mapRef.current,
-      position,
-      title: place.name,
-      icon: {
-        url: getCategoryIcon(place.types[0]),
-        scaledSize: new window.google.maps.Size(30, 30),
-      },
-    });
-
-    marker.addListener('click', () => {
-      fetchPlaceDetails(place.place_id);
-      setMapCenter({
-        lat: place.geometry.location.lat(),
-        lng: place.geometry.location.lng(),
-      });
-      setMapZoom(15);
-    });
-
-    // Add marker to mapRef for cleanup
-    if (!mapRef.current.markers) {
-      mapRef.current.markers = [];
-    }
-    mapRef.current.markers.push(marker);
-  };
-
-  const getCategoryIcon = (type) => {
-    const category = categories.find((cat) => cat.type === type);
-    if (category) {
-      // Using emoji as marker icons
-      return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
-        `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30">
-          <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="24">${category.icon}</text>
-        </svg>`
-      )}`;
-    }
-    // Default marker icon
-    return 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
-  };
-
-  useEffect(() => {
-    if (isLoaded && markers.length > 0) {
-      markers.forEach((marker) => {
-        if (marker.geometry && marker.geometry.location) {
-          addAdvancedMarker(
-            {
-              lat: marker.geometry.location.lat(),
-              lng: marker.geometry.location.lng(),
-            },
-            marker
-          );
-        } else {
-          console.warn(`Marker with ID ${marker.place_id} is missing geometry/location.`);
-        }
-      });
-    }
-
-    // Cleanup markers on unmount or markers change
-    return () => {
-      if (mapRef.current && mapRef.current.markers) {
-        mapRef.current.markers.forEach((marker) => marker.setMap(null));
-        mapRef.current.markers = [];
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoaded, markers]);
 
   // Fetch favorites when authenticated
   useEffect(() => {
@@ -329,164 +706,163 @@ const Trains = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, user]);
 
-  // Handler for journey search form submission
-  const handleJourneySearch = (e) => {
-    e.preventDefault();
-    const origin = e.target.origin.value.trim();
-    const destination = e.target.destination.value.trim();
-    const date = e.target.date.value;
-    const time = e.target.time.value;
-
-    if (!origin || !destination || !date || !time) {
-      toast.error('Please fill in all fields.');
-      return;
+  // Fetch saved trips when authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchSavedTrips();
+    } else {
+      setSavedTrips([]); // Clear saved trips if not authenticated
+      setFilteredSavedTrips([]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, user]);
 
-    // Parse date and time inputs
-    const [year, month, day] = date.split('-').map(Number);
-    const [hours, minutes] = time.split(':').map(Number);
-    const departureDateTime = new Date(year, month - 1, day, hours, minutes);
+  // Handler for viewing a journey on Google Maps externally
+  const handleViewJourneyOnMap = (journey) => {
+    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(
+      journey.origin
+    )}&destination=${encodeURIComponent(
+      journey.destination
+    )}&travelmode=transit`;
+    window.open(mapsUrl, '_blank', 'noopener,noreferrer');
+  };
 
-    // Validate departure time
-    const now = new Date();
-    if (departureDateTime < now) {
-      toast.error('Please select a future date and time for your journey.');
-      return;
-    }
-
-    setDirectionsResponse(null);
-    setJourneyLoading(true);
-    setJourneyError(null);
-    setJourneys([]);
-
-    // Update the map center to the origin
-    searchTrainsByQuery(origin);
-
-    // DirectionsService request
-    const directionsService = new window.google.maps.DirectionsService();
-    directionsService.route(
-      {
-        origin: origin,
-        destination: destination,
-        travelMode: window.google.maps.TravelMode.TRANSIT,
-        transitOptions: {
-          departureTime: departureDateTime,
-          modes: ['TRAIN', 'SUBWAY', 'BUS'],
-        },
-      },
-      (result, status) => {
-        if (status === window.google.maps.DirectionsStatus.OK) {
-          setDirectionsResponse(result);
-
-          // Extract journey details
-          const fetchedJourneys = result.routes.map((route, index) => {
-            const leg = route.legs[0];
-            const steps = leg.steps;
-            const transitSteps = steps.filter(step => step.travel_mode === 'TRANSIT');
-            const transitStops = transitSteps.map(step => step.transit.line.name);
-            const transitLines = transitSteps.map(step => step.transit.line.vehicle.name);
-            const schedule = steps.map((step) => ({
-              segment: step.instructions,
-              departure: step.transit ? formatTime(step.transit.departure_time.value) : '',
-              arrival: step.transit ? formatTime(step.transit.arrival_time.value) : '',
-            }));
-
-            return {
-              departureTime: formatTime(leg.departure_time.value),
-              arrivalTime: formatTime(leg.arrival_time.value),
-              origin: leg.start_address,
-              destination: leg.end_address,
-              transitStops: transitStops,
-              transitLines: transitLines,
-              schedule: schedule,
-            };
-          });
-          setJourneys(fetchedJourneys);
-        } else {
-          console.error('Directions request failed due to ' + status);
-          setJourneyError('Failed to fetch journey details. Please ensure your inputs are correct.');
-          toast.error('Failed to fetch journey details. Please ensure your inputs are correct.');
-        }
-        setJourneyLoading(false);
-      }
+  if (loadError)
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+        <Typography color="error" variant="h5">
+          Error loading maps
+        </Typography>
+      </Box>
     );
-  };
-
-  // Helper function to format UNIX timestamp to HH:MM format
-  const formatTime = (unixTimestamp) => {
-    const date = new Date(unixTimestamp * 1000);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
-
-  if (loadError) return <div className="trains-component-error">Error loading maps</div>;
-  if (!isLoaded || authLoading) return <div className="trains-component-spinner"><div className="spinner"></div> Loading Maps...</div>;
+  if (!isLoaded || authLoading)
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh" flexDirection="column">
+        <CircularProgress />
+        <Typography variant="h6" sx={{ mt: 2 }}>
+          Loading Maps...
+        </Typography>
+      </Box>
+    );
 
   return (
-    <div className="trains-component">
+    <Box className="trains-component">
       <ToastContainer />
+
       {/* Banner Section */}
       <div className="trains-component-banner">
         <div className="trains-component-banner-content">
           <h1>Discover Train Stations</h1>
           <p>Find and explore train stations near you</p>
-          <button onClick={() => document.getElementById('search-input').focus()} className="trains-component-explore-button">
-            Explore Now
+          <button
+            className="trains-component-explore-button"
+            onClick={() => document.getElementById('origin').focus()}
+            aria-label="Explore Train Stations"
+          >
+            <FaTrain /> Explore Now
           </button>
         </div>
       </div>
 
       {/* Journey Search Form */}
-      <div className="trains-component-journey-search-section">
-        <h2>Plan Your Journey</h2>
-        <form className="trains-component-journey-form" onSubmit={handleJourneySearch}>
-          <div className="trains-component-form-group">
-            <label htmlFor="origin">Origin:</label>
-            <input
-              id="origin"
-              name="origin"
-              type="text"
-              placeholder="Enter origin station or city"
-              required
-              aria-label="Origin"
-            />
-          </div>
-          <div className="trains-component-form-group">
-            <label htmlFor="destination">Destination:</label>
-            <input
-              id="destination"
-              name="destination"
-              type="text"
-              placeholder="Enter destination station or city"
-              required
-              aria-label="Destination"
-            />
-          </div>
-          <div className="trains-component-form-group">
-            <label htmlFor="date">Date:</label>
-            <input
-              id="date"
-              name="date"
-              type="date"
-              required
-              aria-label="Date of journey"
-            />
-          </div>
-          <div className="trains-component-form-group">
-            <label htmlFor="time">Time:</label>
-            <input
-              id="time"
-              name="time"
-              type="time"
-              required
-              aria-label="Time of journey"
-            />
-          </div>
-          <button type="submit" className="trains-component-search-journey-button" disabled={journeyLoading}>
-            {journeyLoading ? 'Searching...' : 'Search Journeys'}
-          </button>
-        </form>
-        {journeyError && <div className="trains-component-error-message">{journeyError}</div>}
+      <div className="trains-component-map-search-section">
+        <div className="trains-component-map-search-bar">
+          <Formik
+            initialValues={{
+              origin: '',
+              destination: '',
+              date: '',
+              time: '',
+            }}
+            validationSchema={Yup.object({
+              origin: Yup.string().required('Origin is required'),
+              destination: Yup.string().required('Destination is required'),
+              date: Yup.date()
+                .required('Date is required')
+                .min(moment().startOf('day'), 'Date cannot be in the past'),
+              time: Yup.string().required('Time is required'),
+            })}
+            onSubmit={handleJourneySearch}
+          >
+            {({ isSubmitting, handleChange, values, touched, errors }) => (
+              <Form className="trains-component-journey-form">
+                <div className="trains-component-form-group">
+                  <label htmlFor="origin">Origin</label>
+                  <input
+                    type="text"
+                    id="origin"
+                    name="origin"
+                    value={values.origin}
+                    onChange={handleChange}
+                    placeholder="Enter origin"
+                    required
+                  />
+                  {touched.origin && errors.origin && (
+                    <div className="error-message">{errors.origin}</div>
+                  )}
+                </div>
+
+                <div className="trains-component-form-group">
+                  <label htmlFor="destination">Destination</label>
+                  <input
+                    type="text"
+                    id="destination"
+                    name="destination"
+                    value={values.destination}
+                    onChange={handleChange}
+                    placeholder="Enter destination"
+                    required
+                  />
+                  {touched.destination && errors.destination && (
+                    <div className="error-message">{errors.destination}</div>
+                  )}
+                </div>
+
+                <div className="trains-component-form-group">
+                  <label htmlFor="date">Date</label>
+                  <input
+                    type="date"
+                    id="date"
+                    name="date"
+                    value={values.date}
+                    onChange={handleChange}
+                    required
+                  />
+                  {touched.date && errors.date && (
+                    <div className="error-message">{errors.date}</div>
+                  )}
+                </div>
+
+                <div className="trains-component-form-group">
+                  <label htmlFor="time">Time</label>
+                  <input
+                    type="time"
+                    id="time"
+                    name="time"
+                    value={values.time}
+                    onChange={handleChange}
+                    required
+                  />
+                  {touched.time && errors.time && (
+                    <div className="error-message">{errors.time}</div>
+                  )}
+                </div>
+
+                <div className="trains-component-form-group">
+                  <button
+                    type="submit"
+                    className="trains-component-search-journey-button"
+                    disabled={isSubmitting || journeyLoading}
+                  >
+                    {journeyLoading ? 'Searching...' : 'Search Journeys'}
+                  </button>
+                </div>
+              </Form>
+            )}
+          </Formik>
+        </div>
       </div>
+      {journeyError && <div className="trains-component-error-message">{journeyError}</div>}
 
       {/* Categories Section */}
       <div className="trains-component-categories-section">
@@ -495,11 +871,16 @@ const Trains = () => {
           {categories.map((category, index) => (
             <div
               key={index}
-              className={`trains-component-category-item ${selectedCategory === category.name ? 'selected' : ''}`}
+              className={`trains-component-category-item ${
+                selectedCategory === category.name ? 'selected' : ''
+              }`}
               onClick={() => handleCategoryClick(category)}
               role="button"
               tabIndex={0}
-              onKeyPress={(e) => { if (e.key === 'Enter') handleCategoryClick(category); }}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') handleCategoryClick(category);
+              }}
+              aria-label={`Explore ${category.name}`}
             >
               <div className="trains-component-category-icon">{category.icon}</div>
               <h3>{category.name}</h3>
@@ -509,34 +890,36 @@ const Trains = () => {
       </div>
 
       {/* Search Bar Section */}
-      <div className="trains-component-map-search-section">
-        <div className="trains-component-map-search-bar">
-          <input
-            id="search-input"
-            type="text"
-            placeholder="Search for a city or station..."
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                const query = e.target.value.trim();
-                if (query) {
-                  setIsLoading(true);
-                  searchTrainsByQuery(query);
-                }
-              }
-            }}
-            aria-label="Search for a city or station"
-          />
-          <button onClick={() => {
-            const query = document.getElementById('search-input').value.trim();
+      <Container className="trains-component-map-search-section">
+        <Paper
+          component="form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            const query = e.currentTarget.search.value.trim();
             if (query) {
               setIsLoading(true);
               searchTrainsByQuery(query);
             }
-          }} aria-label="Search" className="trains-component-search-button">
+          }}
+          className="trains-component-map-search-bar"
+          aria-label="Search Train Stations"
+        >
+          <IconButton className="search-icon" aria-label="search">
+            <SearchIcon />
+          </IconButton>
+          <input
+            type="text"
+            id="search"
+            name="search"
+            placeholder="Search for a city or station..."
+            className="search-input"
+            required
+          />
+          <button type="submit" className="trains-component-search-button">
             Search
           </button>
-        </div>
-      </div>
+        </Paper>
+      </Container>
 
       {/* Map Section */}
       <div className="trains-component-map-section">
@@ -551,16 +934,21 @@ const Trains = () => {
           <TransitLayer />
 
           {/* Directions Renderer */}
-          {directionsResponse && (
-            <DirectionsRenderer
-              directions={directionsResponse}
-            />
-          )}
+          {directionsResponse && <DirectionsRenderer directions={directionsResponse} />}
 
+          {/* Marker Clusterer */}
           <MarkerClusterer>
             {(clusterer) =>
               markers.map((marker) => (
-                <div key={marker.place_id} />
+                <Marker
+                  key={marker.place_id}
+                  position={{
+                    lat: marker.geometry.location.lat(),
+                    lng: marker.geometry.location.lng(),
+                  }}
+                  clusterer={clusterer}
+                  onClick={() => fetchPlaceDetails(marker.place_id)}
+                />
               ))
             }
           </MarkerClusterer>
@@ -576,9 +964,6 @@ const Trains = () => {
               <div className="trains-component-info-window">
                 <h3>{selected.name}</h3>
                 {selected.rating && <p>Rating: {selected.rating} ⭐</p>}
-                {selected.price_level !== undefined && (
-                  <p>Price Level: {'$'.repeat(selected.price_level)}</p>
-                )}
                 {selected.formatted_address && <p>{selected.formatted_address}</p>}
                 {selected.photos && selected.photos.length > 0 ? (
                   <img
@@ -589,7 +974,7 @@ const Trains = () => {
                   />
                 ) : (
                   <img
-                    src="https://via.placeholder.com/400"
+                    src={`https://source.unsplash.com/collection/190727/400x300?train`}
                     alt="No available"
                     className="trains-component-info-window-image"
                     loading="lazy"
@@ -600,7 +985,7 @@ const Trains = () => {
                     <h4>User Reviews</h4>
                     {selected.reviews.slice(0, 3).map((review, index) => (
                       <div key={index} className="trains-component-review">
-                        <p><strong>{review.author_name}</strong></p>
+                        <strong>{review.author_name}</strong>
                         <p>{review.text}</p>
                         <p>Rating: {review.rating} ⭐</p>
                       </div>
@@ -608,32 +993,44 @@ const Trains = () => {
                   </div>
                 )}
                 {selected.website && (
-                  <a href={selected.website} target="_blank" rel="noopener noreferrer" className="trains-component-website-link">
+                  <a
+                    href={selected.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="trains-component-website-link"
+                  >
                     Visit Website
                   </a>
                 )}
                 {selected.url && (
-                  <a href={selected.url} target="_blank" rel="noopener noreferrer" className="trains-component-google-maps-link">
+                  <a
+                    href={selected.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="trains-component-google-maps-link"
+                  >
                     View on Google Maps
                   </a>
                 )}
                 <div className="trains-component-info-buttons">
                   <button
+                    className="trains-component-favorite-button"
                     onClick={() => {
                       const favoriteData = {
-                        type: 'train_station', // Ensure this aligns with backend
+                        type: 'train_station',
                         placeId: selected.place_id,
                         name: selected.name,
                         address: selected.formatted_address || '',
                         rating: selected.rating || null,
-                        priceLevel: selected.price_level || null,
-                        photoReference: selected.photos && selected.photos.length > 0 ? selected.photos[0].photo_reference : null
+                        photoReference:
+                          selected.photos && selected.photos.length > 0
+                            ? selected.photos[0].photo_reference
+                            : null,
                       };
                       addFavoriteToDB(favoriteData);
                     }}
-                    className="trains-component-favorite-button"
                   >
-                    Add to Favorites
+                    <FavoriteBorder /> Add to Favorites
                   </button>
                 </div>
               </div>
@@ -642,182 +1039,370 @@ const Trains = () => {
         </GoogleMap>
       </div>
 
-      {/* Dynamic Trains Section */}
-      { (markers.length > 0 || isLoading || error) && (
+      {/* Conditionally Render Train Stations Section */}
+      {markers.length > 0 && (
         <div className="trains-component-dynamic-trains">
-          <h2>{selectedCategory ? `${selectedCategory} Stations` : 'Train Stations'}</h2>
-          {isLoading && <div className="trains-component-spinner"><div className="spinner"></div> Loading train stations...</div>}
-          {error && <div className="trains-component-error-message">{error}</div>}
-          <div className="trains-component-grid">
-            {markers.map((train) => (
-              <div key={train.place_id} className="trains-component-item">
-                <button
-                  onClick={() => fetchPlaceDetails(train.place_id)}
-                  className="trains-component-image-button"
-                  aria-label={`View details for ${train.name}`}
-                >
-                  {train.photos && train.photos.length > 0 ? (
-                    <img
-                      src={getPhotoUrl(train.photos[0].photo_reference)}
-                      alt={train.name}
-                      className="trains-component-placeholder"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <img
-                      src="https://via.placeholder.com/400"
-                      alt="No available"
-                      className="trains-component-placeholder"
-                      loading="lazy"
-                    />
-                  )}
-                </button>
-                <div className="trains-component-info">
-                  <h3>{train.name}</h3>
-                  {train.rating && <p>Rating: {train.rating} ⭐</p>}
-                  {train.price_level !== undefined && (
-                    <p>Price Level: {'$'.repeat(train.price_level)}</p>
-                  )}
-                  <div className="trains-component-actions">
-                    <button
-                      onClick={() => fetchPlaceDetails(train.place_id)}
-                      className="trains-component-view-details-button"
-                    >
-                      View Details
-                    </button>
-                    <button
-                      onClick={() => {
-                        const favoriteData = {
-                          type: 'train_station', // Ensure this aligns with backend
-                          placeId: train.place_id,
-                          name: train.name,
-                          address: train.vicinity || train.formatted_address || '',
-                          rating: train.rating || null,
-                          priceLevel: train.price_level || null,
-                          photoReference: train.photos && train.photos.length > 0 ? train.photos[0].photo_reference : null
-                        };
-                        addFavoriteToDB(favoriteData);
-                      }}
-                      className="trains-component-favorite-button-small"
-                    >
-                      Add to Favorites
-                    </button>
-                  </div>
-                </div>
+          <Container>
+            <h2>Train Stations</h2>
+            {isLoading && (
+              <div className="trains-component-spinner">
+                <CircularProgress />
+                <p>Loading train stations...</p>
               </div>
-            ))}
-          </div>
+            )}
+            {error && <div className="trains-component-error-message">{error}</div>}
+            <Grid container spacing={4}>
+              {markers.map((train) => (
+                <Grid item xs={12} sm={6} md={4} key={train.place_id}>
+                  <Card className="trains-component-item">
+                    <button
+                      className="trains-component-image-button"
+                      onClick={() => fetchPlaceDetails(train.place_id)}
+                      aria-label={`View details for ${train.name}`}
+                    >
+                      <img
+                        src={
+                          train.photos && train.photos.length > 0
+                            ? getPhotoUrl(train.photos[0].photo_reference)
+                            : getPhotoUrl(null)
+                        }
+                        alt={train.name}
+                        className="trains-component-placeholder"
+                        loading="lazy"
+                      />
+                    </button>
+                    <div className="trains-component-info">
+                      <h3>{train.name}</h3>
+                      {train.rating && <p>Rating: {train.rating} ⭐</p>}
+                    </div>
+                    <div className="trains-component-actions">
+                      <button
+                        className="trains-component-view-details-button"
+                        onClick={() => fetchPlaceDetails(train.place_id)}
+                        aria-label={`View details for ${train.name}`}
+                      >
+                        View Details
+                      </button>
+                      <button
+                        className="trains-component-favorite-button-small"
+                        onClick={() => {
+                          const favoriteData = {
+                            type: 'train_station',
+                            placeId: train.place_id,
+                            name: train.name,
+                            address: train.vicinity || train.formatted_address || '',
+                            rating: train.rating || null,
+                            photoReference:
+                              train.photos && train.photos.length > 0
+                                ? train.photos[0].photo_reference
+                                : null,
+                          };
+                          addFavoriteToDB(favoriteData);
+                        }}
+                        aria-label={`Add ${train.name} to favorites`}
+                      >
+                        <FavoriteBorder /> Favorite
+                      </button>
+                    </div>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          </Container>
         </div>
       )}
 
-      {/* Journeys Section */}
-      { (journeys.length > 0 || journeyLoading || journeyError) && (
+      {/* Conditionally Render Your Journeys Section */}
+      {journeys.length > 0 && (
         <div className="trains-component-journeys-section">
-          <h2>Your Journeys</h2>
-          {journeyLoading && <div className="trains-component-spinner"><div className="spinner"></div> Loading journeys...</div>}
-          {journeyError && <div className="trains-component-error-message">{journeyError}</div>}
-          <div className="trains-component-journeys-grid">
-            {journeys.map((journey, index) => (
-              <div key={index} className="trains-component-journey-item">
-                <h3>Journey {index + 1}</h3>
-                <p>
-                  <strong>Departure:</strong> {journey.departureTime} from {journey.origin}
-                </p>
-                <p>
-                  <strong>Arrival:</strong> {journey.arrivalTime} at {journey.destination}
-                </p>
-                <div className="trains-component-transit-stops">
-                  <h4>Transit Stops:</h4>
-                  <ul>
-                    {journey.transitStops.map((stop, idx) => (
-                      <li key={idx}>{stop}</li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="trains-component-transit-lines">
-                  <h4>Transit Lines:</h4>
-                  <ul>
-                    {journey.transitLines.map((line, idx) => (
-                      <li key={idx}>{line}</li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="trains-component-schedule">
-                  <h4>Schedule:</h4>
-                  <ul>
-                    {journey.schedule.map((segment, idx) => (
-                      <li key={idx}>
-                        {segment.segment}: {segment.departure} - {segment.arrival}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+          <Container>
+            <h2>Your Journeys</h2>
+            {journeyLoading && (
+              <div className="trains-component-spinner">
+                <CircularProgress />
+                <p>Loading journeys...</p>
               </div>
-            ))}
-          </div>
+            )}
+            {journeyError && <div className="trains-component-error-message">{journeyError}</div>}
+            <Grid container spacing={4}>
+              {journeys.map((journey, index) => (
+                <Grid item xs={12} md={6} key={index}>
+                  <Card className="trains-component-journey-item">
+                    <CardContent>
+                      <h3>Journey {index + 1}</h3>
+                      <p>
+                        <strong>Departure:</strong> {moment(journey.departureTime).format('YYYY-MM-DD HH:mm')} from {journey.origin}
+                      </p>
+                      <p>
+                        <strong>Arrival:</strong> {moment(journey.arrivalTime).format('YYYY-MM-DD HH:mm')} at {journey.destination}
+                      </p>
+                      <p>
+                        <strong>Duration:</strong> {formatDuration(journey.duration)}
+                      </p>
+                      {journey.transit_stops && journey.transit_stops.length > 0 && (
+                        <div className="trains-component-transit-stops">
+                          <strong>Transit Stops:</strong>
+                          <ul>
+                            {journey.transit_stops.map((stop, idx) => (
+                              <li key={idx}>{stop}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {journey.schedule && journey.schedule.length > 0 && (
+                        <div className="trains-component-schedule">
+                          <strong>Schedule:</strong>
+                          <ul>
+                            {journey.schedule.map((segment, idx) => (
+                              <li key={idx}>
+                                {segment.segment}: {segment.departure} - {segment.arrival}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </CardContent>
+                    <CardActions>
+                      <button
+                        className="trains-component-view-details-button"
+                        onClick={() => {
+                          const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(
+                            journey.origin
+                          )}&destination=${encodeURIComponent(
+                            journey.destination
+                          )}&travelmode=transit`;
+                          window.open(mapsUrl, '_blank', 'noopener,noreferrer');
+                        }}
+                        aria-label={`View directions for Journey ${index + 1}`}
+                      >
+                        <Directions /> View Directions
+                      </button>
+                      {journey.ticket_provider_url && (
+                        <button
+                          className="trains-component-buy-ticket-button"
+                          onClick={() =>
+                            window.open(journey.ticket_provider_url, '_blank', 'noopener,noreferrer')
+                          }
+                          aria-label={`Buy ticket for Journey ${index + 1}`}
+                        >
+                          Buy Ticket
+                        </button>
+                      )}
+                      <button
+                        className="trains-component-save-trip-button"
+                        onClick={() => saveTripToDB(journey)}
+                        aria-label={`Save Journey ${index + 1}`}
+                      >
+                        Save Trip
+                      </button>
+                    </CardActions>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          </Container>
         </div>
       )}
+
+      {/* Saved Trips Section */}
+      <div className="trains-component-saved-trips-section">
+        <Container>
+          <h2>Your Saved Trips</h2>
+          <div className="trains-component-saved-trips-filter">
+            <span>Filter by Departure Date:</span>
+            <input
+              type="date"
+              value={filterDate ? moment(filterDate).format('YYYY-MM-DD') : ''}
+              onChange={(e) => {
+                const selectedDate = e.target.value ? new Date(e.target.value) : null;
+                setFilterDate(selectedDate);
+                if (selectedDate) {
+                  const startOfDay = new Date(selectedDate);
+                  startOfDay.setHours(0, 0, 0, 0);
+                  const endOfDay = new Date(selectedDate);
+                  endOfDay.setHours(23, 59, 59, 999);
+                  setFilteredSavedTrips(
+                    savedTrips.filter((trip) => {
+                      const tripDeparture = new Date(trip.departureTime);
+                      return tripDeparture >= startOfDay && tripDeparture <= endOfDay;
+                    })
+                  );
+                } else {
+                  setFilteredSavedTrips(savedTrips);
+                }
+              }}
+              aria-label="Filter saved trips by departure date"
+            />
+            <button
+              className="trains-component-clear-filter-button"
+              onClick={() => {
+                setFilterDate(null);
+                setFilteredSavedTrips(savedTrips);
+              }}
+              aria-label="Clear saved trips filter"
+            >
+              Clear Filter
+            </button>
+          </div>
+          {filteredSavedTrips.length > 0 ? (
+            <Grid container spacing={4}>
+              {filteredSavedTrips.map((trip, index) => (
+                <Grid item xs={12} md={6} key={trip.id || index}>
+                  <Card className="trains-component-saved-trip-item">
+                    <CardContent>
+                      <h3>Train Trip</h3>
+                      <p>
+                        <strong>From:</strong> {trip.origin}
+                      </p>
+                      <p>
+                        <strong>To:</strong> {trip.destination}
+                      </p>
+                      <p>
+                        <strong>Departure:</strong> {moment(trip.departureTime).format('YYYY-MM-DD HH:mm')}
+                      </p>
+                      <p>
+                        <strong>Arrival:</strong> {moment(trip.arrivalTime).format('YYYY-MM-DD HH:mm')}
+                      </p>
+                      <p>
+                        <strong>Duration:</strong> {formatDuration(trip.duration)}
+                      </p>
+                      {trip.ticket_provider_url && (
+                        <p>
+                          <strong>Ticket:</strong>{' '}
+                          <a href={trip.ticket_provider_url} target="_blank" rel="noopener noreferrer">
+                            Purchase Ticket
+                          </a>
+                        </p>
+                      )}
+                      {trip.transit_stops && trip.transit_stops.length > 0 && (
+                        <div className="trains-component-transit-stops">
+                          <strong>Transit Stops:</strong>
+                          <ul>
+                            {trip.transit_stops.map((stop, idx) => (
+                              <li key={idx}>{stop}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {trip.schedule && trip.schedule.length > 0 && (
+                        <div className="trains-component-schedule">
+                          <strong>Schedule:</strong>
+                          <ul>
+                            {trip.schedule.map((segment, idx) => (
+                              <li key={idx}>
+                                {segment.segment}: {segment.departure} - {segment.arrival}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </CardContent>
+                    <CardActions>
+                      <button
+                        className="trains-component-view-details-button"
+                        onClick={() => {
+                          const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(
+                            trip.origin
+                          )}&destination=${encodeURIComponent(
+                            trip.destination
+                          )}&travelmode=transit`;
+                          window.open(mapsUrl, '_blank', 'noopener,noreferrer');
+                        }}
+                        aria-label={`View directions for saved trip ${index + 1}`}
+                      >
+                        <Directions /> View Directions
+                      </button>
+                      {trip.ticket_provider_url && (
+                        <button
+                          className="trains-component-buy-ticket-button"
+                          onClick={() =>
+                            window.open(trip.ticket_provider_url, '_blank', 'noopener,noreferrer')
+                          }
+                          aria-label={`Buy ticket for saved trip ${index + 1}`}
+                        >
+                          Buy Ticket
+                        </button>
+                      )}
+                      <button
+                        className="trains-component-delete-trip-button"
+                        onClick={() => removeTripFromDB(trip.id)}
+                        aria-label={`Remove saved trip ${index + 1}`}
+                      >
+                        <Delete /> Remove
+                      </button>
+                    </CardActions>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          ) : (
+            <p className="no-saved-trips-message">
+              You have no saved trips{filterDate ? ' for the selected date' : ''}.
+            </p>
+          )}
+        </Container>
+      </div>
 
       {/* Favorites Section */}
       <div className="trains-component-favorites-section">
-        <h2>Your Favorite Train Stations</h2>
-        {favorites.length > 0 ? (
-          <div className="trains-component-favorites-grid">
-            {favorites.map((fav) => (
-              <div key={fav.id} className="trains-component-favorite-item">
-                <button
-                  onClick={() => fetchPlaceDetails(fav.placeId)}
-                  className="trains-component-favorite-image-button"
-                  aria-label={`View details for ${fav.name}`}
-                >
-                  {fav.photoReference ? (
-                    <img
-                      src={getPhotoUrl(fav.photoReference)}
-                      alt={fav.name}
-                      className="trains-component-placeholder"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <img
-                      src="https://via.placeholder.com/400"
-                      alt="No available"
-                      className="trains-component-placeholder"
-                      loading="lazy"
-                    />
-                  )}
-                </button>
-                <div className="trains-component-favorite-info">
-                  <h3>{fav.name}</h3>
-                  {fav.rating && <p>Rating: {fav.rating} ⭐</p>}
-                  {fav.priceLevel !== undefined && (
-                    <p>Price Level: {'$'.repeat(fav.priceLevel)}</p>
-                  )}
-                  <div className="trains-component-favorite-actions">
+        <Container>
+          <h2>Your Favorite Train Stations</h2>
+          {favorites.filter(fav => fav.type === 'train_station').length > 0 ? (
+            <Grid container spacing={4} className="trains-component-favorites-grid">
+              {favorites.filter(fav => fav.type === 'train_station').map((fav) => (
+                <Grid item xs={12} sm={6} md={4} key={fav.id}>
+                  <Card className="trains-component-favorite-item">
                     <button
-                      onClick={() => {
-                        const mapsUrl = `https://www.google.com/maps/place/?q=place_id:${fav.placeId}`;
-                        window.open(mapsUrl, '_blank');
-                      }}
-                      className="trains-component-google-maps-button"
+                      className="trains-component-favorite-image-button"
+                      onClick={() => fetchPlaceDetails(fav.placeId)}
+                      aria-label={`View details for favorite station ${fav.name}`}
                     >
-                      View in Google Maps
+                      {fav.photoReference ? (
+                        <img
+                          src={getPhotoUrl(fav.photoReference)}
+                          alt={fav.name}
+                          className="trains-component-placeholder"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <p>No image available.</p>
+                      )}
                     </button>
-                    <button
-                      onClick={() => removeFavoriteFromDB(fav.id)}
-                      className="trains-component-delete-favorite-button"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p>You have no favorite train stations yet.</p>
-        )}
+                    <div className="trains-component-favorite-info">
+                      <h3>{fav.name}</h3>
+                      {fav.rating && <p>Rating: {fav.rating} ⭐</p>}
+                    </div>
+                    <div className="trains-component-favorite-actions">
+                      <button
+                        className="trains-component-google-maps-button"
+                        onClick={() => {
+                          const mapsUrl = `https://www.google.com/maps/place/?q=place_id:${fav.placeId}`;
+                          window.open(mapsUrl, '_blank', 'noopener,noreferrer');
+                        }}
+                        aria-label={`View ${fav.name} on Google Maps`}
+                      >
+                        View on Google Maps
+                      </button>
+                      <button
+                        className="trains-component-delete-favorite-button"
+                        onClick={() => removeFavoriteFromDB(fav.id)}
+                        aria-label={`Remove favorite station ${fav.name}`}
+                      >
+                        <Delete /> Remove
+                      </button>
+                    </div>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          ) : (
+            <p className="no-favorites-message">
+              You have no favorite train stations yet.
+            </p>
+          )}
+        </Container>
       </div>
-    </div>
+    </Box>
   );
 };
 

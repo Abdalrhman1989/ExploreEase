@@ -1,0 +1,599 @@
+/* src/styles/ApprovedRestaurants.css */
+
+@import './variables.css';
+
+/* Container for Approved Restaurants */
+.approved-restaurants-container {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: var(--font-family);
+  background-color: var(--background-color);
+}
+
+/* Header Section */
+.approved-restaurants-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 30px;
+}
+
+.approved-restaurants-header h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: var(--font-size-xlarge);
+  color: var(--primary-color);
+  position: relative;
+}
+
+.approved-restaurants-header h2::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 4px;
+  background: var(--primary-gradient);
+  margin: 10px auto 0;
+  border-radius: 2px;
+}
+
+.refresh-button {
+  background: var(--secondary-gradient);
+  border: none;
+  color: var(--accent-color);
+  padding: 10px 20px;
+  font-size: var(--font-size-medium);
+  cursor: pointer;
+  border-radius: var(--border-radius);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background var(--transition-speed), transform var(--transition-speed), box-shadow var(--transition-speed);
+  box-shadow: var(--box-shadow);
+}
+
+.refresh-button:hover {
+  background: var(--primary-gradient);
+  transform: scale(1.05);
+  box-shadow: var(--hover-shadow);
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 40px;
+}
+
+.loading-spinner .spinner {
+  border: 6px solid rgba(0, 0, 0, 0.1);
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border-left-color: var(--primary-color);
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-spinner p {
+  font-size: var(--font-size-medium);
+  color: var(--secondary-text-color);
+}
+
+/* Error Message */
+.error-message {
+  text-align: center;
+  color: var(--error-color);
+  font-size: var(--font-size-medium);
+  margin: 30px 0;
+}
+
+/* No Restaurants Message */
+.no-restaurants-message {
+  text-align: center;
+  font-size: var(--font-size-medium);
+  color: var(--secondary-text-color);
+  margin-top: 30px;
+}
+
+/* Restaurants Grid */
+.restaurants-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+/* Restaurant Card */
+.restaurant-card {
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  background-color: var(--card-background);
+  transition: box-shadow var(--transition-speed), transform var(--transition-speed);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.restaurant-card:hover {
+  box-shadow: var(--hover-shadow);
+  transform: translateY(-5px);
+}
+
+/* Restaurant Image */
+.restaurant-image {
+  position: relative;
+  overflow: hidden;
+}
+
+.restaurant-image img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  transition: transform var(--transition-speed);
+}
+
+.restaurant-card:hover .restaurant-image img {
+  transform: scale(1.05);
+}
+
+/* Restaurant Details */
+.restaurant-details {
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.restaurant-details h3 {
+  margin-top: 0;
+  font-size: var(--font-size-large);
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.restaurant-details p {
+  margin: 8px 0;
+  font-size: var(--font-size-medium);
+  color: var(--secondary-text-color);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Amenities Section */
+.amenities {
+  margin-top: 15px;
+}
+
+.amenities h4 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-medium);
+  color: var(--primary-color);
+}
+
+.amenities ul {
+  list-style-type: disc;
+  padding-left: 20px;
+  color: var(--secondary-text-color);
+}
+
+.amenities ul li {
+  margin-bottom: 5px;
+}
+
+/* Expand Button */
+.expand-button {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-size: var(--font-size-medium);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color var(--transition-speed);
+  margin-top: 10px;
+}
+
+.expand-button:hover {
+  color: var(--secondary-color);
+}
+
+/* Actions Section */
+.restaurant-actions {
+  margin-top: auto; /* Pushes actions to the bottom */
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+/* View Details Button */
+.view-details-button,
+.view-calendar-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border-radius: var(--border-radius);
+  text-decoration: none;
+  font-size: var(--font-size-medium);
+  font-weight: 500;
+  transition: background var(--transition-speed), transform var(--transition-speed), box-shadow var(--transition-speed);
+  box-shadow: var(--box-shadow);
+  flex: 1;
+  text-align: center;
+  cursor: pointer;
+  border: none;
+  background: var(--primary-gradient);
+  color: var(--accent-color);
+}
+
+.view-calendar-button {
+  background: var(--secondary-gradient);
+  color: var(--accent-color);
+}
+
+.view-details-button:hover,
+.view-calendar-button:hover {
+  background: var(--secondary-gradient);
+  transform: scale(1.05);
+  box-shadow: var(--hover-shadow);
+}
+
+.view-details-button svg,
+.view-calendar-button svg {
+  margin-right: 8px;
+  font-size: 1.2rem;
+}
+
+/* Availability Calendar Modal */
+.availability-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-index-modal);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-speed), visibility var(--transition-speed);
+}
+
+.availability-modal-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.availability-modal-content {
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: var(--border-radius);
+  width: 90%;
+  max-width: 600px;
+  position: relative;
+  box-shadow: var(--box-shadow);
+  transform: translateY(-50px);
+  transition: transform var(--transition-speed);
+}
+
+.availability-modal-overlay.show .availability-modal-content {
+  transform: translateY(0);
+}
+
+.close-button {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #333333;
+  cursor: pointer;
+  transition: color var(--transition-speed);
+}
+
+.close-button:hover {
+  color: var(--error-color);
+}
+
+.calendar-container {
+  margin-top: 20px;
+}
+
+.available-date {
+  background-color: #4caf50 !important;
+  color: #ffffff !important;
+  border-radius: 50%;
+}
+
+.unavailable-date {
+  background-color: #f44336 !important;
+  color: #ffffff !important;
+  border-radius: 50%;
+}
+
+.calendar-legend {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 15px;
+  justify-content: center;
+}
+
+.available-dot,
+.unavailable-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+
+.available-dot {
+  background-color: #4caf50;
+}
+
+.unavailable-dot {
+  background-color: #f44336;
+}
+
+/* Spinner Styles */
+.spinner {
+  border: 6px solid rgba(0, 0, 0, 0.1);
+  border-top: 6px solid var(--primary-color);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 15px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive Design */
+
+/* Medium Devices (Tablets, 768px to 1199px) */
+@media (max-width: 1200px) and (min-width: 768px) {
+  .approved-restaurants-container {
+    padding: 35px 45px;
+    gap: 20px;
+  }
+
+  .approved-restaurants-header h2,
+  .no-restaurants-message {
+    font-size: 2.2rem;
+  }
+
+  .restaurants-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .restaurant-card {
+    flex-direction: column;
+  }
+
+  .restaurant-image img {
+    height: 180px;
+  }
+
+  .restaurant-details {
+    padding: 15px;
+  }
+
+  .restaurant-details h3 {
+    font-size: 1.4rem;
+  }
+
+  .restaurant-details p {
+    font-size: 0.95rem;
+  }
+
+  .amenities h4 {
+    font-size: 1.1rem;
+  }
+
+  .amenities ul li {
+    font-size: 0.9rem;
+  }
+
+  .expand-button {
+    font-size: 0.95rem;
+  }
+
+  .restaurant-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .view-details-button,
+  .view-calendar-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Modal Adjustments */
+  .availability-modal-content {
+    padding: 20px;
+  }
+
+  .close-button {
+    top: 10px;
+    right: 15px;
+  }
+
+  .availability-modal-content h3 {
+    font-size: 1.4rem;
+  }
+
+  .calendar-container {
+    margin-top: 15px;
+  }
+
+  .calendar-legend {
+    gap: 15px;
+  }
+
+  .available-dot,
+  .unavailable-dot {
+    width: 10px;
+    height: 10px;
+  }
+
+  .available-date,
+  .unavailable-date {
+    width: 30px !important;
+    height: 30px !important;
+  }
+}
+
+/* Small Devices (Mobile Phones, less than 768px) */
+@media (max-width: 767px) {
+  .approved-restaurants-container {
+    padding: 30px 20px;
+    gap: 15px;
+  }
+
+  .approved-restaurants-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .approved-restaurants-header h2 {
+    font-size: 2rem;
+  }
+
+  .refresh-button {
+    width: 100%;
+    max-width: 200px;
+    padding: 10px 0;
+    font-size: var(--font-size-medium);
+  }
+
+  .restaurants-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .restaurant-card {
+    flex-direction: column;
+  }
+
+  .restaurant-image img {
+    height: 150px;
+  }
+
+  .restaurant-details {
+    padding: 15px;
+  }
+
+  .restaurant-details h3 {
+    font-size: 1.2rem;
+  }
+
+  .restaurant-details p {
+    font-size: 0.9rem;
+  }
+
+  .amenities h4 {
+    font-size: 1rem;
+  }
+
+  .amenities ul li {
+    font-size: 0.85rem;
+  }
+
+  .expand-button {
+    font-size: 0.85rem;
+  }
+
+  .restaurant-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .view-details-button,
+  .view-calendar-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Modal Adjustments */
+  .availability-modal-content {
+    padding: 15px;
+  }
+
+  .close-button {
+    top: 10px;
+    right: 15px;
+  }
+
+  .availability-modal-content h3 {
+    font-size: 1.2rem;
+  }
+
+  .calendar-container {
+    margin-top: 10px;
+  }
+
+  .calendar-legend {
+    gap: 15px;
+  }
+
+  .available-dot,
+  .unavailable-dot {
+    width: 10px;
+    height: 10px;
+  }
+
+  .available-date,
+  .unavailable-date {
+    width: 25px !important;
+    height: 25px !important;
+  }
+
+  /* Button Size Adjustments */
+  .view-details-button,
+  .view-calendar-button {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+
+  /* Heading Sizes */
+  .approved-restaurants-header h2,
+  .no-restaurants-message {
+    font-size: 2rem;
+  }
+
+  /* Image Heights */
+  .restaurant-image img,
+  .availability-modal-content img {
+    height: 120px;
+  }
+
+  /* Reduce gaps for smaller screens */
+  .restaurants-grid {
+    gap: 20px;
+  }
+}
+
+/* Extra Small Devices (Very Small Phones, less than 480px) */
+/* Further adjustments can be made within the above media queries */

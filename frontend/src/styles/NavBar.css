@@ -1,49 +1,52 @@
 /* src/styles/NavBar.css */
 
-/* Base Styles */
-body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Poppins', sans-serif;
-    background-color: #f4f4f4;
-    color: #333;
-}
+@import './variables.css';
 
-/* Navbar Styles */
+/* Global Navbar Styles */
 .navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 15px 30px;
-    background-color: #003580;
-    color: white;
+    background: var(--primary-gradient);
+    color: var(--accent-color);
     position: relative;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--box-shadow);
     z-index: 1000;
+    transition: background var(--transition-speed) ease;
 }
 
 .navbar-logo a {
     font-size: 1.8rem;
     font-weight: bold;
-    color: white;
+    color: var(--accent-color);
     text-decoration: none;
     letter-spacing: 1px;
-    transition: color 0.3s ease;
+    transition: color var(--transition-speed) ease, background var(--transition-speed) ease;
+    /* Ensure the logo has a transparent background initially */
+    background: none;
+    -webkit-background-clip: text;
+    background-clip: text;
 }
 
 .navbar-logo a:hover {
-    color: #ff9900;
+    background: var(--secondary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; /* For Safari */
+    background-clip: text;
+    color: transparent; /* Make text transparent to show the gradient */
 }
 
 .navbar-menu {
     display: none;
     cursor: pointer;
-    font-size: 2rem;
-    color: white;
+    font-size: 1.8rem;
+    color: var(--accent-color);
+    transition: color var(--transition-speed) ease;
 }
 
-.menu-icon {
-    display: block;
+.navbar-menu:hover {
+    color: var(--secondary-color); /* Consistent hover effect */
 }
 
 .navbar-links {
@@ -51,22 +54,22 @@ body {
     display: flex;
     gap: 20px;
     margin: 0;
-    transition: all 0.3s ease-in-out;
+    transition: all var(--transition-speed) ease-in-out;
     align-items: center;
 }
 
 .navbar-links a {
-    color: white;
+    color: var(--accent-color);
     text-decoration: none;
-    font-size: 1rem;
+    font-size: var(--font-size-medium);
     padding: 8px 15px;
-    border-radius: 25px;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    border-radius: var(--border-radius);
+    transition: background var(--transition-speed) ease, color var(--transition-speed) ease;
 }
 
 .navbar-links a:hover {
-    background-color: #ff9900;
-    color: white;
+    background: var(--secondary-gradient); /* Consistent hover background */
+    color: var(--accent-color); /* Ensures text remains readable */
 }
 
 .navbar-right {
@@ -77,19 +80,19 @@ body {
 
 /* Language Selector */
 .navbar-language {
-    font-size: 1rem;
+    font-size: var(--font-size-medium);
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 5px;
     position: relative;
     padding: 8px 12px;
-    border-radius: 25px;
-    transition: background-color 0.3s ease;
+    border-radius: var(--border-radius);
+    transition: background-color var(--transition-speed) ease;
 }
 
 .navbar-language:hover {
-    background-color: #0047b3;
+    background-color: rgba(106, 17, 203, 0.2); /* Adjusted for secondary-gradient */
 }
 
 .language-text {
@@ -105,57 +108,66 @@ body {
     position: absolute;
     top: 45px;
     right: 0;
-    background-color: #003580;
-    border-radius: 5px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background: var(--background-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--dropdown-shadow);
     padding: 10px 0;
     list-style: none;
     z-index: 1000;
     display: flex;
     flex-direction: column;
     gap: 10px;
-    width: 150px;
+    width: 160px;
 }
 
 .language-dropdown li {
-    color: white;
+    color: var(--text-color);
     cursor: pointer;
     padding: 8px 20px;
     display: flex;
     align-items: center;
-    transition: background-color 0.3s ease;
+    transition: background-color var(--transition-speed) ease;
 }
 
 .language-dropdown li:hover {
-    background-color: #ff9900;
+    background: var(--secondary-gradient); /* Consistent hover background */
+}
+
+.language-dropdown li ReactCountryFlag {
+    margin-right: 10px;
 }
 
 /* Authentication Buttons */
 .auth-button {
-    background-color: #ff9900;
-    color: white;
+    background: var(--secondary-gradient);
+    color: var(--accent-color);
     border: none;
     padding: 8px 16px;
-    border-radius: 25px;
+    border-radius: var(--border-radius);
     text-decoration: none;
     font-weight: bold;
-    font-size: 0.9rem;
-    transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
+    font-size: var(--font-size-medium);
+    transition: background var(--transition-speed) ease, color var(--transition-speed) ease, transform var(--transition-speed) ease;
     cursor: pointer;
 }
 
 .auth-button:hover {
-    background-color: #e68a00;
+    background: var(--secondary-gradient); /* Maintain gradient on hover */
     transform: translateY(-2px);
 }
 
-/* Logout Button Specific Styling */
-.logout-button {
-    background-color: #e60000;
+.auth-icon-button {
+    background: none;
+    border: none;
+    color: var(--accent-color);
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: color var(--transition-speed) ease, transform var(--transition-speed) ease;
 }
 
-.logout-button:hover {
-    background-color: #cc0000;
+.auth-icon-button:hover {
+    color: var(--hover-color);
+    transform: scale(1.1);
 }
 
 /* Profile Link */
@@ -169,47 +181,39 @@ body {
     cursor: pointer;
 }
 
-/* Profile Avatar Image */
 .profile-avatar {
     width: 40px;
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #ff9900;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: none; /* Removed border */
+    transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
 }
 
 .profile-avatar:hover {
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--hover-shadow);
 }
 
-/* Profile Initial Circle */
 .profile-initial {
     width: 40px;
     height: 40px;
-    background-color: #ff9900;
-    color: white;
+    background-color: var(--secondary-color);
+    color: var(--accent-color);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: bold;
-    font-size: 1rem;
-    border: 2px solid #ff9900;
-    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    font-size: var(--font-size-medium);
+    border: none; /* Removed border */
+    transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
 }
 
 .profile-initial:hover {
-    background-color: #e68a00;
+    background-color: var(--hover-color);
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-/* Remove any styles related to user-avatar since we're using text */
-.navbar-user .user-avatar,
-.navbar-user .user-initial {
-    display: none;
+    box-shadow: var(--hover-shadow);
 }
 
 /* Mobile Auth */
@@ -217,30 +221,6 @@ body {
     display: none;
     flex-direction: column;
     gap: 10px;
-}
-
-/* User Profile Mobile */
-.navbar-user-mobile {
-    display: none;
-}
-
-.navbar-user-mobile img,
-.navbar-user-mobile .user-initial {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #ff9900;
-}
-
-.navbar-user-mobile .user-initial {
-    background-color: #ff9900;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    font-weight: bold;
-    font-size: 0.9rem;
 }
 
 /* Mobile Styles */
@@ -255,11 +235,11 @@ body {
         position: absolute;
         top: 70px;
         right: 20px;
-        background-color: #003580;
+        background: var(--primary-gradient);
         padding: 15px;
-        border-radius: 10px;
+        border-radius: var(--border-radius);
         z-index: 1000;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        box-shadow: var(--hover-shadow);
         width: 220px;
     }
 
@@ -307,12 +287,12 @@ body {
 
     .navbar-links a,
     .profile-link {
-        font-size: 0.9rem;
+        font-size: var(--font-size-medium);
     }
 
     .auth-button {
         padding: 6px 12px;
-        font-size: 0.8rem;
+        font-size: var(--font-size-small);
     }
 
     .language-text {
@@ -331,8 +311,8 @@ body {
         padding: 6px 12px;
     }
 
-    .logout-button {
-        width: 100%;
+    .auth-icon-button {
+        font-size: 1rem;
     }
 
     /* Further adjust Profile Icon for Smaller Screens */
@@ -344,78 +324,4 @@ body {
 }
 
 /* Hero Section (unchanged) */
-.hero {
-    position: relative;
-    height: 70vh;
-    background: url('../assets/flight.jpg') center center/cover no-repeat;
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 20px;
-}
-
-.hero-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1;
-}
-
-.hero-content {
-    position: relative;
-    z-index: 2;
-}
-
-.hero-content h1 {
-    font-size: 3rem;
-    margin-bottom: 20px;
-    font-weight: bold;
-    text-transform: uppercase;
-}
-
-.hero-content p {
-    font-size: 1.5rem;
-    margin-bottom: 30px;
-}
-
-.hero-content .cta-btn {
-    background-color: #ff9900;
-    color: white;
-    padding: 15px 30px;
-    border-radius: 30px;
-    font-size: 1.2rem;
-    text-decoration: none;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-.hero-content .cta-btn:hover {
-    background-color: #e68a00;
-    transform: translateY(-5px);
-}
-
-@media (max-width: 768px) {
-    .hero-content h1 {
-        font-size: 2.5rem;
-    }
-
-    .hero-content p {
-        font-size: 1.2rem;
-    }
-
-    .hero-content .cta-btn {
-        font-size: 1rem;
-        padding: 12px 25px;
-    }
-}
-
-/* Optional: Add transition for smooth appearance */
-.profile-link,
-.profile-avatar,
-.profile-initial {
-    transition: all 0.3s ease;
-}
+/* ... Rest of your Hero styles ... */

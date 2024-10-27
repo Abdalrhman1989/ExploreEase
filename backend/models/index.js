@@ -1,3 +1,5 @@
+// backend/models/index.js
+
 'use strict';
 
 const fs = require('fs');
@@ -27,7 +29,17 @@ fs
     );
   })
   .forEach(file => {
-    const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes);
+    console.log(`Importing model file: ${file}`);
+    const modelModule = require(path.join(__dirname, file));
+    console.log(`Export of ${file}:`, modelModule);
+
+    if (typeof modelModule !== 'function') {
+      console.error(`Error: The file ${file} does not export a function.`);
+      return;
+    }
+
+    const model = modelModule(sequelize, Sequelize.DataTypes);
+    console.log(`Loaded model: ${model.name}`);
     db[model.name] = model;
   });
 

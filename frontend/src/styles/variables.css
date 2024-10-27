@@ -1,0 +1,39 @@
+:root {
+    /* Color Palette */
+    --primary-color: #1e3c72; /* Deep Blue */
+    --secondary-color: #2a5298; /* Medium Blue */
+    --accent-color: #ffffff; /* White */
+    --background-color: #f4f6f8; /* Light Gray */
+    --card-background: #ffffff; /* White */
+    --text-color: #333333; /* Dark Gray */
+    --secondary-text-color: #555555; /* Medium Gray */
+    --error-color: #dc3545; /* Red for errors */
+    --success-color: #28a745; /* Green for success messages */
+  
+    /* Gradients */
+    --primary-gradient: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    --secondary-gradient: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+  
+    /* Shadows */
+    --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    --hover-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  
+    /* Border Radius */
+    --border-radius: 12px;
+  
+    /* Transitions */
+    --transition-speed: 0.3s;
+  
+    /* Font Sizes */
+    --font-size-small: 0.9rem;
+    --font-size-medium: 1rem;
+    --font-size-large: 1.5rem;
+    --font-size-xlarge: 2.5rem;
+  
+    /* Z-Index for layering */
+    --z-index-modal: 1000;
+  
+    /* Typography */
+    --font-family: 'Roboto', sans-serif;
+  }
+  

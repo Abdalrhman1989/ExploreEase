@@ -1,12 +1,21 @@
+// backend/models/user.js
+
 'use strict';
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     static associate(models) {
+      // Define associations here
       User.hasMany(models.Favorite, { foreignKey: 'userId', as: 'favorites' });
+      User.hasMany(models.Trip, { foreignKey: 'userId', as: 'trips' });
+      User.hasMany(models.Testimonial, { foreignKey: 'UserID', as: 'testimonials' });
+      User.hasMany(models.Attraction, { foreignKey: 'FirebaseUID', as: 'attractions' });
+
+
     }
   }
+
   User.init({
     UserID: {
       type: DataTypes.INTEGER,
@@ -14,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
       primaryKey: true
     },
-    FirebaseUID: { // Link to Firebase UID
+    FirebaseUID: {
       type: DataTypes.STRING(255),
       allowNull: false,
       unique: true
@@ -34,19 +43,29 @@ module.exports = (sequelize, DataTypes) => {
     Email: {
       type: DataTypes.STRING(100),
       allowNull: false,
-      unique: true
+      unique: true,
+      validate: {
+        isEmail: true
+      }
     },
     PhoneNumber: {
       type: DataTypes.STRING(20),
-      allowNull: true
+      allowNull: true,
+      validate: {
+        is: /^[0-9\-+()\s]*$/i
+      }
     },
     UserType: {
       type: DataTypes.ENUM('User', 'Admin', 'BusinessAdministrator'),
-      allowNull: false
+      allowNull: false,
+      defaultValue: 'User'
     },
     ProfilePicture: {
       type: DataTypes.STRING(255),
-      allowNull: true
+      allowNull: true,
+      validate: {
+        isUrl: true
+      }
     },
     AccountCreatedDate: {
       type: DataTypes.DATE,
@@ -59,5 +78,6 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'Users',
     timestamps: true,
   });
+
   return User;
 };

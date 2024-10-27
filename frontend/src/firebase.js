@@ -2,14 +2,14 @@ import { initializeApp, setLogLevel } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-// Your web app's Firebase configuration
+// Your web app's Firebase configuration from environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyArr5FmCvvFO2onC1eHWXplk7ZshavM6R8",
-  authDomain: "exploreease-5ea15.firebaseapp.com",
-  projectId: "exploreease-5ea15",
-  storageBucket: "exploreease-5ea15.appspot.com",
-  messagingSenderId: "774714874961",
-  appId: "1:774714874961:web:40748954c00c961c4d6c70"
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY, 
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN, 
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID, 
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET, 
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID, 
+  appId: process.env.REACT_APP_FIREBASE_APP_ID 
 };
 
 // Initialize Firebase

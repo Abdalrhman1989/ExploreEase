@@ -21,7 +21,7 @@ const syncUser = async (req, res) => {
       Email: email,
       PhoneNumber: phoneNumber,
       UserType: userType,
-      ProfilePicture: profilePicture,
+      ProfilePicture: profilePicture || null // Convert empty string to null
     });
 
     res.status(201).json({ message: 'User synchronized with MySQL', user: newUser });

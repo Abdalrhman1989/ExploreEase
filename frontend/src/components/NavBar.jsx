@@ -7,6 +7,8 @@ import { auth } from '../firebase';
 import '../styles/NavBar.css';
 import { AuthContext } from '../context/AuthContext';
 import ReactCountryFlag from 'react-country-flag';
+import { FaBars, FaTimes, FaSignOutAlt } from 'react-icons/fa';
+import { MdLanguage } from 'react-icons/md'; // Corrected import
 
 const Navbar = () => {
   const [menuActive, setMenuActive] = useState(false);
@@ -51,8 +53,8 @@ const Navbar = () => {
       <div className="navbar-logo">
         <Link to="/">ExploreEase</Link>
       </div>
-      <div className={`navbar-menu ${menuActive ? 'active' : ''}`} onClick={toggleMenu}>
-        <span className="menu-icon">&#9776;</span>
+      <div className="navbar-menu" onClick={toggleMenu} aria-label="Toggle navigation menu">
+        {menuActive ? <FaTimes /> : <FaBars />}
       </div>
       <ul className={`navbar-links ${menuActive ? 'active' : ''}`}>
         <li><Link to="/stays" onClick={toggleMenu}>Stays</Link></li>
@@ -78,7 +80,18 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <button onClick={() => { handleLogout(); toggleMenu(); }} className="auth-button">Logout</button>
+              <button onClick={() => { handleLogout(); toggleMenu(); }} className="auth-icon-button" title="Logout">
+                <FaSignOutAlt />
+              </button>
+              <Link to="/profile" className="profile-link" onClick={toggleMenu} title="Profile">
+                {user && user.photoURL ? (
+                  <img src={user.photoURL} alt={`${user.displayName}'s Profile`} className="profile-avatar" />
+                ) : (
+                  <div className="profile-initial">
+                    {getUserInitial()}
+                  </div>
+                )}
+              </Link>
             </>
           )}
         </li>
@@ -92,15 +105,7 @@ const Navbar = () => {
         ) : (
           <>
             <div className="navbar-language" onClick={toggleLanguageMenu}>
-              <ReactCountryFlag
-                countryCode="US"
-                svg
-                style={{
-                  width: '1.5em',
-                  height: '1.5em',
-                }}
-                title="US"
-              />
+              <MdLanguage size={20} /> {/* Updated icon */}
               <span className="language-text">English</span>
               <span className="dropdown-arrow">&#9662;</span>
               {languageMenuActive && (
@@ -142,7 +147,9 @@ const Navbar = () => {
                 </ul>
               )}
             </div>
-            <button onClick={handleLogout} className="auth-button logout-button">Logout</button>
+            <button onClick={handleLogout} className="auth-icon-button" title="Logout">
+              <FaSignOutAlt size={20} />
+            </button>
             {/* User Profile Icon */}
             <Link to="/profile" className="profile-link" title="Profile">
               {user && user.photoURL ? (

@@ -41,7 +41,6 @@ const Register = () => {
         email,
         phoneNumber,
         userType: role,
-        profilePicture: '' // Add if available
       }, {
         headers: {
           'Authorization': `Bearer ${idToken}`

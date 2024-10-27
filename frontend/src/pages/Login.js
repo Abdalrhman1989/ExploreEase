@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../firebase"; 
 import '../styles/Auth.css';
-import axios from 'axios'; // Install axios: npm install axios
+import axios from 'axios'; // Ensure axios is installed: npm install axios
+import { ReactComponent as GoogleLogo } from '../assets/google-icon-logo.svg'; // Import Google SVG logo
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -163,7 +164,8 @@ const Login = () => {
           Don't have an account? <a href="/register">Register here</a>
         </p>
         <button onClick={handleGoogleLogin} className="google-login-button">
-          Login with Google
+          <GoogleLogo className="google-logo" />
+          <span>Sign in with Google</span>
         </button>
       </div>
     </div>

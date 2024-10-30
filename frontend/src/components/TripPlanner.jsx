@@ -1,3 +1,5 @@
+// src/components/TripPlanner.jsx
+
 import React, { useState, useEffect } from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
@@ -139,7 +141,7 @@ const TripPlanner = ({ idToken }) => {
       if (isEditing && selectedTrip) {
         // Update existing trip
         const response = await axios.put(
-          `${API_BASE_URL}/trips/${selectedTrip.id}`,
+          `${API_BASE_URL}/api/trips/${selectedTrip.id}`,
           tripData,
           {
             headers: {
@@ -201,7 +203,7 @@ const TripPlanner = ({ idToken }) => {
     if (!selectedTrip) return;
 
     try {
-      await axios.delete(`${API_BASE_URL}/trips/${selectedTrip.id}`, {
+      await axios.delete(`${API_BASE_URL}/api/trips/${selectedTrip.id}`, {
         headers: {
           Authorization: `Bearer ${idToken}`,
         },
@@ -250,7 +252,7 @@ const TripPlanner = ({ idToken }) => {
 
     try {
       const response = await axios.put(
-        `${API_BASE_URL}/trips/${event.id}`,
+        `${API_BASE_URL}/api/trips/${event.id}`,
         tripData,
         {
           headers: {
@@ -309,7 +311,7 @@ const TripPlanner = ({ idToken }) => {
 
     try {
       const response = await axios.put(
-        `${API_BASE_URL}/trips/${event.id}`,
+        `${API_BASE_URL}/api/trips/${event.id}`,
         tripData,
         {
           headers: {
@@ -391,9 +393,7 @@ const TripPlanner = ({ idToken }) => {
             fullWidth
             variant="standard"
             margin="dense"
-            sx={{
-              mb: 2,
-            }}
+            sx={{ mb: 2 }}
           >
             <MenuItem value="bus">Bus</MenuItem>
             <MenuItem value="train">Train</MenuItem>
@@ -408,9 +408,7 @@ const TripPlanner = ({ idToken }) => {
             variant="standard"
             value={tripOrigin}
             onChange={(e) => setTripOrigin(e.target.value)}
-            sx={{
-              mb: 2,
-            }}
+            sx={{ mb: 2 }}
           />
           <TextField
             margin="dense"
@@ -420,9 +418,7 @@ const TripPlanner = ({ idToken }) => {
             variant="standard"
             value={tripDestination}
             onChange={(e) => setTripDestination(e.target.value)}
-            sx={{
-              mb: 2,
-            }}
+            sx={{ mb: 2 }}
           />
           <TextField
             margin="dense"
@@ -435,9 +431,7 @@ const TripPlanner = ({ idToken }) => {
             InputLabelProps={{
               shrink: true,
             }}
-            sx={{
-              mb: 2,
-            }}
+            sx={{ mb: 2 }}
           />
           <TextField
             margin="dense"
@@ -450,9 +444,7 @@ const TripPlanner = ({ idToken }) => {
             InputLabelProps={{
               shrink: true,
             }}
-            sx={{
-              mb: 2,
-            }}
+            sx={{ mb: 2 }}
           />
           {/* Add more fields as required by the backend */}
           {tripError && (

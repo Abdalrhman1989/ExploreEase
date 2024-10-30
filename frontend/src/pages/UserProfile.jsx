@@ -20,9 +20,6 @@ import {
   TableCell,
   TableHead,
   TableRow,
-  List,
-  ListItem,
-  ListItemText,
   IconButton,
   Dialog,
   DialogTitle,
@@ -34,11 +31,38 @@ import {
   useTheme,
   Tooltip,
   Stack,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  Rating,
+  Chip,
 } from '@mui/material';
-import { Edit, Delete, Add, PhotoCamera } from '@mui/icons-material';
+import {
+  Edit,
+  Delete,
+  Add,
+  PhotoCamera,
+  Search,
+  Sort,
+  Send,
+  SaveAlt,
+} from '@mui/icons-material';
 import TripPlanner from '../components/TripPlanner';
+import BudgetPlanner from '../components/BudgetPlanner';
+import TravelStatistics from '../components/TravelStatistics'; // New Component
+import SavedItineraries from '../components/SavedItineraries'; // New Component
+import PaymentSubscriptions from '../components/PaymentSubscriptions'; // New Component
+import SupportHelp from '../components/SupportHelp'; // New Component
+import { gapi } from 'gapi-script'; // For Google Calendar Integration
 import '../styles/UserProfile.css'; // Ensure this is imported
 
+// Initialize Google API client
+const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY; // If needed
+
+const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
+const SCOPES = "https://www.googleapis.com/auth/calendar.events";
 
 // Utility component for Tab Panels
 const TabPanel = (props) => {
@@ -84,14 +108,22 @@ const UserProfile = () => {
   const [userInfoLoading, setUserInfoLoading] = useState(false);
   const [userInfoError, setUserInfoError] = useState(null);
 
-  // States for Favorite Places Dialog
-  const [favDialogOpen, setFavDialogOpen] = useState(false);
-  const [favDialogMode, setFavDialogMode] = useState('add'); // 'add' or 'edit'
-  const [favPlaceName, setFavPlaceName] = useState('');
-  const [currentFavId, setCurrentFavId] = useState(null);
-  const [favPlaces, setFavPlaces] = useState([]);
-  const [favLoading, setFavLoading] = useState(true);
-  const [favError, setFavError] = useState(null);
+  // States for Wishlist Dialog
+  const [wishlistDialogOpen, setWishlistDialogOpen] = useState(false);
+  const [wishlistDialogMode, setWishlistDialogMode] = useState('add'); // 'add' or 'edit'
+  const [wishlistPlaceData, setWishlistPlaceData] = useState({
+    type: '',
+    placeId: '',
+    name: '',
+    address: '',
+    rating: 0,
+    priceLevel: 1,
+    photoReference: '',
+  });
+  const [currentWishlistId, setCurrentWishlistId] = useState(null);
+  const [wishlistPlaces, setWishlistPlaces] = useState([]);
+  const [wishlistLoading, setWishlistLoading] = useState(true);
+  const [wishlistError, setWishlistError] = useState(null);
 
   // States for Trip History
   const [trips, setTrips] = useState([]);
@@ -107,10 +139,29 @@ const UserProfile = () => {
   const [snackbarMsg, setSnackbarMsg] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success'); // 'success' | 'error' | 'warning' | 'info'
 
+  // States for Wishlist Sorting and Filtering
+  const [sortField, setSortField] = useState('');
+  const [sortOrder, setSortOrder] = useState('asc');
+  const [filterType, setFilterType] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+
   const API_BASE_URL = process.env.REACT_APP_BACKEND_URL;
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  // Google API Initialization
+  useEffect(() => {
+    function start() {
+      gapi.client.init({
+        apiKey: API_KEY,
+        clientId: CLIENT_ID,
+        discoveryDocs: DISCOVERY_DOCS,
+        scope: SCOPES,
+      });
+    }
+    gapi.load('client:auth2', start);
+  }, []);
 
   // Fetch Profile Data
   useEffect(() => {
@@ -187,83 +238,117 @@ const UserProfile = () => {
     }
   };
 
-  // Fetch Favorite Places
+  // Fetch Wishlist Places
   useEffect(() => {
-    const fetchFavorites = async () => {
+    const fetchWishlist = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/api/favorites`, { // Corrected
+        const response = await axios.get(`${API_BASE_URL}/api/favorites`, {
           headers: {
             Authorization: `Bearer ${idToken}`,
           },
         });
-        setFavPlaces(response.data.favorites);
+        setWishlistPlaces(response.data.favorites);
       } catch (error) {
-        console.error('Error fetching favorite places:', error.response ? error.response.data : error.message);
-        setFavError('Failed to load favorite places.');
+        console.error('Error fetching wishlist:', error.response ? error.response.data : error.message);
+        setWishlistError('Failed to load wishlist.');
       } finally {
-        setFavLoading(false);
+        setWishlistLoading(false);
       }
     };
 
-    fetchFavorites();
+    fetchWishlist();
   }, [idToken, API_BASE_URL]);
 
-  // Handle Add Favorite Place
-  const handleAddFavPlace = () => {
-    setFavDialogMode('add');
-    setFavPlaceName('');
-    setCurrentFavId(null);
-    setFavDialogOpen(true);
+  // Handle Add Wishlist Place
+  const handleAddWishlistPlace = () => {
+    setWishlistDialogMode('add');
+    setWishlistPlaceData({
+      type: '',
+      placeId: '',
+      name: '',
+      address: '',
+      rating: 0,
+      priceLevel: 1,
+      photoReference: '',
+    });
+    setCurrentWishlistId(null);
+    setWishlistDialogOpen(true);
   };
 
-  // Handle Edit Favorite Place
-  const handleEditFavPlace = (place) => {
-    setFavDialogMode('edit');
-    setFavPlaceName(place.name);
-    setCurrentFavId(place.FavoritePlaceID);
-    setFavDialogOpen(true);
-  };
-
-  // Handle Delete Favorite Place
-  const handleDeleteFavPlace = async (id) => {
-    try {
-      await axios.delete(`${API_BASE_URL}/api/favorites/${id}`, { // Corrected
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-        },
+  // Handle Edit Wishlist Place
+  const handleEditWishlistPlace = (id) => {
+    const placeToEdit = wishlistPlaces.find((place) => place.id === id);
+    if (placeToEdit) {
+      setWishlistDialogMode('edit');
+      setWishlistPlaceData({
+        type: placeToEdit.type || '',
+        placeId: placeToEdit.placeId || '',
+        name: placeToEdit.name || '',
+        address: placeToEdit.address || '',
+        rating: placeToEdit.rating || 0,
+        priceLevel: placeToEdit.priceLevel || 1,
+        photoReference: placeToEdit.photoReference || '',
       });
-      setFavPlaces(favPlaces.filter((place) => place.FavoritePlaceID !== id));
-      setSnackbarMsg('Favorite place deleted successfully!');
-      setSnackbarSeverity('success');
-      setSnackbarOpen(true);
-    } catch (error) {
-      console.error('Error deleting favorite place:', error.response ? error.response.data : error.message);
-      setFavError('Failed to delete favorite place.');
-      setSnackbarMsg('Failed to delete favorite place.');
+      setCurrentWishlistId(id);
+      setWishlistDialogOpen(true);
+    } else {
+      setSnackbarMsg('Wishlist place not found.');
       setSnackbarSeverity('error');
       setSnackbarOpen(true);
     }
   };
 
-  // Handle Save Favorite Place
-  const handleSaveFavPlace = async () => {
-    if (!favPlaceName.trim()) {
-      setFavError('Place name cannot be empty.');
+  // Handle Delete Wishlist Place
+  const handleDeleteWishlistPlace = async (id) => {
+    try {
+      await axios.delete(`${API_BASE_URL}/api/favorites/${id}`, {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+      setWishlistPlaces(wishlistPlaces.filter((place) => place.id !== id));
+      setSnackbarMsg('Wishlist place deleted successfully!');
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error('Error deleting wishlist place:', error.response ? error.response.data : error.message);
+      setWishlistError('Failed to delete wishlist place.');
+      setSnackbarMsg('Failed to delete wishlist place.');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    }
+  };
+
+  // Handle Save Wishlist Place
+  const handleSaveWishlistPlace = async () => {
+    const { type, placeId, name, address, rating, priceLevel, photoReference } = wishlistPlaceData;
+
+    // Validation
+    if (!name.trim()) {
+      setWishlistError('Place name is required.');
+      return;
+    }
+    if (!type) {
+      setWishlistError('Type is required.');
+      return;
+    }
+    if (!placeId && wishlistDialogMode === 'add') {
+      setWishlistError('Place ID is required.');
       return;
     }
 
     try {
-      if (favDialogMode === 'add') {
+      if (wishlistDialogMode === 'add') {
         const response = await axios.post(
-          `${API_BASE_URL}/favorites`, // Corrected
+          `${API_BASE_URL}/api/favorites`,
           {
-            type: 'attraction', // Adjust as needed or make dynamic
-            placeId: `place_${Date.now()}`, // Example unique placeId
-            name: favPlaceName,
-            address: '', // Collect from user if needed
-            rating: 0, // Default rating or collect from user
-            priceLevel: 1, // Default or collect
-            photoReference: '', // Collect if needed
+            type,
+            placeId,
+            name,
+            address,
+            rating,
+            priceLevel,
+            photoReference,
           },
           {
             headers: {
@@ -271,16 +356,20 @@ const UserProfile = () => {
             },
           }
         );
-        setFavPlaces([...favPlaces, response.data.favorite]);
-        setSnackbarMsg('Favorite place added successfully!');
+        setWishlistPlaces([...wishlistPlaces, response.data.favorite]);
+        setSnackbarMsg('Wishlist place added successfully!');
         setSnackbarSeverity('success');
-        setSnackbarOpen(true);
-      } else if (favDialogMode === 'edit') {
+      } else if (wishlistDialogMode === 'edit') {
         const response = await axios.put(
-          `${API_BASE_URL}/favorites/${currentFavId}`, // Corrected
+          `${API_BASE_URL}/api/favorites/${currentWishlistId}`,
           {
-            name: favPlaceName,
-            // Include other fields if necessary
+            type,
+            placeId,
+            name,
+            address,
+            rating,
+            priceLevel,
+            photoReference,
           },
           {
             headers: {
@@ -288,21 +377,21 @@ const UserProfile = () => {
             },
           }
         );
-        setFavPlaces(
-          favPlaces.map((place) =>
-            place.FavoritePlaceID === currentFavId ? response.data.favorite : place
+        setWishlistPlaces(
+          wishlistPlaces.map((place) =>
+            place.id === currentWishlistId ? response.data.favorite : place
           )
         );
-        setSnackbarMsg('Favorite place updated successfully!');
+        setSnackbarMsg('Wishlist place updated successfully!');
         setSnackbarSeverity('success');
-        setSnackbarOpen(true);
       }
-      setFavDialogOpen(false);
-      setFavError(null);
+      setWishlistDialogOpen(false);
+      setWishlistError(null);
+      setSnackbarOpen(true);
     } catch (error) {
-      console.error('Error saving favorite place:', error.response ? error.response.data : error.message);
-      setFavError('Failed to save favorite place.');
-      setSnackbarMsg('Failed to save favorite place.');
+      console.error('Error saving wishlist place:', error.response ? error.response.data : error.message);
+      setWishlistError('Failed to save wishlist place.');
+      setSnackbarMsg('Failed to save wishlist place.');
       setSnackbarSeverity('error');
       setSnackbarOpen(true);
     }
@@ -312,7 +401,7 @@ const UserProfile = () => {
   useEffect(() => {
     const fetchTrips = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/api/trips`, { // Corrected
+        const response = await axios.get(`${API_BASE_URL}/api/trips`, {
           headers: {
             Authorization: `Bearer ${idToken}`,
           },
@@ -341,7 +430,7 @@ const UserProfile = () => {
 
       try {
         const response = await axios.post(
-          `${API_BASE_URL}/user/profile-picture`,
+          `${API_BASE_URL}/api/user/profile-picture`,
           formData,
           {
             headers: {
@@ -374,11 +463,133 @@ const UserProfile = () => {
     setSnackbarOpen(false);
   };
 
-  // Handle Favorite Place Dialog Close
-  const handleFavDialogClose = () => {
-    setFavDialogOpen(false);
-    setFavError(null);
+  // Handle Wishlist Dialog Close
+  const handleWishlistDialogClose = () => {
+    setWishlistDialogOpen(false);
+    setWishlistError(null);
   };
+
+  // Handle Google Calendar Sync
+  const handleSyncToGoogleCalendar = async () => {
+    try {
+      const authInstance = gapi.auth2.getAuthInstance();
+      if (!authInstance.isSignedIn.get()) {
+        await authInstance.signIn();
+      }
+
+      const tripEvents = trips.map((trip) => ({
+        summary: `${trip.type.charAt(0).toUpperCase() + trip.type.slice(1)} Trip: ${trip.origin} to ${trip.destination}`,
+        start: {
+          dateTime: new Date(trip.departureTime).toISOString(),
+        },
+        end: {
+          dateTime: new Date(trip.arrivalTime).toISOString(),
+        },
+        description: `Duration: ${trip.duration} minutes`,
+      }));
+
+      const batch = gapi.client.newBatch();
+
+      tripEvents.forEach((event) => {
+        const request = gapi.client.calendar.events.insert({
+          calendarId: 'primary',
+          resource: event,
+        });
+        batch.add(request);
+      });
+
+      batch.then(
+        (response) => {
+          console.log('Events synced to Google Calendar:', response);
+          setSnackbarMsg('Trips synced to Google Calendar successfully!');
+          setSnackbarSeverity('success');
+          setSnackbarOpen(true);
+        },
+        (err) => {
+          console.error('Error syncing to Google Calendar:', err);
+          setSnackbarMsg('Failed to sync trips to Google Calendar.');
+          setSnackbarSeverity('error');
+          setSnackbarOpen(true);
+        }
+      );
+    } catch (error) {
+      console.error('Error during Google Calendar sync:', error);
+      setSnackbarMsg('An error occurred while syncing to Google Calendar.');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    }
+  };
+
+  // Handle Wishlist Place Data Change
+  const handleWishlistPlaceDataChange = (e) => {
+    const { name, value } = e.target;
+    setWishlistPlaceData({
+      ...wishlistPlaceData,
+      [name]: value,
+    });
+  };
+
+  // Handle Rating Change
+  const handleRatingChange = (event, newValue) => {
+    setWishlistPlaceData({
+      ...wishlistPlaceData,
+      rating: newValue,
+    });
+  };
+
+  // Handle Price Level Change
+  const handlePriceLevelChange = (event) => {
+    setWishlistPlaceData({
+      ...wishlistPlaceData,
+      priceLevel: event.target.value,
+    });
+  };
+
+  // Handle Type Change
+  const handleTypeChange = (event) => {
+    setWishlistPlaceData({
+      ...wishlistPlaceData,
+      type: event.target.value,
+    });
+  };
+
+  // Handle Photo Reference Change
+  const handlePhotoReferenceChange = (e) => {
+    setWishlistPlaceData({
+      ...wishlistPlaceData,
+      photoReference: e.target.value,
+    });
+  };
+
+  // Handle Sorting
+  const handleSortChange = (field) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+
+  // Apply Sorting, Filtering, and Searching
+  const filteredAndSortedWishlist = wishlistPlaces
+    .filter((place) => {
+      if (filterType && place.type !== filterType) return false;
+      if (searchTerm && !place.name.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      if (!sortField) return 0;
+      const fieldA = a[sortField];
+      const fieldB = b[sortField];
+      if (typeof fieldA === 'string') {
+        return sortOrder === 'asc' ? fieldA.localeCompare(fieldB) : fieldB.localeCompare(fieldA);
+      }
+      if (typeof fieldA === 'number') {
+        return sortOrder === 'asc' ? fieldA - fieldB : fieldB - fieldA;
+      }
+      return 0;
+    });
 
   return (
     <Container maxWidth="lg" sx={{ mt: { xs: 2, sm: 4 }, mb: { xs: 2, sm: 4 } }}>
@@ -402,8 +613,13 @@ const UserProfile = () => {
         >
           <Tab label="User Info" {...a11yProps(0)} />
           <Tab label="Trip History" {...a11yProps(1)} />
-          <Tab label="Favorite Places" {...a11yProps(2)} />
+          <Tab label="Wishlist" {...a11yProps(2)} />
           <Tab label="Trip Planner" {...a11yProps(3)} />
+          <Tab label="Budget Planner" {...a11yProps(4)} />
+          <Tab label="Travel Statistics" {...a11yProps(5)} /> {/* New Tab */}
+          <Tab label="Saved Itineraries" {...a11yProps(6)} /> {/* New Tab */}
+          <Tab label="Payment & Subscriptions" {...a11yProps(7)} /> {/* New Tab */}
+          <Tab label="Support & Help" {...a11yProps(8)} /> {/* New Tab */}
         </Tabs>
       </Paper>
 
@@ -486,9 +702,9 @@ const UserProfile = () => {
                       onClick={() => setEditMode(true)}
                       sx={{
                         textTransform: 'none',
-                        transition: 'background-color 0.3s, color 0.3s',
+                        transition: 'background-color 0.3s',
                         '&:hover': {
-                          backgroundColor: theme.palette.primary.main,
+                          backgroundColor: theme.palette.primary.dark,
                           color: 'white',
                         },
                       }}
@@ -599,6 +815,24 @@ const UserProfile = () => {
           <Typography>No trips found.</Typography>
         ) : (
           <Paper elevation={1} sx={{ p: { xs: 2, sm: 3 } }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6">Trip History</Typography>
+              <Button
+                variant="contained"
+                startIcon={<Edit />} // You can change the icon if needed
+                onClick={handleSyncToGoogleCalendar}
+                sx={{
+                  textTransform: 'none',
+                  transition: 'background-color 0.3s',
+                  '&:hover': {
+                    backgroundColor: theme.palette.primary.dark,
+                  },
+                }}
+                size={isMobile ? 'small' : 'medium'}
+              >
+                Sync to Google Calendar
+              </Button>
+            </Box>
             <Box sx={{ overflowX: 'auto' }}>
               <Table>
                 <TableHead>
@@ -632,14 +866,14 @@ const UserProfile = () => {
       </TabPanel>
 
       <TabPanel value={tabValue} index={2}>
-        {/* Favorite Places */}
+        {/* Wishlist */}
         <Paper elevation={1} sx={{ p: { xs: 2, sm: 3 } }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6">Favorite Places</Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 2 }}>
+            <Typography variant="h6">Wishlist</Typography>
             <Button
               variant="contained"
               startIcon={<Add />}
-              onClick={handleAddFavPlace}
+              onClick={handleAddWishlistPlace}
               sx={{
                 textTransform: 'none',
                 transition: 'background-color 0.3s',
@@ -652,23 +886,136 @@ const UserProfile = () => {
               Add
             </Button>
           </Box>
-          {favLoading ? (
+
+          {/* Search and Filter Section */}
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 3 }}>
+            <TextField
+              label="Search by Name"
+              variant="outlined"
+              size="small"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              InputProps={{
+                endAdornment: <Search />,
+              }}
+              sx={{ flex: 1, minWidth: 200 }}
+            />
+
+            <FormControl variant="outlined" size="small" sx={{ minWidth: 150 }}>
+              <InputLabel id="filter-type-label">Filter by Type</InputLabel>
+              <Select
+                labelId="filter-type-label"
+                label="Filter by Type"
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+              >
+                <MenuItem value="">All</MenuItem>
+                <MenuItem value="car_rental">Car Rental</MenuItem>
+                <MenuItem value="attraction">Attraction</MenuItem>
+                <MenuItem value="flight">Flight</MenuItem>
+                <MenuItem value="hotel">Hotel</MenuItem>
+                <MenuItem value="restaurant">Restaurant</MenuItem>
+                <MenuItem value="train_station">Train Station</MenuItem>
+                <MenuItem value="subway_station">Subway Station</MenuItem>
+                <MenuItem value="bus_station">Bus Station</MenuItem>
+                <MenuItem value="transit_station">Transit Station</MenuItem>
+              </Select>
+            </FormControl>
+
+            <FormControl variant="outlined" size="small" sx={{ minWidth: 150 }}>
+              <InputLabel id="sort-field-label">Sort By</InputLabel>
+              <Select
+                labelId="sort-field-label"
+                label="Sort By"
+                value={sortField}
+                onChange={(e) => setSortField(e.target.value)}
+              >
+                <MenuItem value="">None</MenuItem>
+                <MenuItem value="name">Name</MenuItem>
+                <MenuItem value="type">Type</MenuItem>
+                <MenuItem value="priceLevel">Price Level</MenuItem>
+                <MenuItem value="rating">Rating</MenuItem>
+                <MenuItem value="createdAt">Date Added</MenuItem>
+              </Select>
+            </FormControl>
+
+            {sortField && (
+              <Button
+                variant="outlined"
+                startIcon={<Sort />}
+                onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                size="small"
+              >
+                {sortOrder === 'asc' ? 'Ascending' : 'Descending'}
+              </Button>
+            )}
+          </Box>
+
+          {wishlistLoading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '30vh' }}>
               <CircularProgress />
             </Box>
-          ) : favError ? (
-            <Alert severity="error">{favError}</Alert>
-          ) : favPlaces.length === 0 ? (
-            <Typography>No favorite places found.</Typography>
+          ) : wishlistError ? (
+            <Alert severity="error">{wishlistError}</Alert>
+          ) : filteredAndSortedWishlist.length === 0 ? (
+            <Typography>No wishlist places found.</Typography>
           ) : (
-            <List>
-              {favPlaces.map((place) => (
-                <ListItem
-                  key={place.FavoritePlaceID} // Ensure unique key
-                  secondaryAction={
-                    <Box>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Photo</TableCell>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Type</TableCell>
+                  <TableCell>Address</TableCell>
+                  <TableCell>Rating</TableCell>
+                  <TableCell>Price Level</TableCell>
+                  <TableCell>Date Added</TableCell>
+                  <TableCell align="right">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filteredAndSortedWishlist.map((place) => (
+                  <TableRow key={place.id} hover>
+                    <TableCell>
+                      {place.photoReference ? (
+                        <Avatar
+                          variant="rounded"
+                          src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=100&photoreference=${place.photoReference}&key=${API_KEY}`}
+                          alt={place.name}
+                          sx={{ width: 56, height: 56 }}
+                        />
+                      ) : (
+                        <Avatar variant="rounded" sx={{ width: 56, height: 56 }}>
+                          <PhotoCamera />
+                        </Avatar>
+                      )}
+                    </TableCell>
+                    <TableCell>{place.name}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={place.type.charAt(0).toUpperCase() + place.type.slice(1)}
+                        color="primary"
+                        size="small"
+                      />
+                    </TableCell>
+                    <TableCell>{place.address || 'N/A'}</TableCell>
+                    <TableCell>
+                      <Rating value={place.rating} readOnly precision={0.1} />
+                    </TableCell>
+                    <TableCell>
+                      {Array.from({ length: place.priceLevel }, (_, i) => (
+                        <Chip
+                          key={i}
+                          label="$"
+                          size="small"
+                          sx={{ backgroundColor: theme.palette.success.light, mr: 0.5 }}
+                        />
+                      ))}
+                    </TableCell>
+                    <TableCell>{new Date(place.createdAt).toLocaleDateString()}</TableCell>
+                    <TableCell align="right">
                       <Tooltip title="Edit">
-                        <IconButton edge="end" aria-label="edit" onClick={() => handleEditFavPlace(place)}>
+                        <IconButton edge="end" aria-label="edit" onClick={() => handleEditWishlistPlace(place.id)}>
                           <Edit />
                         </IconButton>
                       </Tooltip>
@@ -676,24 +1023,16 @@ const UserProfile = () => {
                         <IconButton
                           edge="end"
                           aria-label="delete"
-                          onClick={() => handleDeleteFavPlace(place.FavoritePlaceID)}
+                          onClick={() => handleDeleteWishlistPlace(place.id)}
                         >
                           <Delete />
                         </IconButton>
                       </Tooltip>
-                    </Box>
-                  }
-                  sx={{
-                    '&:hover': {
-                      backgroundColor: theme.palette.action.hover,
-                    },
-                    transition: 'background-color 0.3s',
-                  }}
-                >
-                  <ListItemText primary={place.name} secondary={place.type} />
-                </ListItem>
-              ))}
-            </List>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
         </Paper>
       </TabPanel>
@@ -703,26 +1042,133 @@ const UserProfile = () => {
         <TripPlanner idToken={idToken} />
       </TabPanel>
 
-      {/* Favorite Place Dialog */}
-      <Dialog open={favDialogOpen} onClose={handleFavDialogClose} fullWidth maxWidth="sm">
-        <DialogTitle>{favDialogMode === 'add' ? 'Add Favorite Place' : 'Edit Favorite Place'}</DialogTitle>
+      <TabPanel value={tabValue} index={4}>
+        {/* Budget Planner */}
+        <BudgetPlanner />
+      </TabPanel>
+
+      {/* Adjusted Tab Panels */}
+      <TabPanel value={tabValue} index={5}>
+        {/* Travel Statistics Content */}
+        <TravelStatistics idToken={idToken} API_BASE_URL={API_BASE_URL} />
+      </TabPanel>
+
+      <TabPanel value={tabValue} index={6}>
+        {/* Saved Itineraries Content */}
+        <SavedItineraries idToken={idToken} API_BASE_URL={API_BASE_URL} />
+      </TabPanel>
+
+      <TabPanel value={tabValue} index={7}>
+        {/* Payment & Subscriptions Content */}
+        <PaymentSubscriptions idToken={idToken} API_BASE_URL={API_BASE_URL} />
+      </TabPanel>
+
+      <TabPanel value={tabValue} index={8}>
+        {/* Support & Help Content */}
+        <SupportHelp idToken={idToken} API_BASE_URL={API_BASE_URL} />
+      </TabPanel>
+
+      {/* Wishlist Place Dialog */}
+      <Dialog open={wishlistDialogOpen} onClose={handleWishlistDialogClose} fullWidth maxWidth="sm">
+        <DialogTitle>{wishlistDialogMode === 'add' ? 'Add Wishlist Place' : 'Edit Wishlist Place'}</DialogTitle>
         <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Place Name"
-            type="text"
-            fullWidth
-            variant="standard"
-            value={favPlaceName}
-            onChange={(e) => setFavPlaceName(e.target.value)}
-          />
-          {/* Add more fields as necessary */}
-          {favError && <Alert severity="error" sx={{ mt: 2 }}>{favError}</Alert>}
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            <FormControl fullWidth variant="standard">
+              <InputLabel id="type-label">Type</InputLabel>
+              <Select
+                labelId="type-label"
+                label="Type"
+                name="type"
+                value={wishlistPlaceData.type}
+                onChange={handleTypeChange}
+              >
+                <MenuItem value="car_rental">Car Rental</MenuItem>
+                <MenuItem value="attraction">Attraction</MenuItem>
+                <MenuItem value="flight">Flight</MenuItem>
+                <MenuItem value="hotel">Hotel</MenuItem>
+                <MenuItem value="restaurant">Restaurant</MenuItem>
+                <MenuItem value="train_station">Train Station</MenuItem>
+                <MenuItem value="subway_station">Subway Station</MenuItem>
+                <MenuItem value="bus_station">Bus Station</MenuItem>
+                <MenuItem value="transit_station">Transit Station</MenuItem>
+              </Select>
+            </FormControl>
+
+            <TextField
+              label="Place ID"
+              name="placeId"
+              type="text"
+              fullWidth
+              variant="standard"
+              value={wishlistPlaceData.placeId}
+              onChange={handleWishlistPlaceDataChange}
+              disabled={wishlistDialogMode === 'edit'} // Disable editing placeId on edit
+            />
+
+            <TextField
+              label="Name"
+              name="name"
+              type="text"
+              fullWidth
+              variant="standard"
+              value={wishlistPlaceData.name}
+              onChange={handleWishlistPlaceDataChange}
+            />
+
+            <TextField
+              label="Address"
+              name="address"
+              type="text"
+              fullWidth
+              variant="standard"
+              value={wishlistPlaceData.address}
+              onChange={handleWishlistPlaceDataChange}
+            />
+
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography component="legend">Rating</Typography>
+              <Rating
+                name="rating"
+                value={wishlistPlaceData.rating}
+                onChange={handleRatingChange}
+                precision={0.1}
+              />
+            </Box>
+
+            <FormControl fullWidth variant="standard">
+              <InputLabel id="price-level-label">Price Level</InputLabel>
+              <Select
+                labelId="price-level-label"
+                label="Price Level"
+                name="priceLevel"
+                value={wishlistPlaceData.priceLevel}
+                onChange={handlePriceLevelChange}
+              >
+                <MenuItem value={1}>$</MenuItem>
+                <MenuItem value={2}>$$</MenuItem>
+                <MenuItem value={3}>$$$</MenuItem>
+                <MenuItem value={4}>$$$$</MenuItem>
+                <MenuItem value={5}>$$$$$</MenuItem>
+              </Select>
+            </FormControl>
+
+            <TextField
+              label="Photo Reference"
+              name="photoReference"
+              type="text"
+              fullWidth
+              variant="standard"
+              value={wishlistPlaceData.photoReference}
+              onChange={handlePhotoReferenceChange}
+              helperText="Optional: Provide a Google Place Photo Reference"
+            />
+
+            {wishlistError && <Alert severity="error">{wishlistError}</Alert>}
+          </Stack>
         </DialogContent>
         <DialogActions>
           <Button
-            onClick={handleFavDialogClose}
+            onClick={handleWishlistDialogClose}
             sx={{
               textTransform: 'none',
               transition: 'background-color 0.3s, color 0.3s',
@@ -735,7 +1181,7 @@ const UserProfile = () => {
             Cancel
           </Button>
           <Button
-            onClick={handleSaveFavPlace}
+            onClick={handleSaveWishlistPlace}
             variant="contained"
             color="primary"
             sx={{
@@ -747,7 +1193,7 @@ const UserProfile = () => {
             }}
             size={isMobile ? 'small' : 'medium'}
           >
-            {favDialogMode === 'add' ? 'Add' : 'Update'}
+            {wishlistDialogMode === 'add' ? 'Add' : 'Update'}
           </Button>
         </DialogActions>
       </Dialog>

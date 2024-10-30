@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // Define association to User
-      Trip.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
+      Trip.belongsTo(models.User, { foreignKey: 'UserID', as: 'user' });
     }
   }
   Trip.init({
@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
       allowNull: false
     },
-    userId: { // Foreign key
+    UserID: { // Foreign key
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {

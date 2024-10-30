@@ -1,4 +1,3 @@
-// backend/server.js
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -20,10 +19,16 @@ const testimonialRoutes = require('./routes/testimonials');
 const hotelRoutes = require('./routes/hotels'); 
 const restaurantRoutes = require('./routes/restaurants'); 
 const attractionRoutes = require('./routes/attraction');
-
-
+const itinerariesRouter = require('./routes/itineraries'); 
+const paymentsRouter = require('./routes/payments'); 
+const userRoutes = require('./routes/user');
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+
+
+// ... other routes ...
+
 
 // Setup Winston logger for logging events and errors
 const logger = winston.createLogger({
@@ -100,6 +105,8 @@ initDB().then(() => {
   });
 });
 
+
+
 // Use Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/protected', protectedRoutes);
@@ -111,7 +118,9 @@ app.use('/api/testimonials', testimonialRoutes);
 app.use('/api/hotels', hotelRoutes); 
 app.use('/api/restaurants', restaurantRoutes);
 app.use('/api/attractions', attractionRoutes);
-
+app.use('/api/itineraries', itinerariesRouter); 
+app.use('/api/payments', paymentsRouter); 
+app.use('/api/user', userRoutes);
 
 
 // Health Check Endpoint

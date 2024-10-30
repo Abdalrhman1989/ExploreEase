@@ -1,31 +1,6 @@
 const { validationResult } = require('express-validator');
 const { Restaurant } = require('../models');
 const { Op } = require('sequelize');
-const axios = require('axios'); // Ensure axios is imported
-
-/**
- * Geocode an address to get latitude and longitude using Google Geocoding API
- */
-const geocodeLocation = async (address) => {
-  const apiKey = process.env.GEOCODING_API_KEY; // Ensure this is set in your .env
-  const encodedAddress = encodeURIComponent(address);
-  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodedAddress}&key=${apiKey}`;
-
-  try {
-    const response = await axios.get(url);
-    if (response.data.status === 'OK' && response.data.results.length > 0) {
-      const location = response.data.results[0].geometry.location;
-      return {
-        latitude: location.lat,
-        longitude: location.lng,
-      };
-    } else {
-      throw new Error(`Geocoding failed: ${response.data.status}`);
-    }
-  } catch (error) {
-    throw new Error(`Geocoding error: ${error.message}`);
-  }
-};
 
 /**
  * Create a new restaurant submission
@@ -78,17 +53,6 @@ const createRestaurant = async (req, res) => {
       throw new Error('Availability must be an object with date keys in YYYY-MM-DD format and boolean values.');
     }
 
-    // Geocode the location to get latitude and longitude
-    let geocodedLocation = { latitude: null, longitude: null };
-    if (location) {
-      try {
-        geocodedLocation = await geocodeLocation(location);
-      } catch (error) {
-        console.error('Error geocoding location:', error.message);
-        return res.status(400).json({ success: false, message: 'Invalid location address. Could not geocode.' });
-      }
-    }
-
     // Create new restaurant with status 'Pending'
     const newRestaurant = await Restaurant.create({
       FirebaseUID: req.user.uid,
@@ -102,8 +66,7 @@ const createRestaurant = async (req, res) => {
       images: processedImages,
       status: 'Pending',
       availability: processedAvailability, // Set availability from request
-      latitude: geocodedLocation.latitude,
-      longitude: geocodedLocation.longitude,
+      // latitude and longitude are omitted since geocoding is removed
     });
 
     res.status(201).json({
@@ -146,8 +109,7 @@ const getApprovedRestaurants = async (req, res) => {
         'amenities',
         'images',
         'availability',
-        'latitude',
-        'longitude',
+        // latitude and longitude are omitted
       ],
     });
     res.status(200).json({ success: true, restaurants });

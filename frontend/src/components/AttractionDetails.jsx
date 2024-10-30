@@ -1,4 +1,4 @@
-// frontend/src/pages/AttractionDetails.jsx
+// src/pages/AttractionDetails.jsx
 
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -27,7 +27,7 @@ const options = {
 const AttractionDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, idToken, user, loading } = useContext(AuthContext);
   const [attraction, setAttraction] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -44,8 +44,19 @@ const AttractionDetails = () => {
   useEffect(() => {
     const fetchAttractionDetails = async () => {
       try {
-        console.log(`Fetching attraction details for ID: ${id}`);
-        const response = await axios.get(`http://localhost:3001/api/attractions/${id}`);
+        if (!isAuthenticated || !user) {
+          throw new Error('You must be logged in to view attraction details.');
+        }
+
+        // Force refresh the token to ensure it's fresh
+        const freshToken = await user.getIdToken(true);
+        console.log(`Fetching attraction details for ID: ${id} with fresh token: ${freshToken}`);
+
+        const response = await axios.get(`http://localhost:3001/api/attractions/${id}`, {
+          headers: {
+            Authorization: `Bearer ${freshToken}`, // Include the fresh token in headers
+          },
+        });
         console.log('API Response:', response.data);
 
         if (response.data.attraction) {
@@ -73,13 +84,21 @@ const AttractionDetails = () => {
         setIsLoading(false);
       } catch (err) {
         console.error('Error fetching attraction details:', err.response ? err.response.data : err.message);
-        setError(err.response?.data?.message || 'Failed to fetch attraction details.');
+        setError(err.response?.data?.message || err.message || 'Failed to fetch attraction details.');
         setIsLoading(false);
       }
     };
 
-    fetchAttractionDetails();
-  }, [id]);
+    // Ensure that AuthContext has finished loading
+    if (!loading) {
+      if (isAuthenticated && idToken && user) {
+        fetchAttractionDetails();
+      } else {
+        setError('You must be logged in to view attraction details.');
+        setIsLoading(false);
+      }
+    }
+  }, [id, isAuthenticated, idToken, loading, user]);
 
   const handleAddFavorite = async () => {
     if (!isAuthenticated || !user) {
@@ -90,7 +109,10 @@ const AttractionDetails = () => {
     if (!attraction) return;
 
     try {
-      const idToken = await user.getIdToken();
+      // Force refresh the token before making the POST request
+      const freshToken = await user.getIdToken(true);
+      console.log(`Adding favorite with fresh token: ${freshToken}`);
+
       const favoriteData = {
         type: 'attraction',
         placeId: attraction.place_id || attraction.AttractionID,
@@ -110,7 +132,7 @@ const AttractionDetails = () => {
 
       await axios.post('http://localhost:3001/api/favorites', favoriteData, {
         headers: {
-          Authorization: `Bearer ${idToken}`,
+          Authorization: `Bearer ${freshToken}`, // Include the fresh token in headers
         },
       });
       alert('Favorite added successfully!');
@@ -251,6 +273,7 @@ const AttractionDetails = () => {
       {/* Optionally, include user reviews or other details here */}
     </div>
   );
+
 };
 
 export default AttractionDetails;

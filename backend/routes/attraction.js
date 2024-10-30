@@ -1,5 +1,3 @@
-// backend/routes/attraction.js
-
 const express = require('express');
 const { body } = require('express-validator');
 const attractionController = require('../controllers/attractionController');
@@ -10,9 +8,6 @@ const router = express.Router();
 
 // 1. Public Routes (No Authentication Required)
 router.get('/approved', attractionController.getApprovedAttractions);
-
-// Make GET /:id public by defining it before the authentication middleware
-router.get('/:id', attractionController.getAttractionById);
 
 // 2. Apply Authentication Middleware to Protect Subsequent Routes
 router.use(authenticate);
@@ -71,5 +66,8 @@ router.get(
   authorize(['User', 'BusinessAdministrator', 'Admin']),
   attractionController.getUserAttractions
 );
+
+// Make GET /:id public by defining it after other routes
+router.get('/:id', attractionController.getAttractionById);
 
 module.exports = router;

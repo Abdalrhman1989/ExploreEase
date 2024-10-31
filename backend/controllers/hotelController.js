@@ -1,7 +1,7 @@
 // backend/controllers/hotelController.js
 
 const { validationResult } = require('express-validator');
-const { Hotel } = require('../models');
+const { Hotel } = require('../models'); // Ensure Hotel model is correctly defined
 const { Op } = require('sequelize');
 
 /**
@@ -39,6 +39,21 @@ const createHotel = async (req, res) => {
       });
     }
 
+    // Validate roomTypes
+    let processedRoomTypes = [];
+    if (roomTypes && Array.isArray(roomTypes)) {
+      processedRoomTypes = roomTypes;
+    }
+
+    // Validate seasonalPricing
+    let processedSeasonalPricing = [];
+    if (seasonalPricing && Array.isArray(seasonalPricing)) {
+      processedSeasonalPricing = seasonalPricing;
+    }
+
+    // Validate amenities
+    let processedAmenities = amenities || [];
+
     // Validate availability
     let processedAvailability = {};
     if (availability && typeof availability === 'object' && !Array.isArray(availability)) {
@@ -62,9 +77,9 @@ const createHotel = async (req, res) => {
       location,
       basePrice,
       description,
-      roomTypes: roomTypes ? JSON.parse(roomTypes) : [],
-      seasonalPricing: seasonalPricing ? JSON.parse(seasonalPricing) : [],
-      amenities: amenities ? JSON.parse(amenities) : [],
+      roomTypes: processedRoomTypes, // Directly assign the array
+      seasonalPricing: processedSeasonalPricing, // Directly assign the array
+      amenities: processedAmenities, // Directly assign the array
       images: processedImages,
       status: 'Pending',
       availability: processedAvailability, // Set availability from request
@@ -102,7 +117,7 @@ const getApprovedHotels = async (req, res) => {
 };
 
 /**
- * Get pending hotels
+ * Get pending hotels (Admin Only)
  */
 const getPendingHotels = async (req, res) => {
   try {
@@ -115,7 +130,7 @@ const getPendingHotels = async (req, res) => {
 };
 
 /**
- * Approve a hotel
+ * Approve a hotel (Admin Only)
  */
 const approveHotel = async (req, res) => {
   const hotelId = req.params.id;
@@ -141,7 +156,7 @@ const approveHotel = async (req, res) => {
 };
 
 /**
- * Reject a hotel
+ * Reject a hotel (Admin Only)
  */
 const rejectHotel = async (req, res) => {
   const hotelId = req.params.id;
@@ -221,10 +236,159 @@ const updateHotelAvailability = async (req, res) => {
 const getUserHotels = async (req, res) => {
   try {
     const userUid = req.user.uid;
-    const hotels = await Hotel.findAll({ where: { FirebaseUID: userUid, status: 'Approved' } });
+    const hotels = await Hotel.findAll({
+      where: { FirebaseUID: userUid },
+      attributes: [
+        'HotelID',
+        'FirebaseUID',
+        'name',
+        'location',
+        'basePrice',
+        'description',
+        'roomTypes',
+        'seasonalPricing',
+        'amenities',
+        'images',
+        'availability',
+        'status',
+        'createdAt',
+        'updatedAt',
+      ],
+      order: [['createdAt', 'DESC']],
+    });
     res.status(200).json({ success: true, hotels });
   } catch (error) {
     console.error('Error fetching user hotels:', error);
+    res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+  }
+};
+
+/**
+ * Update a hotel by ID (Full Update)
+ */
+const updateHotel = async (req, res) => {
+  // Handle validation errors
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ success: false, errors: errors.array() });
+  }
+
+  const hotelId = req.params.id;
+
+  try {
+    const hotel = await Hotel.findByPk(hotelId);
+    if (!hotel) {
+      return res.status(404).json({ success: false, message: 'Hotel not found' });
+    }
+
+    // Check if the user is authorized to update the hotel
+    if (hotel.FirebaseUID !== req.user.uid && !['Admin'].includes(req.user.role)) {
+      return res.status(403).json({ success: false, message: 'Unauthorized to update this hotel.' });
+    }
+
+    const {
+      name,
+      location,
+      basePrice,
+      description,
+      roomTypes,
+      seasonalPricing,
+      amenities,
+      images, // Expecting an array of Base64 strings
+      availability, // Date-wise availability
+      status, // Optional: Allow status updates if authorized
+    } = req.body;
+
+    // Validate and process images
+    let processedImages = hotel.images; // Start with existing images
+    if (images && Array.isArray(images)) {
+      processedImages = images.map((base64String) => {
+        // Validate the Base64 string format
+        if (!base64String.startsWith('data:image/')) {
+          throw new Error('Invalid image format. Images must be Base64 encoded strings starting with "data:image/".');
+        }
+        return base64String;
+      });
+    }
+
+    // Validate roomTypes
+    let processedRoomTypes = hotel.roomTypes;
+    if (roomTypes && Array.isArray(roomTypes)) {
+      processedRoomTypes = roomTypes;
+    }
+
+    // Validate seasonalPricing
+    let processedSeasonalPricing = hotel.seasonalPricing;
+    if (seasonalPricing && Array.isArray(seasonalPricing)) {
+      processedSeasonalPricing = seasonalPricing;
+    }
+
+    // Validate amenities
+    let processedAmenities = hotel.amenities;
+    if (amenities && Array.isArray(amenities)) {
+      processedAmenities = amenities;
+    }
+
+    // Validate availability
+    let processedAvailability = hotel.availability;
+    if (availability && typeof availability === 'object' && !Array.isArray(availability)) {
+      processedAvailability = {};
+      for (const [date, isAvailable] of Object.entries(availability)) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+          throw new Error(`Invalid date format: ${date}. Expected YYYY-MM-DD.`);
+        }
+        if (typeof isAvailable !== 'boolean') {
+          throw new Error(`Invalid availability value for ${date}. Expected boolean.`);
+        }
+        processedAvailability[date] = isAvailable;
+      }
+    }
+
+    // Update hotel details
+    hotel.name = name || hotel.name;
+    hotel.location = location || hotel.location;
+    hotel.basePrice = basePrice || hotel.basePrice;
+    hotel.description = description || hotel.description;
+    hotel.roomTypes = processedRoomTypes;
+    hotel.seasonalPricing = processedSeasonalPricing;
+    hotel.amenities = processedAmenities;
+    hotel.images = processedImages.length > 0 ? processedImages : hotel.images;
+    hotel.availability = processedAvailability;
+    if (status && ['Pending', 'Approved', 'Rejected'].includes(status)) {
+      hotel.status = status;
+    }
+
+    await hotel.save();
+
+    res.status(200).json({ success: true, message: 'Hotel updated successfully.', hotel });
+  } catch (error) {
+    console.error('Error updating hotel:', error);
+    res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+  }
+};
+
+/**
+ * Delete a hotel by ID
+ */
+const deleteHotel = async (req, res) => {
+  const hotelId = req.params.id;
+
+  try {
+    const hotel = await Hotel.findByPk(hotelId);
+    if (!hotel) {
+      return res.status(404).json({ success: false, message: 'Hotel not found.' });
+    }
+
+    // Check if the user is authorized to delete the hotel
+    if (hotel.FirebaseUID !== req.user.uid && !['Admin'].includes(req.user.role)) {
+      return res.status(403).json({ success: false, message: 'Unauthorized to delete this hotel.' });
+    }
+
+    await hotel.destroy();
+
+    res.status(200).json({ success: true, message: 'Hotel deleted successfully.' });
+  } catch (error) {
+    console.error('Error deleting hotel:', error);
     res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
   }
 };
@@ -238,4 +402,6 @@ module.exports = {
   getHotelById,
   updateHotelAvailability,
   getUserHotels,
+  updateHotel,      // Newly added method
+  deleteHotel,      // Newly added method
 };

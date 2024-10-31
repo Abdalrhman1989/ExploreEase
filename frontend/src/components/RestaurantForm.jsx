@@ -1,11 +1,13 @@
+// src/components/RestaurantForm.jsx
+
 import React, { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
 import '../styles/RestaurantForm.css';
-import { DateRange } from 'react-date-range';
-import 'react-date-range/dist/styles.css'; // Main style file
-import 'react-date-range/dist/theme/default.css'; // Theme CSS
-import { format } from 'date-fns';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const RestaurantForm = () => {
   const { user } = useContext(AuthContext); // Access user from context
@@ -18,17 +20,14 @@ const RestaurantForm = () => {
     description: '',
     amenities: [],
   });
-  const [images, setImages] = useState([]);
   const [availability, setAvailability] = useState([]); // Array of date strings
-  const [message, setMessage] = useState(null);
+  const [images, setImages] = useState([]); // Array of Base64 strings
   const [error, setError] = useState(null);
-  const [dateRange, setDateRange] = useState([
-    {
-      startDate: new Date(),
-      endDate: new Date(),
-      key: 'selection',
-    },
-  ]);
+  const [message, setMessage] = useState(null);
+  const [selectedRange, setSelectedRange] = useState({
+    startDate: new Date(),
+    endDate: new Date(),
+  });
 
   // Handle form field changes
   const handleChange = (e) => {
@@ -53,7 +52,7 @@ const RestaurantForm = () => {
       })
       .catch((err) => {
         console.error('Error converting images:', err);
-        setError('Failed to process images.');
+        toast.error('Failed to process images.');
       });
   };
 
@@ -71,22 +70,31 @@ const RestaurantForm = () => {
     );
   };
 
-  // Handle Date Range Selection
-  const handleSelect = (ranges) => {
-    const { selection } = ranges;
-    setDateRange([selection]);
+  // Handle Date Range Selection using react-datepicker
+  const handleDateChange = (dates) => {
+    const [start, end] = dates;
+    setSelectedRange({ startDate: start, endDate: end });
 
-    const { startDate, endDate } = selection;
-
-    // Generate all dates within the selected range
-    const datesInRange = [];
-    let currentDate = new Date(startDate);
-    while (currentDate <= endDate) {
-      datesInRange.push(format(currentDate, 'yyyy-MM-dd'));
-      currentDate = new Date(currentDate.setDate(currentDate.getDate() + 1));
+    if (start && end) {
+      // Generate all dates within the selected range
+      const datesInRange = [];
+      let currentDate = new Date(start);
+      while (currentDate <= end) {
+        datesInRange.push(formatDate(currentDate));
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+      setAvailability(datesInRange);
+    } else {
+      setAvailability([]);
     }
+  };
 
-    setAvailability(datesInRange);
+  // Helper function to format date to YYYY-MM-DD
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = `${date.getMonth() + 1}`.padStart(2, '0');
+    const day = `${date.getDate()}`.padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   // Remove a selected date
@@ -97,8 +105,9 @@ const RestaurantForm = () => {
   // Handle Form Submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage(null);
+    toast.dismiss(); // Dismiss existing toasts
     setError(null);
+    setMessage(null);
 
     // Convert availability array to JSON object
     const availabilityObj = {};
@@ -111,10 +120,10 @@ const RestaurantForm = () => {
       name: restaurantDetails.name,
       location: restaurantDetails.location,
       cuisine: restaurantDetails.cuisine,
-      priceRange: restaurantDetails.priceRange,
-      rating: restaurantDetails.rating,
+      priceRange: parseInt(restaurantDetails.priceRange, 10),
+      rating: parseFloat(restaurantDetails.rating),
       description: restaurantDetails.description,
-      amenities: JSON.stringify(restaurantDetails.amenities),
+      amenities: restaurantDetails.amenities, // Send as an array
       images: images, // Array of Base64 strings
       availability: availabilityObj, // Date-wise availability
     };
@@ -122,6 +131,7 @@ const RestaurantForm = () => {
     try {
       if (!user) {
         setError('Authentication required. Please log in.');
+        toast.error('Authentication required. Please log in.');
         return;
       }
 
@@ -137,6 +147,8 @@ const RestaurantForm = () => {
       });
 
       setMessage(response.data.message);
+      toast.success(response.data.message);
+
       // Reset form fields
       setRestaurantDetails({
         name: '',
@@ -149,13 +161,10 @@ const RestaurantForm = () => {
       });
       setImages([]);
       setAvailability([]);
-      setDateRange([
-        {
-          startDate: new Date(),
-          endDate: new Date(),
-          key: 'selection',
-        },
-      ]);
+      setSelectedRange({
+        startDate: new Date(),
+        endDate: new Date(),
+      });
     } catch (err) {
       console.error('Error submitting restaurant:', err);
       if (err.response && err.response.data) {
@@ -163,11 +172,14 @@ const RestaurantForm = () => {
         if (err.response.data.errors) {
           const validationErrors = err.response.data.errors.map((error) => error.msg).join(' | ');
           setError(validationErrors);
+          toast.error(validationErrors);
         } else {
           setError(err.response.data.message || 'Failed to submit restaurant');
+          toast.error(err.response.data.message || 'Failed to submit restaurant');
         }
       } else {
         setError('Failed to submit restaurant');
+        toast.error('Failed to submit restaurant');
       }
     }
   };
@@ -237,7 +249,7 @@ const RestaurantForm = () => {
       />
 
       {/* Amenities */}
-      <div className="amenities">
+      <div className="restaurant-amenities">
         <h3>Amenities</h3>
         <label>
           <input
@@ -288,15 +300,16 @@ const RestaurantForm = () => {
       </div>
 
       {/* Availability */}
-      <div className="availability">
+      <div className="restaurant-availability">
         <h3>Availability Dates</h3>
-        <DateRange
-          editableDateInputs={true}
-          onChange={handleSelect}
-          moveRangeOnFirstSelection={false}
-          ranges={dateRange}
-          maxDate={new Date(new Date().setFullYear(new Date().getFullYear() + 1))}
-          className="date-range-picker"
+        <DatePicker
+          selectsRange
+          startDate={selectedRange.startDate}
+          endDate={selectedRange.endDate}
+          onChange={handleDateChange}
+          isClearable={true}
+          inline
+          className="date-picker"
         />
         {availability.length > 0 && (
           <div className="selected-dates">
@@ -316,7 +329,7 @@ const RestaurantForm = () => {
       </div>
 
       {/* Image Upload */}
-      <div className="image-upload">
+      <div className="restaurant-image-upload">
         <h3>Restaurant Images</h3>
         <input type="file" accept="image/*" multiple onChange={handleImageUpload} />
         {images.length > 0 && (
@@ -336,6 +349,8 @@ const RestaurantForm = () => {
       <button type="submit" className="submit-button">
         Add Restaurant
       </button>
+
+      <ToastContainer />
     </form>
   );
 };

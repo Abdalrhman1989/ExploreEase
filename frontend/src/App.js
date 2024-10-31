@@ -1,6 +1,12 @@
-import React from 'react';
+// src/App.jsx
+
+import React, { useContext } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { useContext } from 'react';
+
+// Context
+import { AuthContext } from './context/AuthContext';
+
+// Pages
 import Home from './pages/Home';
 import Stays from './pages/Stays';
 import Flights from './pages/Flights';
@@ -9,8 +15,6 @@ import Attractions from './pages/Attractions';
 import Trains from './pages/Trains';
 import Buses from './pages/Buses';
 import Restaurants from './pages/Restaurants';
-import Navbar from './components/NavBar.jsx';
-import Footer from './components/Footer';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AdminDashboard from './pages/AdminDashboard';
@@ -23,22 +27,30 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import GDPR from './pages/GDPR';
 import PrivacyPolicy from './pages/PrivacyPolicy';
-import HotelForm from './components/HotelForm';
-import RestaurantForm from './components/RestaurantForm';
-import AttractionForm from './components/AttractionForm';
-import BusinessOverview from './components/BusinessOverview';
 import NotFound from './pages/NotFound';
-import AdminConfirmOffers from './components/AdminConfirmOffers';
 import FAQ from './pages/FAQ';
 import Support from './pages/Support';
 import UserProfile from './pages/UserProfile';
 import Confirmation from './pages/Confirmation.jsx';
-import ApprovedHotels from './components/ApprovedHotels.jsx';
 import HotelDetails from './pages/HotelDetails.jsx';
-import HotelBook from './pages/HotelBook.jsx'; 
-import './styles/App.css';
-import { AuthContext } from './context/AuthContext'; 
+import HotelBook from './pages/HotelBook.jsx';
+import ManageAttractions from './pages/ManageAttractions.jsx';
+import ManageRestaurants from './pages/ManageRestaurants.jsx';
+import ManageHotels from './pages/ManageHotels.jsx';
+
+// Components
+import Navbar from './components/NavBar.jsx';
+import Footer from './components/Footer';
+import HotelForm from './components/HotelForm';
+import RestaurantForm from './components/RestaurantForm';
+import AttractionForm from './components/AttractionForm';
+import BusinessOverview from './components/BusinessOverview';
+import AdminConfirmOffers from './components/AdminConfirmOffers';
+import ApprovedHotels from './components/ApprovedHotels.jsx';
 import AttractionDetails from './components/AttractionDetails';
+
+// Styles
+import './styles/App.css';
 
 function App() {
   const location = useLocation();
@@ -60,7 +72,6 @@ function App() {
         <Route path="/car-rentals" element={<CarRentals />} />
         <Route path="/attractions" element={<Attractions />} />
         <Route path="/attractions/:id" element={<AttractionDetails />} />
-
         <Route path="/trains" element={<Trains />} />
         <Route path="/buses" element={<Buses />} />
         <Route path="/restaurants" element={<Restaurants />} />
@@ -95,9 +106,16 @@ function App() {
           {/* Specific Routes */}
           <Route path="dashboard" element={<BusinessOverview />} />
           <Route path="hotels" element={<HotelForm />} />
+          <Route path="hotels/add" element={<HotelForm />} /> 
+
           <Route path="restaurants" element={<RestaurantForm />} />
+          <Route path="restaurants/add" element={<RestaurantForm />} /> 
           <Route path="attractions" element={<AttractionForm />} />
-          
+          <Route path="attractions/add" element={<AttractionForm />} />
+
+          <Route path="manage-hotels" element={<ManageHotels />} />
+          <Route path="manage-restaurants" element={<ManageRestaurants />} />
+          <Route path="manage-attractions" element={<ManageAttractions />} />
         </Route>
 
         {/* General Routes */}

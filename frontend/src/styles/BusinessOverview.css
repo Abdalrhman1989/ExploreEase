@@ -1,56 +1,106 @@
 /* src/styles/BusinessOverview.css */
+
 .dashboard-overview {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
-  padding: 20px;
+  justify-content: center; /* Centers the cards horizontally */
+  gap: 1.5rem;
+  padding: 2rem;
+  box-sizing: border-box;
 }
 
 .overview-card {
-  flex: 1 1 calc(25% - 40px);
-  background-color: #f8f9fa;
+  background-color: #fff;
   border-radius: 8px;
+  box-shadow: var(--box-shadow);
   text-decoration: none;
-  color: #333;
-  padding: 20px;
+  color: inherit;
+  padding: 1.5rem;
   display: flex;
   align-items: center;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+  cursor: pointer;
+  flex: 0 1 calc(33% - 3rem); /* Allows three cards per row with gaps */
+  margin: 10px;
+  max-width: 300px;
+  box-sizing: border-box;
 }
 
 .overview-card:hover {
-  background-color: #e2e6ea;
-}
-
-.overview-card:hover .overview-info h3,
-.overview-card:hover .overview-info p {
-  color: #ffffff;
+  transform: translateY(-5px);
+  box-shadow: var(--hover-shadow);
 }
 
 .overview-icon {
-  font-size: 2rem;
-  margin-right: 15px;
+  font-size: 2.5rem;
+  margin-right: 1rem;
+  color: #007bff;
 }
 
 .overview-info h3 {
   margin: 0;
-  font-size: 1.2rem;
+  font-size: 1.25rem;
 }
 
 .overview-info p {
-  margin: 5px 0 0 0;
-  font-size: 0.9rem;
+  margin: 0.5rem 0 0 0;
   color: #666;
 }
 
-@media (max-width: 768px) {
-  .overview-card {
-    flex: 1 1 calc(50% - 40px);
-  }
+/* Responsive Styles */
+@media (max-width: 1199px) {
+    .dashboard-overview {
+        padding: 1.5rem;
+    }
 }
 
-@media (max-width: 480px) {
-  .overview-card {
-    flex: 1 1 100%;
-  }
+@media (max-width: 768px) {
+    .dashboard-overview {
+        padding: 1rem;
+        justify-content: center; /* Ensure center alignment on smaller screens */
+    }
+
+    .overview-card {
+        padding: 1rem;
+        flex: 0 1 calc(50% - 3rem); /* Two cards per row */
+        max-width: 100%;
+        margin: 10px;
+    }
+
+    .overview-icon {
+        font-size: 2rem;
+    }
+
+    .overview-info h3 {
+        font-size: 1rem;
+    }
+
+    .overview-info p {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 575px) {
+    .dashboard-overview {
+        padding: 1rem;
+    }
+
+    .overview-card {
+        padding: 1rem;
+        flex: 0 1 100%; /* Single card per row */
+        max-width: 100%;
+        margin: 10px 0;
+    }
+
+    .overview-icon {
+        font-size: 1.75rem;
+    }
+
+    .overview-info h3 {
+        font-size: 0.95rem;
+    }
+
+    .overview-info p {
+        font-size: 0.85rem;
+    }
 }

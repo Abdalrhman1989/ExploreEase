@@ -1,0 +1,463 @@
+/* src/styles/ManageRestaurants.css */
+
+:root {
+    /* Color Palette */
+    --primary-color: #1e3c72; /* Deep Blue */
+    --secondary-color: #2a5298; /* Medium Blue */
+    --accent-color: #ffffff; /* White */
+    --background-color: #f4f6f8; /* Light Gray */
+    --card-background: #ffffff; /* White */
+    --text-color: #333333; /* Dark Gray */
+    --secondary-text-color: #555555; /* Medium Gray */
+    --error-color: #dc3545; /* Red for errors */
+    --success-color: #28a745; /* Green for success messages */
+  
+    /* Gradients */
+    --primary-gradient: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    --secondary-gradient: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+  
+    /* Shadows */
+    --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    --hover-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  
+    /* Border Radius */
+    --border-radius: 12px;
+  
+    /* Transitions */
+    --transition-speed: 0.3s;
+  
+    /* Font Sizes */
+    --font-size-small: 0.9rem;
+    --font-size-medium: 1rem;
+    --font-size-large: 1.5rem;
+    --font-size-xlarge: 2.5rem;
+  
+    /* Z-Index for layering */
+    --z-index-modal: 1000;
+  
+    /* Typography */
+    --font-family: 'Roboto', sans-serif;
+}
+
+/* Global Container */
+.manage-restaurants-container {
+    padding: 2rem;
+    background-color: var(--background-color);
+    min-height: calc(100vh - 120px); /* Adjust based on Navbar/Footer height */
+    font-family: var(--font-family);
+    box-sizing: border-box;
+}
+
+.manage-restaurants-container h2 {
+    margin-bottom: 1.5rem;
+    color: var(--text-color);
+    font-size: var(--font-size-large);
+    text-align: center;
+}
+
+/* Header Section */
+.manage-restaurants-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.manage-restaurants-search {
+    padding: 0.5rem 1rem;
+    width: 100%;
+    max-width: 300px;
+    border: 1px solid #ccc;
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-medium);
+    margin-bottom: 1rem;
+    box-sizing: border-box;
+}
+
+.manage-restaurants-add-button {
+    background: var(--primary-gradient);
+    color: var(--accent-color);
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    transition: box-shadow var(--transition-speed), background var(--transition-speed);
+    font-size: var(--font-size-medium);
+    box-sizing: border-box;
+}
+
+.manage-restaurants-add-button:hover {
+    box-shadow: var(--hover-shadow);
+}
+
+.manage-restaurants-add-button i {
+    margin-right: 0.5rem;
+}
+
+/* Restaurants Table */
+.manage-restaurants-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--card-background);
+    box-shadow: var(--box-shadow);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.manage-restaurants-table th,
+.manage-restaurants-table td {
+    padding: 0.75rem 1rem;
+    border: 1px solid #ddd;
+    text-align: left;
+    color: var(--text-color);
+    font-size: var(--font-size-medium);
+    box-sizing: border-box;
+}
+
+.manage-restaurants-table th {
+    background-color: #f1f1f1;
+}
+
+.manage-restaurants-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* Action Buttons */
+.manage-restaurants-view-button,
+.manage-restaurants-delete-button {
+    padding: 0.4rem 0.8rem;
+    margin-right: 0.5rem;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    color: var(--accent-color);
+    transition: box-shadow var(--transition-speed), transform var(--transition-speed);
+    font-size: var(--font-size-small);
+}
+
+.manage-restaurants-view-button {
+    background: var(--secondary-gradient);
+}
+
+.manage-restaurants-view-button:hover {
+    box-shadow: var(--hover-shadow);
+    transform: translateY(-2px);
+}
+
+.manage-restaurants-delete-button {
+    background: var(--error-color);
+}
+
+.manage-restaurants-delete-button:hover {
+    box-shadow: var(--hover-shadow);
+    transform: translateY(-2px);
+}
+
+/* View/Edit Section */
+.manage-restaurants-view-edit-section {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    box-sizing: border-box;
+}
+
+.restaurant-details h3 {
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+    font-size: var(--font-size-large);
+}
+
+.restaurant-details p {
+    margin-bottom: 0.5rem;
+    color: var(--secondary-text-color);
+    font-size: var(--font-size-medium);
+}
+
+.restaurant-details h4 {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+    font-size: var(--font-size-medium);
+}
+
+.restaurant-images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.restaurant-image {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    object-fit: cover;
+    border-radius: var(--border-radius);
+}
+
+/* Edit Toggle Button */
+.manage-restaurants-edit-toggle-button {
+    margin-top: 1rem;
+    background: var(--secondary-gradient);
+    color: var(--accent-color);
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: box-shadow var(--transition-speed), background var(--transition-speed);
+    font-size: var(--font-size-medium);
+    box-sizing: border-box;
+}
+
+.manage-restaurants-edit-toggle-button:hover {
+    box-shadow: var(--hover-shadow);
+    transform: translateY(-2px);
+}
+
+/* Edit Form Styles */
+.manage-restaurants-edit-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.manage-restaurants-edit-form input,
+.manage-restaurants-edit-form textarea,
+.manage-restaurants-edit-form select {
+    padding: 0.6rem 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-medium);
+    box-sizing: border-box;
+}
+
+.manage-restaurants-amenities {
+    margin-bottom: 1.5rem;
+}
+
+.manage-restaurants-amenities h4 {
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+    font-size: var(--font-size-medium);
+}
+
+.manage-restaurants-amenities label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+    font-size: var(--font-size-medium);
+}
+
+.manage-restaurants-amenities input[type="checkbox"] {
+    margin-right: 0.5rem;
+}
+
+.manage-restaurants-image-upload {
+    margin-bottom: 1.5rem;
+}
+
+.manage-restaurants-image-upload h4 {
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+    font-size: var(--font-size-medium);
+}
+
+.manage-restaurants-image-upload input[type="file"] {
+    margin-top: 0.5rem;
+}
+
+.manage-restaurants-image-previews {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.manage-restaurants-preview-image {
+    width: 100%;
+    max-width: 150px;
+    height: auto;
+    object-fit: cover;
+    border-radius: var(--border-radius);
+    border: 1px solid #ddd;
+}
+
+.manage-restaurants-submit-button {
+    background: var(--secondary-gradient);
+    color: var(--accent-color);
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: box-shadow var(--transition-speed), background var(--transition-speed), transform var(--transition-speed);
+    font-size: var(--font-size-medium);
+    align-self: flex-start;
+    box-sizing: border-box;
+}
+
+.manage-restaurants-submit-button:hover {
+    box-shadow: var(--hover-shadow);
+    transform: translateY(-2px);
+}
+
+/* Message Styles */
+.error-message {
+    color: var(--error-color);
+    margin-bottom: 1rem;
+    font-weight: bold;
+    font-size: var(--font-size-medium);
+}
+
+.success-message {
+    color: var(--success-color);
+    margin-bottom: 1rem;
+    font-weight: bold;
+    font-size: var(--font-size-medium);
+}
+
+/* Responsive Design */
+
+/* Medium Devices (Tablets, 768px to 1199px) */
+@media (min-width: 768px) and (max-width: 1199px) {
+    .manage-restaurants-container {
+        padding: 1.5rem;
+    }
+
+    .restaurant-details h3 {
+        font-size: var(--font-size-xlarge);
+    }
+
+    .restaurant-image {
+        max-width: 180px;
+    }
+
+    .manage-restaurants-edit-form input,
+    .manage-restaurants-edit-form textarea,
+    .manage-restaurants-edit-form select {
+        font-size: var(--font-size-medium);
+    }
+
+    .manage-restaurants-submit-button {
+        align-self: flex-start;
+    }
+}
+
+/* Small Devices (Large Phones, 576px to 767px) */
+@media (min-width: 576px) and (max-width: 767px) {
+    .manage-restaurants-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .manage-restaurants-search {
+        width: 100%;
+        max-width: none;
+        margin-bottom: 1rem;
+    }
+
+    .manage-restaurants-add-button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .manage-restaurants-view-edit-section {
+        padding: 1rem;
+    }
+
+    .manage-restaurants-edit-form input,
+    .manage-restaurants-edit-form textarea,
+    .manage-restaurants-edit-form select {
+        padding: 0.5rem 0.8rem;
+        font-size: var(--font-size-small);
+    }
+
+    .manage-restaurants-submit-button {
+        align-self: stretch;
+    }
+
+    .manage-restaurants-view-button,
+    .manage-restaurants-delete-button {
+        width: 48%;
+    }
+}
+
+/* Extra Small Devices (Small Phones, less than 576px) */
+@media (max-width: 575px) {
+    .manage-restaurants-container {
+        padding: 1rem;
+    }
+
+    .manage-restaurants-search {
+        width: 100%;
+    }
+
+    .manage-restaurants-add-button {
+        padding: 0.5rem;
+        font-size: var(--font-size-small);
+    }
+
+    .manage-restaurants-table th,
+    .manage-restaurants-table td {
+        padding: 0.5rem;
+    }
+
+    .manage-restaurants-view-button,
+    .manage-restaurants-delete-button {
+        padding: 0.3rem 0.5rem;
+        font-size: var(--font-size-small);
+    }
+
+    .manage-restaurants-submit-button {
+        padding: 0.5rem 1rem;
+        font-size: var(--font-size-small);
+    }
+
+    .restaurant-details h3 {
+        font-size: var(--font-size-medium);
+    }
+
+    .restaurant-details p {
+        font-size: var(--font-size-small);
+    }
+
+    .restaurant-details h4 {
+        font-size: var(--font-size-medium);
+    }
+
+    /* Adjust Image Sizes */
+    .restaurant-image,
+    .manage-restaurants-preview-image {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    /* Adjust Form Inputs */
+    .manage-restaurants-edit-form input,
+    .manage-restaurants-edit-form textarea,
+    .manage-restaurants-edit-form select {
+        padding: 0.3rem 0.6rem;
+        font-size: var(--font-size-small);
+    }
+
+    /* Buttons Adjustments */
+    .manage-restaurants-add-button,
+    .manage-restaurants-view-button,
+    .manage-restaurants-delete-button,
+    .manage-restaurants-edit-toggle-button,
+    .manage-restaurants-submit-button {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 0.5rem;
+    }
+
+    .manage-restaurants-view-button,
+    .manage-restaurants-delete-button {
+        width: 100%;
+    }
+}

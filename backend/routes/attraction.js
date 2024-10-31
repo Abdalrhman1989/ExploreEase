@@ -1,3 +1,5 @@
+// backend/routes/attractionRoutes.js
+
 const express = require('express');
 const { body } = require('express-validator');
 const attractionController = require('../controllers/attractionController');
@@ -65,6 +67,29 @@ router.get(
   '/user',
   authorize(['User', 'BusinessAdministrator', 'Admin']),
   attractionController.getUserAttractions
+);
+
+// Route to delete an attraction (Protected: 'Admin', 'User', 'BusinessAdministrator')
+router.delete(
+  '/:id',
+  authorize(['Admin', 'User', 'BusinessAdministrator']),
+  attractionController.deleteAttraction
+);
+
+// Route to update an attraction (Protected: 'Admin', 'User', 'BusinessAdministrator')
+router.put(
+  '/:id',
+  authorize(['Admin', 'User', 'BusinessAdministrator']),
+  [
+    body('name').optional().notEmpty().withMessage('Attraction name cannot be empty'),
+    body('location').optional().notEmpty().withMessage('Location cannot be empty'),
+    body('type').optional().notEmpty().withMessage('Type cannot be empty'),
+    body('rating').optional().isFloat({ min: 1, max: 5 }).withMessage('Rating must be between 1 and 5'),
+    body('description').optional().notEmpty().withMessage('Description cannot be empty'),
+    body('amenities').optional().isArray(),
+    body('images').optional().isArray(),
+  ],
+  attractionController.updateAttraction
 );
 
 // Make GET /:id public by defining it after other routes

@@ -8,6 +8,8 @@ import { DateRange } from 'react-date-range';
 import 'react-date-range/dist/styles.css'; // Main style file
 import 'react-date-range/dist/theme/default.css'; // Theme CSS
 import { format } from 'date-fns';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const HotelForm = () => {
   const { user } = useContext(AuthContext); // Access user from context
@@ -87,7 +89,7 @@ const HotelForm = () => {
       })
       .catch((err) => {
         console.error('Error converting images:', err);
-        setError('Failed to process images.');
+        toast.error('Failed to process images.');
       });
   };
 
@@ -133,6 +135,7 @@ const HotelForm = () => {
     e.preventDefault();
     setMessage(null);
     setError(null);
+    toast.dismiss(); // Dismiss existing toasts
 
     // Convert availability array to JSON object
     const availabilityObj = {};
@@ -156,6 +159,7 @@ const HotelForm = () => {
     try {
       if (!user) {
         setError('Authentication required. Please log in.');
+        toast.error('Authentication required. Please log in.');
         return;
       }
 
@@ -171,6 +175,7 @@ const HotelForm = () => {
       });
 
       setMessage(response.data.message);
+      toast.success(response.data.message);
       // Reset form fields
       setHotelDetails({
         name: '',
@@ -197,11 +202,14 @@ const HotelForm = () => {
         if (err.response.data.errors) {
           const validationErrors = err.response.data.errors.map((error) => error.msg).join(' | ');
           setError(validationErrors);
+          toast.error(validationErrors);
         } else {
           setError(err.response.data.message || 'Failed to submit hotel');
+          toast.error(err.response.data.message || 'Failed to submit hotel');
         }
       } else {
         setError('Failed to submit hotel');
+        toast.error('Failed to submit hotel');
       }
     }
   };
@@ -236,6 +244,7 @@ const HotelForm = () => {
         placeholder="Base Price per Night"
         value={hotelDetails.basePrice}
         onChange={handleChange}
+        min="0"
         required
       />
 
@@ -375,6 +384,7 @@ const HotelForm = () => {
           />
           Bar
         </label>
+        {/* Add more amenities as needed */}
       </div>
 
       {/* Availability */}
@@ -426,6 +436,8 @@ const HotelForm = () => {
       <button type="submit" className="submit-button">
         Add Hotel
       </button>
+
+      <ToastContainer />
     </form>
   );
 };

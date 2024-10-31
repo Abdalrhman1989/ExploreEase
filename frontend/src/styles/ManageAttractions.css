@@ -1,0 +1,430 @@
+/* src/styles/ManageAttractions.css */
+
+:root {
+    /* ... existing variables ... */
+    /* Add any new variables if needed */
+}
+
+/* Global Container */
+.manage-attractions-container {
+    padding: 2rem;
+    background-color: var(--background-color);
+    min-height: calc(100vh - 120px); /* Adjust based on Navbar/Footer height */
+    font-family: var(--font-family);
+    box-sizing: border-box;
+}
+
+/* Heading */
+.manage-attractions-container h2 {
+    margin-bottom: 1.5rem;
+    color: var(--text-color);
+    font-size: var(--font-size-large);
+    text-align: center;
+}
+
+/* Header Section */
+.manage-attractions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.manage-attractions-search {
+    padding: 0.5rem 1rem;
+    width: 100%;
+    max-width: 300px;
+    border: 1px solid #ccc;
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-medium);
+    margin-bottom: 1rem;
+    box-sizing: border-box;
+}
+
+.manage-attractions-add-button {
+    background: var(--primary-gradient);
+    color: var(--accent-color);
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    transition: box-shadow var(--transition-speed), background var(--transition-speed);
+    font-size: var(--font-size-medium);
+    box-sizing: border-box;
+}
+
+.manage-attractions-add-button:hover {
+    box-shadow: var(--hover-shadow);
+}
+
+.manage-attractions-add-button i {
+    margin-right: 0.5rem;
+}
+
+/* Attractions Table */
+.manage-attractions-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--card-background);
+    box-shadow: var(--box-shadow);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.manage-attractions-table th,
+.manage-attractions-table td {
+    padding: 0.75rem 1rem;
+    border: 1px solid #ddd;
+    text-align: left;
+    color: var(--text-color);
+    font-size: var(--font-size-medium);
+    box-sizing: border-box;
+}
+
+.manage-attractions-table th {
+    background-color: #f1f1f1;
+}
+
+.manage-attractions-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* Action Buttons */
+.manage-attractions-view-button,
+.manage-attractions-delete-button {
+    padding: 0.4rem 0.8rem;
+    margin-right: 0.5rem;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    color: var(--accent-color);
+    transition: box-shadow var(--transition-speed), transform var(--transition-speed);
+    font-size: var(--font-size-small);
+}
+
+.manage-attractions-view-button {
+    background: var(--secondary-gradient);
+}
+
+.manage-attractions-view-button:hover {
+    box-shadow: var(--hover-shadow);
+    transform: translateY(-2px);
+}
+
+.manage-attractions-delete-button {
+    background: var(--error-color);
+}
+
+.manage-attractions-delete-button:hover {
+    box-shadow: var(--hover-shadow);
+    transform: translateY(-2px);
+}
+
+/* View/Edit Section */
+.manage-attractions-view-edit-section {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    box-sizing: border-box;
+}
+
+.attraction-details h3 {
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+    font-size: var(--font-size-large);
+}
+
+.attraction-details p {
+    margin-bottom: 0.5rem;
+    color: var(--secondary-text-color);
+    font-size: var(--font-size-medium);
+}
+
+.attraction-details h4 {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+    font-size: var(--font-size-medium);
+}
+
+.attraction-images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.attraction-image {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    object-fit: cover;
+    border-radius: var(--border-radius);
+}
+
+/* Edit Toggle Button */
+.manage-attractions-edit-toggle-button {
+    margin-top: 1rem;
+    background: var(--secondary-gradient);
+    color: var(--accent-color);
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: box-shadow var(--transition-speed), background var(--transition-speed);
+    font-size: var(--font-size-medium);
+    box-sizing: border-box;
+}
+
+.manage-attractions-edit-toggle-button:hover {
+    box-shadow: var(--hover-shadow);
+    transform: translateY(-2px);
+}
+
+/* Edit Form Styles */
+.manage-attractions-edit-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.manage-attractions-edit-form input,
+.manage-attractions-edit-form textarea,
+.manage-attractions-edit-form select {
+    padding: 0.6rem 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-medium);
+    box-sizing: border-box;
+}
+
+.manage-attractions-amenities {
+    margin-bottom: 1.5rem;
+}
+
+.manage-attractions-amenities h4 {
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+    font-size: var(--font-size-medium);
+}
+
+.manage-attractions-amenities label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+    font-size: var(--font-size-medium);
+}
+
+.manage-attractions-amenities input[type="checkbox"] {
+    margin-right: 0.5rem;
+}
+
+.manage-attractions-image-upload {
+    margin-bottom: 1.5rem;
+}
+
+.manage-attractions-image-upload h4 {
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+    font-size: var(--font-size-medium);
+}
+
+.manage-attractions-image-upload input[type="file"] {
+    margin-top: 0.5rem;
+}
+
+.manage-attractions-image-previews {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.manage-attractions-preview-image {
+    width: 100%;
+    max-width: 150px;
+    height: auto;
+    object-fit: cover;
+    border-radius: var(--border-radius);
+    border: 1px solid #ddd;
+}
+
+.manage-attractions-submit-button {
+    background: var(--secondary-gradient);
+    color: var(--accent-color);
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: box-shadow var(--transition-speed), background var(--transition-speed), transform var(--transition-speed);
+    font-size: var(--font-size-medium);
+    align-self: flex-start;
+    box-sizing: border-box;
+}
+
+.manage-attractions-submit-button:hover {
+    box-shadow: var(--hover-shadow);
+    transform: translateY(-2px);
+}
+
+/* Message Styles */
+.error-message {
+    color: var(--error-color);
+    margin-bottom: 1rem;
+    font-weight: bold;
+    font-size: var(--font-size-medium);
+}
+
+.success-message {
+    color: var(--success-color);
+    margin-bottom: 1rem;
+    font-weight: bold;
+    font-size: var(--font-size-medium);
+}
+
+/* Responsive Design */
+
+/* Medium Devices (Tablets, 768px to 1199px) */
+@media (min-width: 768px) and (max-width: 1199px) {
+    .manage-attractions-container {
+        padding: 1.5rem;
+    }
+
+    .attraction-details h3 {
+        font-size: var(--font-size-xlarge);
+    }
+
+    .attraction-image {
+        max-width: 180px;
+    }
+
+    .manage-attractions-edit-form input,
+    .manage-attractions-edit-form textarea,
+    .manage-attractions-edit-form select {
+        font-size: var(--font-size-medium);
+    }
+
+    .manage-attractions-submit-button {
+        align-self: flex-start;
+    }
+}
+
+/* Small Devices (Large Phones, 576px to 767px) */
+@media (min-width: 576px) and (max-width: 767px) {
+    .manage-attractions-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .manage-attractions-search {
+        width: 100%;
+        max-width: none;
+        margin-bottom: 1rem;
+    }
+
+    .manage-attractions-add-button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .manage-attractions-view-edit-section {
+        padding: 1rem;
+    }
+
+    .manage-attractions-edit-form input,
+    .manage-attractions-edit-form textarea,
+    .manage-attractions-edit-form select {
+        padding: 0.5rem 0.8rem;
+        font-size: var(--font-size-small);
+    }
+
+    .manage-attractions-submit-button {
+        align-self: stretch;
+    }
+
+    .manage-attractions-view-button,
+    .manage-attractions-delete-button {
+        width: 48%;
+    }
+}
+
+/* Extra Small Devices (Small Phones, less than 576px) */
+@media (max-width: 575px) {
+    .manage-attractions-container {
+        padding: 1rem;
+    }
+
+    .manage-attractions-search {
+        width: 100%;
+    }
+
+    .manage-attractions-add-button {
+        padding: 0.5rem;
+        font-size: var(--font-size-small);
+    }
+
+    .manage-attractions-table th,
+    .manage-attractions-table td {
+        padding: 0.5rem;
+    }
+
+    .manage-attractions-view-button,
+    .manage-attractions-delete-button {
+        padding: 0.3rem 0.5rem;
+        font-size: var(--font-size-small);
+    }
+
+    .manage-attractions-submit-button {
+        padding: 0.5rem 1rem;
+        font-size: var(--font-size-small);
+    }
+
+    .attraction-details h3 {
+        font-size: var(--font-size-medium);
+    }
+
+    .attraction-details p {
+        font-size: var(--font-size-small);
+    }
+
+    .attraction-details h4 {
+        font-size: var(--font-size-medium);
+    }
+
+    /* Adjust Image Sizes */
+    .attraction-image,
+    .manage-attractions-preview-image {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    /* Adjust Form Inputs */
+    .manage-attractions-edit-form input,
+    .manage-attractions-edit-form textarea,
+    .manage-attractions-edit-form select {
+        padding: 0.3rem 0.6rem;
+        font-size: var(--font-size-small);
+    }
+
+    /* Buttons Adjustments */
+    .manage-attractions-add-button,
+    .manage-attractions-view-button,
+    .manage-attractions-delete-button,
+    .manage-attractions-edit-toggle-button,
+    .manage-attractions-submit-button {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 0.5rem;
+    }
+
+    .manage-attractions-view-button,
+    .manage-attractions-delete-button {
+        width: 100%;
+    }
+}

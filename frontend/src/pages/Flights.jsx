@@ -362,10 +362,8 @@ const Flights = () => {
       <div className="content-wrapper">
         <TrendingSection title="Popular Flights Near You" items={trendingFlights} />
       </div>
-      <Testimonials />
       <HowItWorks />
       <FAQs />
-      <Footer />
     </div>
   );
 };

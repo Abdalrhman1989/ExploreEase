@@ -4,7 +4,9 @@ const { Attraction } = require('../models');
 const { validationResult } = require('express-validator');
 const axios = require('axios');
 
-// Create a new Attraction (Accessible by 'User' and 'BusinessAdministrator')
+/**
+ * Create a new Attraction (Accessible by 'User' and 'BusinessAdministrator')
+ */
 exports.createAttraction = async (req, res) => {
   // Validate incoming request
   const errors = validationResult(req);
@@ -42,6 +44,7 @@ exports.createAttraction = async (req, res) => {
       images,
       latitude,
       longitude,
+      status: 'Pending', // Set initial status
     });
 
     res.status(201).json({
@@ -54,7 +57,9 @@ exports.createAttraction = async (req, res) => {
   }
 };
 
-// Get all Approved Attractions (Public Access) with optional city filtering
+/**
+ * Get all Approved Attractions (Public Access) with optional city filtering
+ */
 exports.getApprovedAttractions = async (req, res) => {
   try {
     const { city } = req.query;
@@ -70,7 +75,9 @@ exports.getApprovedAttractions = async (req, res) => {
   }
 };
 
-// Get a Single Attraction by ID (Public Access)
+/**
+ * Get a Single Attraction by ID (Public Access)
+ */
 exports.getAttractionById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -108,7 +115,9 @@ exports.getAttractionById = async (req, res) => {
   }
 };
 
-// Get all Pending Attractions (Admin Only)
+/**
+ * Get all Pending Attractions (Admin Only)
+ */
 exports.getPendingAttractions = async (req, res) => {
   try {
     const attractions = await Attraction.findAll({ where: { status: 'Pending' } });
@@ -119,7 +128,9 @@ exports.getPendingAttractions = async (req, res) => {
   }
 };
 
-// Approve an Attraction (Admin Only)
+/**
+ * Approve an Attraction (Admin Only)
+ */
 exports.approveAttraction = async (req, res) => {
   try {
     const { id } = req.params;
@@ -143,7 +154,9 @@ exports.approveAttraction = async (req, res) => {
   }
 };
 
-// Reject an Attraction (Admin Only)
+/**
+ * Reject an Attraction (Admin Only)
+ */
 exports.rejectAttraction = async (req, res) => {
   try {
     const { id } = req.params;
@@ -167,7 +180,9 @@ exports.rejectAttraction = async (req, res) => {
   }
 };
 
-// Get Authenticated User's Attractions (Accessible by 'User', 'BusinessAdministrator', 'Admin')
+/**
+ * Get Authenticated User's Attractions (Accessible by 'User', 'BusinessAdministrator', 'Admin')
+ */
 exports.getUserAttractions = async (req, res) => {
   try {
     const FirebaseUID = req.user.uid; // Extracted from authentication middleware
@@ -178,3 +193,79 @@ exports.getUserAttractions = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+/**
+ * Delete an Attraction (Accessible by 'Admin', 'User', 'BusinessAdministrator')
+ */
+exports.deleteAttraction = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const attraction = await Attraction.findByPk(id);
+
+    if (!attraction) {
+      return res.status(404).json({ message: 'Attraction not found' });
+    }
+
+    // Authorization: Admin can delete any, users can delete their own
+    if (req.user.role !== 'Admin' && attraction.FirebaseUID !== req.user.uid) {
+      return res.status(403).json({ message: 'Forbidden: You cannot delete this attraction' });
+    }
+
+    await attraction.destroy();
+
+    res.status(200).json({ message: 'Attraction deleted successfully.' });
+  } catch (error) {
+    console.error('Error deleting attraction:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Handle Update Attraction
+exports.updateAttraction = async (req, res) => {
+  const { id } = req.params;
+
+  // Validate incoming request
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  try {
+    const attraction = await Attraction.findByPk(id);
+    if (!attraction) {
+      return res.status(404).json({ message: 'Attraction not found.' });
+    }
+
+    // Check if the user is authorized to update the attraction
+    if (attraction.FirebaseUID !== req.user.uid && req.user.role !== 'Admin') {
+      return res.status(403).json({ message: 'Unauthorized to update this attraction.' });
+    }
+
+    // Update fields
+    const {
+      name,
+      location,
+      type,
+      rating,
+      description,
+      amenities,
+      images,
+    } = req.body;
+
+    attraction.name = name || attraction.name;
+    attraction.location = location || attraction.location;
+    attraction.type = type || attraction.type;
+    attraction.rating = rating || attraction.rating;
+    attraction.description = description || attraction.description;
+    attraction.amenities = amenities || attraction.amenities;
+    attraction.images = images || attraction.images;
+
+    await attraction.save();
+
+    res.status(200).json({ message: 'Attraction updated successfully.', attraction });
+  } catch (error) {
+    console.error('Error updating attraction:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+};
+

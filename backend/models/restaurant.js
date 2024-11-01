@@ -7,7 +7,8 @@ module.exports = (sequelize, DataTypes) => {
      * Define associations here.
      */
     static associate(models) {
-      // Define associations if necessary (e.g., User hasMany Restaurants)
+      Restaurant.belongsTo(models.User, { foreignKey: 'FirebaseUID', targetKey: 'FirebaseUID', as: 'user' });
+
     }
   }
 
@@ -22,6 +23,10 @@ module.exports = (sequelize, DataTypes) => {
       FirebaseUID: {
         type: DataTypes.STRING(255),
         allowNull: false,
+        references: {
+          model: 'Users',
+          key: 'FirebaseUID',
+        },
       },
       name: {
         type: DataTypes.STRING(100),
@@ -36,7 +41,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       priceRange: {
-        type: DataTypes.INTEGER, // Represented as number of '$' signs
+        type: DataTypes.INTEGER, 
         allowNull: false,
       },
       rating: {
@@ -52,11 +57,11 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
       },
       amenities: {
-        type: DataTypes.JSON, // Stores an array of amenities
+        type: DataTypes.JSON, 
         allowNull: true,
       },
       images: {
-        type: DataTypes.TEXT, // Stores an array of Base64 image strings
+        type: DataTypes.TEXT, 
         allowNull: true,
         get() {
           const rawValue = this.getDataValue('images');
@@ -67,7 +72,7 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
       availability: {
-        type: DataTypes.JSON, // Example: { "2024-10-01": true, "2024-10-02": false, ... }
+        type: DataTypes.JSON, 
         allowNull: true,
       },
       latitude: {

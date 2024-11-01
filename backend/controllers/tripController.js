@@ -8,10 +8,14 @@ const { validationResult } = require('express-validator');
  */
 const createTrip = async (req, res) => {
   console.log('Received trip data:', req.body);
+  console.log('Authenticated user UID:', req.user.uid);
+
 
   // Handle validation errors
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    console.log('Validation errors:', errors.array());
+
     return res.status(400).json({ errors: errors.array() });
   }
 
@@ -35,10 +39,18 @@ const createTrip = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+    // Log the user data to verify UserID
+    console.log('User found:', user.toJSON());
+
+    // Check if UserID is valid
+    if (!user.UserID) {
+      console.error('User.UserID is null or undefined:', user.UserID);
+      return res.status(500).json({ message: 'Internal Server Error: UserID is missing.' });
+    }
 
     // Create new trip
     const newTrip = await Trip.create({
-      userId: user.UserID,
+      UserID: user.UserID,
       type,
       origin,
       destination,

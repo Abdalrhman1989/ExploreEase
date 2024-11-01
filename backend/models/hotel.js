@@ -3,11 +3,9 @@ const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
   class Hotel extends Model {
-    /**
-     * Define associations here.
-     */
+
     static associate(models) {
-      // No associations since we're using a single table
+      Hotel.belongsTo(models.User, { foreignKey: 'FirebaseUID', targetKey: 'FirebaseUID', as: 'user' });  
     }
   }
 
@@ -22,6 +20,10 @@ module.exports = (sequelize, DataTypes) => {
       FirebaseUID: {
         type: DataTypes.STRING(255),
         allowNull: false,
+        references: {
+          model: 'Users',
+          key: 'FirebaseUID',
+        },
       },
       name: {
         type: DataTypes.STRING(100),
@@ -29,6 +31,18 @@ module.exports = (sequelize, DataTypes) => {
       },
       location: {
         type: DataTypes.STRING(255),
+        allowNull: false,
+      },
+      city: { // New field
+        type: DataTypes.STRING(100),
+        allowNull: false,
+      },
+      latitude: { 
+        type: DataTypes.FLOAT,
+        allowNull: false,
+      },
+      longitude: { 
+        type: DataTypes.FLOAT,
         allowNull: false,
       },
       basePrice: {
@@ -40,19 +54,19 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       roomTypes: {
-        type: DataTypes.JSON, // Stores an array of room types
+        type: DataTypes.JSON, 
         allowNull: true,
       },
       seasonalPricing: {
-        type: DataTypes.JSON, // Stores an array of seasonal pricing
+        type: DataTypes.JSON, 
         allowNull: true,
       },
       amenities: {
-        type: DataTypes.JSON, // Stores an array of amenities
+        type: DataTypes.JSON, 
         allowNull: true,
       },
       images: {
-        type: DataTypes.TEXT, // Stores an array of Base64 image strings
+        type: DataTypes.TEXT, 
         allowNull: true,
         get() {
           const rawValue = this.getDataValue('images');
@@ -63,7 +77,7 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
       availability: {
-        type: DataTypes.JSON, // Example: { "2024-10-01": true, "2024-10-02": false, ... }
+        type: DataTypes.JSON, 
         allowNull: true,
       },
       status: {

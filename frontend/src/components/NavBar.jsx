@@ -15,6 +15,9 @@ const Navbar = () => {
   const [languageMenuActive, setLanguageMenuActive] = useState(false);
   
   const { isAuthenticated, userRole, user } = useContext(AuthContext);
+  console.log('Navbar - isAuthenticated:', isAuthenticated);
+  console.log('Navbar - userRole:', userRole);
+  console.log('Navbar - user:', user);
 
   const toggleMenu = () => {
     setMenuActive(!menuActive);

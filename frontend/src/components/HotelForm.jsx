@@ -1,6 +1,4 @@
-// src/components/HotelForm.jsx
-
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useRef, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
 import '../styles/HotelForm.css';
@@ -10,12 +8,33 @@ import 'react-date-range/dist/theme/default.css'; // Theme CSS
 import { format } from 'date-fns';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import {
+  GoogleMap,
+  useLoadScript,
+  Marker,
+  Autocomplete,
+} from '@react-google-maps/api';
+
+const mapContainerStyle = {
+  width: '100%',
+  height: '400px',
+};
+
+const defaultCenter = {
+  lat: 48.8566, // Fallback to Paris
+  lng: 2.3522,
+};
+
+const libraries = ['places'];
+
+const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
 
 const HotelForm = () => {
   const { user } = useContext(AuthContext); // Access user from context
   const [hotelDetails, setHotelDetails] = useState({
     name: '',
     location: '',
+    city: '', // New field
     basePrice: '',
     description: '',
     roomTypes: [{ type: '', price: '', availability: 'Available' }],
@@ -33,6 +52,37 @@ const HotelForm = () => {
       key: 'selection',
     },
   ]);
+  const [selectedPosition, setSelectedPosition] = useState(null); // New state for position
+  const [mapCenter, setMapCenter] = useState(defaultCenter); // Dynamic map center
+
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
+    libraries,
+  });
+
+  const autocompleteRef = useRef(null);
+
+  // Effect to get user's current location
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setMapCenter({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.error('Error fetching user location:', error);
+          // Optionally, notify the user about the fallback
+          toast.info('Unable to retrieve your location. Defaulting to Paris.');
+        }
+      );
+    } else {
+      console.error('Geolocation not supported by this browser.');
+      toast.info('Geolocation is not supported by your browser. Defaulting to Paris.');
+    }
+  }, []);
 
   // Handle form field changes
   const handleChange = (e) => {
@@ -51,7 +101,10 @@ const HotelForm = () => {
   const addRoomType = () => {
     setHotelDetails({
       ...hotelDetails,
-      roomTypes: [...hotelDetails.roomTypes, { type: '', price: '', availability: 'Available' }],
+      roomTypes: [
+        ...hotelDetails.roomTypes,
+        { type: '', price: '', availability: 'Available' },
+      ],
     });
   };
 
@@ -67,7 +120,10 @@ const HotelForm = () => {
   const addSeasonalPricing = () => {
     setHotelDetails({
       ...hotelDetails,
-      seasonalPricing: [...hotelDetails.seasonalPricing, { startDate: '', endDate: '', price: '' }],
+      seasonalPricing: [
+        ...hotelDetails.seasonalPricing,
+        { startDate: '', endDate: '', price: '' },
+      ],
     });
   };
 
@@ -130,12 +186,51 @@ const HotelForm = () => {
     setAvailability(availability.filter((date) => date !== dateToRemove));
   };
 
+  // Handle Map Click to set position
+  const handleMapClick = (event) => {
+    const lat = event.latLng.lat();
+    const lng = event.latLng.lng();
+    setSelectedPosition({
+      lat,
+      lng,
+    });
+    setHotelDetails({
+      ...hotelDetails,
+      location: '', // Optionally, clear location string if using map selection
+    });
+  };
+
+  // Handle Place Selection from Autocomplete
+  const handlePlaceChanged = () => {
+    const place = autocompleteRef.current.getPlace();
+    if (place.geometry) {
+      const lat = place.geometry.location.lat();
+      const lng = place.geometry.location.lng();
+      setSelectedPosition({ lat, lng });
+      setMapCenter({ lat, lng }); // Center the map to the selected place
+      setHotelDetails({
+        ...hotelDetails,
+        location: place.formatted_address || place.name || '',
+        city: place.address_components.find(comp => comp.types.includes('locality'))?.long_name || '', // Extract city
+      });
+    } else {
+      toast.error('No details available for the selected location.');
+    }
+  };
+
   // Handle Form Submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage(null);
     setError(null);
     toast.dismiss(); // Dismiss existing toasts
+
+    // Ensure that position is selected
+    if (!selectedPosition) {
+      setError('Please select a location using the search box or by clicking on the map.');
+      toast.error('Please select a location using the search box or by clicking on the map.');
+      return;
+    }
 
     // Convert availability array to JSON object
     const availabilityObj = {};
@@ -147,13 +242,16 @@ const HotelForm = () => {
     const payload = {
       name: hotelDetails.name,
       location: hotelDetails.location,
-      basePrice: hotelDetails.basePrice,
+      city: hotelDetails.city, // Include city
+      basePrice: parseFloat(hotelDetails.basePrice),
       description: hotelDetails.description,
-      roomTypes: JSON.stringify(hotelDetails.roomTypes),
-      seasonalPricing: JSON.stringify(hotelDetails.seasonalPricing),
-      amenities: JSON.stringify(hotelDetails.amenities),
+      roomTypes: hotelDetails.roomTypes, // Array of room types
+      seasonalPricing: hotelDetails.seasonalPricing, // Array of seasonal pricing
+      amenities: hotelDetails.amenities, // Array of amenities
       images: images, // Array of Base64 strings
       availability: availabilityObj, // Date-wise availability
+      latitude: selectedPosition.lat, // Latitude from map
+      longitude: selectedPosition.lng, // Longitude from map
     };
 
     try {
@@ -180,6 +278,7 @@ const HotelForm = () => {
       setHotelDetails({
         name: '',
         location: '',
+        city: '', // Reset city
         basePrice: '',
         description: '',
         roomTypes: [{ type: '', price: '', availability: 'Available' }],
@@ -195,6 +294,8 @@ const HotelForm = () => {
           key: 'selection',
         },
       ]);
+      setSelectedPosition(null);
+      setMapCenter(defaultCenter); // Reset map center
     } catch (err) {
       console.error('Error submitting hotel:', err);
       if (err.response && err.response.data) {
@@ -214,6 +315,9 @@ const HotelForm = () => {
     }
   };
 
+  if (loadError) return <div>Error loading maps</div>;
+  if (!isLoaded) return <div>Loading Maps...</div>;
+
   return (
     <form className="hotel-form" onSubmit={handleSubmit}>
       <h2>Add New Hotel</h2>
@@ -229,14 +333,31 @@ const HotelForm = () => {
         required
       />
 
+      {/* City Input */}
       <input
         type="text"
-        name="location"
-        placeholder="Location"
-        value={hotelDetails.location}
+        name="city"
+        placeholder="City"
+        value={hotelDetails.city}
         onChange={handleChange}
         required
       />
+
+      {/* Autocomplete Search Box */}
+      <Autocomplete
+        onLoad={(autocomplete) => (autocompleteRef.current = autocomplete)}
+        onPlaceChanged={handlePlaceChanged}
+      >
+        <input
+          type="text"
+          name="location"
+          placeholder="Search Location"
+          value={hotelDetails.location}
+          onChange={handleChange}
+          required
+          className="autocomplete-input"
+        />
+      </Autocomplete>
 
       <input
         type="number"
@@ -412,6 +533,41 @@ const HotelForm = () => {
               ))}
             </ul>
           </div>
+        )}
+      </div>
+
+      {/* Location Selection via Autocomplete and Map */}
+      <div className="map-selection">
+        <h3>Select Location</h3>
+        {/* Autocomplete Search Box */}
+        <Autocomplete
+          onLoad={(autocomplete) => (autocompleteRef.current = autocomplete)}
+          onPlaceChanged={handlePlaceChanged}
+        >
+          <input
+            type="text"
+            name="location"
+            placeholder="Search Location"
+            value={hotelDetails.location}
+            onChange={handleChange}
+            required
+            className="autocomplete-input"
+          />
+        </Autocomplete>
+
+        {/* Google Map */}
+        <GoogleMap
+          mapContainerStyle={mapContainerStyle}
+          zoom={selectedPosition ? 15 : 12}
+          center={mapCenter} // Dynamic map center based on user's location
+          onClick={handleMapClick}
+        >
+          {selectedPosition && <Marker position={selectedPosition} />}
+        </GoogleMap>
+        {selectedPosition && (
+          <p>
+            Selected Coordinates: Latitude: {selectedPosition.lat}, Longitude: {selectedPosition.lng}
+          </p>
         )}
       </div>
 

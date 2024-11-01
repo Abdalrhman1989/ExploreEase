@@ -1,15 +1,35 @@
 // src/pages/ManageHotels.jsx
 
-import React, { useEffect, useState, useContext } from 'react'; // Single React import
+import React, { useEffect, useState, useContext, useRef } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import '../styles/ManageHotels.css';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import {
+  GoogleMap,
+  Marker,
+  useLoadScript,
+  Autocomplete,
+} from '@react-google-maps/api';
+
+const libraries = ['places'];
+
+const mapContainerStyle = {
+  width: '100%',
+  height: '300px',
+};
+
+const defaultCenter = {
+  lat: 48.8566, // Default to Paris
+  lng: 2.3522,
+};
+
+const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
 
 const ManageHotels = () => {
-  const { idToken, isAuthenticated, userRole } = useContext(AuthContext);
+  const { idToken, isAuthenticated, userRole, user, loading } = useContext(AuthContext);
   const [hotels, setHotels] = useState([]);
   const [selectedHotel, setSelectedHotel] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -22,10 +42,24 @@ const ManageHotels = () => {
     description: '',
     amenities: [],
     images: [],
-    availability: {}, // Initialize availability as an empty object
+    availability: {},
+    latitude: '',
+    longitude: '',
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState('');
+
+  // **Initialize Missing State Variables**
+  const [markerPosition, setMarkerPosition] = useState(null);
+  const [mapCenter, setMapCenter] = useState(defaultCenter);
+
+  const autocompleteRef = useRef(null);
+  const mapRef = useRef(null);
+
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
+    libraries,
+  });
 
   // Fetch hotels when authenticated
   useEffect(() => {
@@ -105,6 +139,8 @@ const ManageHotels = () => {
         amenities: hotel.amenities || [],
         images: hotel.images || [],
         availability: hotel.availability || {}, // Ensure availability is an object
+        latitude: hotel.latitude || '',
+        longitude: hotel.longitude || '',
       });
       setIsEditing(false);
     }
@@ -156,6 +192,60 @@ const ManageHotels = () => {
     );
   };
 
+  // Handle Place Selection from Autocomplete
+  const handlePlaceChanged = () => {
+    const place = autocompleteRef.current.getPlace();
+    if (place.geometry) {
+      const lat = place.geometry.location.lat();
+      const lng = place.geometry.location.lng();
+      setFormData({
+        ...formData,
+        location: place.formatted_address || place.name || '',
+        latitude: lat,
+        longitude: lng,
+      });
+      setMarkerPosition({ lat, lng });
+      setMapCenter({ lat, lng }); // Center the map to the selected place
+    } else {
+      toast.error('No details available for the selected location.');
+    }
+  };
+
+  // Reverse Geocoding: Get address from coordinates (Optional)
+  const reverseGeocode = async (lat, lng) => {
+    try {
+      const geocodeResponse = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', {
+        params: {
+          latlng: `${lat},${lng}`,
+          key: GOOGLE_MAPS_API_KEY,
+        },
+      });
+
+      if (geocodeResponse.data.status === 'OK') {
+        const address = geocodeResponse.data.results[0]?.formatted_address || '';
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          location: address,
+        }));
+      } else {
+        toast.error('Failed to retrieve address from coordinates.');
+      }
+    } catch (err) {
+      console.error('Reverse geocoding error:', err);
+      toast.error('Error retrieving address from coordinates.');
+    }
+  };
+
+  // Handle Map Click to set marker position
+  const handleMapClick = (event) => {
+    const lat = event.latLng.lat();
+    const lng = event.latLng.lng();
+    setMarkerPosition({ lat, lng });
+    setFormData({ ...formData, latitude: lat, longitude: lng });
+    // Optionally, reverse geocode to get address
+    reverseGeocode(lat, lng);
+  };
+
   // Handle Form Submission for Edit
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -167,18 +257,20 @@ const ManageHotels = () => {
       name: formData.name,
       location: formData.location,
       type: formData.type,
-      basePrice: formData.basePrice,
+      basePrice: parseFloat(formData.basePrice),
       rating: parseFloat(formData.rating), // Ensure rating is a float
       description: formData.description,
       amenities: formData.amenities, // Assuming backend accepts array
       images: formData.images, // Array of Base64 strings
       // availability is optional; include it only if editing
       ...(isEditing && { availability: formData.availability }),
+      latitude: formData.latitude, // Include latitude
+      longitude: formData.longitude, // Include longitude
     };
 
     try {
       const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
-      await axios.put(`${backendUrl}/api/hotels/${selectedHotel.HotelID}`, payload, { // Use HotelID
+      await axios.put(`${backendUrl}/api/hotels/${selectedHotel.HotelID}`, payload, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${idToken}`,
@@ -199,16 +291,25 @@ const ManageHotels = () => {
         amenities: [],
         images: [],
         availability: {},
+        latitude: '',
+        longitude: '',
       });
       setIsEditing(false);
     } catch (err) {
       console.error('Error updating hotel:', err);
       if (err.response && err.response.data) {
-        setError(err.response.data.message || 'Failed to update hotel.');
+        if (err.response.data.errors) {
+          const validationErrors = err.response.data.errors.map((error) => error.msg).join(' | ');
+          setError(validationErrors);
+          toast.error(validationErrors);
+        } else {
+          setError(err.response.data.message || 'Failed to update hotel.');
+          toast.error(err.response.data.message || 'Failed to update hotel.');
+        }
       } else {
         setError('Failed to update hotel.');
+        toast.error('Failed to update hotel.');
       }
-      toast.error(error || 'Failed to update hotel.');
     }
   };
 
@@ -336,6 +437,7 @@ const ManageHotels = () => {
               <h3>Edit Hotel</h3>
               {error && <p className="error-message">{error}</p>}
 
+              {/* Hotel Name */}
               <input
                 type="text"
                 name="name"
@@ -345,24 +447,33 @@ const ManageHotels = () => {
                 required
               />
 
-              <input
-                type="text"
-                name="location"
-                placeholder="Location"
-                value={formData.location || ''}
-                onChange={handleChange}
-                required
-              />
+              {/* Location Autocomplete Search Box */}
+              <Autocomplete
+                onLoad={(autocomplete) => (autocompleteRef.current = autocomplete)}
+                onPlaceChanged={handlePlaceChanged}
+              >
+                <input
+                  type="text"
+                  name="location"
+                  placeholder="Search Location"
+                  value={formData.location || ''}
+                  onChange={handleChange}
+                  required
+                  className="autocomplete-input"
+                />
+              </Autocomplete>
 
+              {/* Type Input */}
               <input
                 type="text"
                 name="type"
-                placeholder="Type"
+                placeholder="Type (e.g., Hotel, Resort)"
                 value={formData.type || ''}
                 onChange={handleChange}
                 required
               />
 
+              {/* Base Price Input */}
               <input
                 type="number"
                 name="basePrice"
@@ -373,6 +484,7 @@ const ManageHotels = () => {
                 required
               />
 
+              {/* Rating Input */}
               <input
                 type="number"
                 name="rating"
@@ -385,6 +497,7 @@ const ManageHotels = () => {
                 required
               />
 
+              {/* Description Textarea */}
               <textarea
                 name="description"
                 placeholder="Description"
@@ -393,7 +506,7 @@ const ManageHotels = () => {
                 required
               />
 
-              {/* Amenities */}
+              {/* Amenities Selection */}
               <div className="manage-hotels-amenities">
                 <h4>Amenities</h4>
                 <label>
@@ -511,6 +624,54 @@ const ManageHotels = () => {
                 </ul>
               </div>
 
+              {/* Coordinates Section with Map Picker */}
+              <div className="coordinates">
+                <h3>Coordinates</h3>
+                <div className="coordinates-inputs">
+                  <input
+                    type="number"
+                    name="latitude"
+                    placeholder="Latitude"
+                    value={formData.latitude || ''}
+                    onChange={handleChange}
+                    step="0.0001"
+                    required
+                  />
+                  <input
+                    type="number"
+                    name="longitude"
+                    placeholder="Longitude"
+                    value={formData.longitude || ''}
+                    onChange={handleChange}
+                    step="0.0001"
+                    required
+                  />
+                </div>
+                {/* Map Picker */}
+                <div className="map-picker">
+                  <h4>Pick Location on Map</h4>
+                  <GoogleMap
+                    mapContainerStyle={mapContainerStyle}
+                    zoom={formData.latitude && formData.longitude ? 15 : 12}
+                    center={
+                      formData.latitude && formData.longitude
+                        ? { lat: parseFloat(formData.latitude), lng: parseFloat(formData.longitude) }
+                        : defaultCenter
+                    }
+                    onClick={handleMapClick}
+                    options={{
+                      disableDefaultUI: false,
+                      zoomControl: true,
+                    }}
+                    onLoad={(map) => (mapRef.current = map)}
+                  >
+                    {formData.latitude && formData.longitude && (
+                      <Marker position={{ lat: parseFloat(formData.latitude), lng: parseFloat(formData.longitude) }} />
+                    )}
+                  </GoogleMap>
+                </div>
+              </div>
+
               <button
                 type="submit"
                 className="manage-hotels-submit-button"
@@ -519,7 +680,6 @@ const ManageHotels = () => {
               </button>
             </form>
           )}
-
           <ToastContainer />
         </div>
       )}

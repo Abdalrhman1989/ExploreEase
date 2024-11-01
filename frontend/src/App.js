@@ -22,7 +22,6 @@ import BusinessDashboard from './pages/Dashboard';
 import Destination from './pages/Destination';
 import Booking from './pages/Booking';
 import FlightResults from './pages/FlightResults';
-import StaysResults from './pages/StaysResults';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import GDPR from './pages/GDPR';
@@ -122,7 +121,6 @@ function App() {
         <Route path="/destination/:destinationName" element={<Destination />} />
         <Route path="/booking" element={<Booking />} />
         <Route path="/search-flights" element={<FlightResults />} />
-        <Route path="/search-stays" element={<StaysResults />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/gdpr" element={<GDPR />} />

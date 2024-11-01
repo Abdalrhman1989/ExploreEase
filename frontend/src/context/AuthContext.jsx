@@ -1,7 +1,7 @@
 // src/context/AuthContext.jsx
 
 import React, { createContext, useEffect, useState } from 'react';
-import { onAuthStateChanged, signOut } from 'firebase/auth'; // Import signOut
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 import axios from 'axios';
 
@@ -20,7 +20,6 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       await signOut(auth); // Firebase signOut
-      // The onAuthStateChanged listener will handle the rest (state reset, token removal)
     } catch (error) {
       console.error('Error during logout:', error);
       throw error; // Propagate the error to handle it in the UI
@@ -41,7 +40,7 @@ export const AuthProvider = ({ children }) => {
           console.log("ID Token:", token);
 
           // Fetch user role from your backend
-          const response = await axios.get('http://localhost:3001/api/protected/dashboard', {
+          const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/protected/dashboard`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -73,5 +72,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// Correct Export: Export AuthProvider, not AdminDashboard
 export default AuthProvider;

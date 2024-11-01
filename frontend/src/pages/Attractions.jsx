@@ -1,5 +1,3 @@
-// frontend/src/pages/Attractions.jsx
-
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import {
   GoogleMap,
@@ -8,9 +6,8 @@ import {
   MarkerClusterer,
   InfoWindow,
 } from '@react-google-maps/api';
-import { AuthContext } from '../context/AuthContext'; // Ensure this path is correct
-import axios from 'axios'; // Import Axios directly
-import { useNavigate } from 'react-router-dom'; // For navigation
+import { AuthContext } from '../context/AuthContext';
+import axios from 'axios';
 import '../styles/Attractions.css';
 
 const libraries = ['places'];
@@ -25,30 +22,31 @@ const options = {
   zoomControl: true,
 };
 
-// Ensure you have set REACT_APP_GOOGLE_MAPS_API_KEY in your .env file
 const Attractions = () => {
-  const { user, isAuthenticated, loading: authLoading } = useContext(AuthContext); // Access AuthContext
-  const navigate = useNavigate(); // For navigation
-  const [mapCenter, setMapCenter] = useState({ lat: 55.4038, lng: 10.4024 }); // Odense center
+  const { user, isAuthenticated, loading: authLoading } = useContext(AuthContext);
+  const [mapCenter, setMapCenter] = useState({ lat: 55.4038, lng: 10.4024 });
   const [mapZoom, setMapZoom] = useState(12);
   const [googleMarkers, setGoogleMarkers] = useState([]);
   const [selected, setSelected] = useState(null);
-  const [favorites, setFavorites] = useState([]); // Initialize favorites as empty array
-  const [createdAttractions, setCreatedAttractions] = useState([]); // State for created attractions
+  const [favorites, setFavorites] = useState([]);
+  const [createdAttractions, setCreatedAttractions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const mapRef = useRef(null);
-
-  // State to track selected city
-  const [selectedCity, setSelectedCity] = useState(null);
-
-  // State to track if a search has been performed
-  const [hasSearched, setHasSearched] = useState(false);
-
-  // Ref for the map section to scroll into view
   const mapSectionRef = useRef(null);
+  const [selectedCity, setSelectedCity] = useState(null);
+  const [hasSearched, setHasSearched] = useState(false);
+  const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
 
-  // Define categories array (Removed 'Health', 'Transportation', 'Healthcare')
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
+    libraries,
+  });
+
+  const onMapLoad = (map) => {
+    mapRef.current = map;
+  };
+
   const categories = [
     { name: 'Adventure', type: 'park', icon: '🚵' },
     { name: 'Cultural', type: 'museum', icon: '🏛️' },
@@ -63,18 +61,6 @@ const Attractions = () => {
     { name: 'Government', type: 'city_hall', icon: '🏢' },
   ];
 
-  const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
-
-  const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
-    libraries,
-  });
-
-  const onMapLoad = (map) => {
-    mapRef.current = map;
-  };
-
-  // Function to fetch favorites from backend
   const fetchFavorites = async () => {
     if (!isAuthenticated || !user) return;
 
@@ -92,7 +78,6 @@ const Attractions = () => {
     }
   };
 
-  // Function to add a favorite via backend
   const addFavoriteToDB = async (favoriteData) => {
     if (!isAuthenticated || !user) {
       alert('Please log in to add favorites.');
@@ -110,7 +95,6 @@ const Attractions = () => {
           },
         }
       );
-      // Update favorites state with the new favorite
       setFavorites((prevFavorites) => [...prevFavorites, response.data.favorite]);
       alert('Favorite added successfully!');
     } catch (err) {
@@ -123,7 +107,6 @@ const Attractions = () => {
     }
   };
 
-  // Function to remove a favorite via backend
   const removeFavoriteFromDB = async (favoriteId) => {
     if (!isAuthenticated || !user) {
       alert('Please log in to remove favorites.');
@@ -137,7 +120,6 @@ const Attractions = () => {
           Authorization: `Bearer ${idToken}`,
         },
       });
-      // Update favorites state by removing the deleted favorite
       setFavorites((prevFavorites) => prevFavorites.filter((fav) => fav.id !== favoriteId));
       alert('Favorite removed successfully!');
     } catch (err) {
@@ -154,7 +136,7 @@ const Attractions = () => {
     setIsLoading(true);
     setGoogleMarkers([]);
     setSelected(null);
-    setHasSearched(true); // Set hasSearched to true when a category is clicked
+    setHasSearched(true);
     searchAttractionsByType(category.type);
   };
 
@@ -191,7 +173,7 @@ const Attractions = () => {
       return;
     }
 
-    setHasSearched(true); // Set hasSearched to true when a search is performed
+    setHasSearched(true);
 
     const geocoder = new window.google.maps.Geocoder();
 
@@ -203,7 +185,7 @@ const Attractions = () => {
         setSelectedCategory(null);
         const city = extractCityFromGeocodeResults(results[0]);
         setSelectedCity(city);
-        fetchCreatedAttractions(city); // Fetch created attractions for the city
+        fetchCreatedAttractions(city);
 
         const service = new window.google.maps.places.PlacesService(mapRef.current);
         const request = {
@@ -225,7 +207,7 @@ const Attractions = () => {
         });
       } else {
         setError('Location not found. Please try a different search.');
-        setMapCenter({ lat: 55.4038, lng: 10.4024 }); // Odense coordinates
+        setMapCenter({ lat: 55.4038, lng: 10.4024 });
         setMapZoom(12);
         setGoogleMarkers([]);
         setSelectedCity(null);
@@ -235,7 +217,6 @@ const Attractions = () => {
     });
   };
 
-  // Function to extract city from geocode results
   const extractCityFromGeocodeResults = (geocodeResult) => {
     if (!geocodeResult || !geocodeResult.address_components) return null;
     const addressComponents = geocodeResult.address_components;
@@ -251,12 +232,12 @@ const Attractions = () => {
     if (photoReference) {
       return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photoReference}&key=${GOOGLE_MAPS_API_KEY}`;
     }
-    return null; // Return null if no photo reference
+    return null;
   };
 
-  // Fetch detailed place information
   const fetchPlaceDetails = (placeId) => {
-    // Handle both Google Places and user-created attractions
+    if (!window.google || !mapRef.current) return;
+
     if (!isNaN(placeId)) {
       const attraction = createdAttractions.find(attr => attr.AttractionID === parseInt(placeId));
       if (attraction) {
@@ -267,7 +248,7 @@ const Attractions = () => {
           rating: attraction.rating,
           price_level: attraction.priceLevel,
           photos: attraction.images.map((img) => ({
-            photo_reference: img, // Assuming images are URLs
+            photo_reference: img,
           })),
           latitude: attraction.latitude,
           longitude: attraction.longitude,
@@ -279,9 +260,6 @@ const Attractions = () => {
         setMapZoom(15);
       }
     } else {
-      // Handle Google Places attraction
-      if (!window.google || !mapRef.current) return;
-
       const service = new window.google.maps.places.PlacesService(mapRef.current);
       service.getDetails(
         {
@@ -291,7 +269,6 @@ const Attractions = () => {
         (place, status) => {
           if (status === window.google.maps.places.PlacesServiceStatus.OK && place && place.geometry && place.geometry.location) {
             setSelected(place);
-            // Pan the map to the selected place
             setMapCenter({
               lat: place.geometry.location.lat(),
               lng: place.geometry.location.lng(),
@@ -305,7 +282,6 @@ const Attractions = () => {
     }
   };
 
-  // Function to get city name from current location
   const getCityFromLocation = async (location) => {
     try {
       const geocoder = new window.google.maps.Geocoder();
@@ -320,7 +296,6 @@ const Attractions = () => {
     }
   };
 
-  // Function to fetch created attractions based on city
   const fetchCreatedAttractions = async (city) => {
     if (!city) {
       setCreatedAttractions([]);
@@ -330,7 +305,6 @@ const Attractions = () => {
     try {
       const response = await axios.get('http://localhost:3001/api/attractions/approved', {
         params: { city },
-        // No Authorization header since it's a public route
       });
       setCreatedAttractions(response.data.attractions);
     } catch (err) {
@@ -340,25 +314,20 @@ const Attractions = () => {
     }
   };
 
-  // Fetch created attractions when selectedCity changes
   useEffect(() => {
     if (selectedCity) {
       fetchCreatedAttractions(selectedCity);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCity]);
 
-  // Fetch favorites when authenticated
   useEffect(() => {
     if (isAuthenticated) {
       fetchFavorites();
     } else {
-      setFavorites([]); // Clear favorites if not authenticated
+      setFavorites([]);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, user]);
 
-  // Optionally, fetch created attractions based on current location if no search is performed
   useEffect(() => {
     if (!selectedCity && isLoaded) {
       if (navigator.geolocation) {
@@ -371,7 +340,6 @@ const Attractions = () => {
             setMapCenter(currentLocation);
             setMapZoom(12);
 
-            // Reverse geocode to get city
             const city = await getCityFromLocation(currentLocation);
             if (city) {
               setSelectedCity(city);
@@ -379,33 +347,26 @@ const Attractions = () => {
             }
           },
           () => {
-            console.error('Error getting current location');
+            // Handle location access denial if needed
           }
         );
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded]);
 
-  // Define getCategoryIcon function
   const getCategoryIcon = (type) => {
     const category = categories.find((cat) => cat.type === type);
     if (category) {
-      // Replace emoji with actual icon URLs if desired
       return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
         `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30">
           <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="24">${category.icon}</text>
         </svg>`
       )}`;
     }
-    // Default marker icon
     return 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
   };
 
-  // Define getCreatedAttractionIcon function
   const getCreatedAttractionIcon = () => {
-    // Use a different color or a unique symbol for created attractions
-    // Example: Star icon
     return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
       `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30">
         <polygon points="15,1 19,11 29,11 21,17 24,27 15,21 6,27 9,17 1,11 11,11" 
@@ -419,10 +380,11 @@ const Attractions = () => {
   if (!isLoaded || authLoading)
     return <div className="attractions-component-loading">Loading Maps...</div>;
 
-  // Function to handle "View Details" button click
   const handleViewDetails = (attraction) => {
-    navigate(`/attractions/${attraction.AttractionID || attraction.place_id}`);
-    // Optionally, you can scroll to the map section after navigation
+    fetchPlaceDetails(attraction.AttractionID || attraction.place_id);
+    if (mapSectionRef.current) {
+      mapSectionRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   return (
@@ -514,7 +476,7 @@ const Attractions = () => {
             }
           </MarkerClusterer>
 
-          {/* Render createdAttractions markers */}
+          {/* Created Attractions Markers */}
           {createdAttractions.map((attraction) => (
             <Marker
               key={attraction.AttractionID}
@@ -557,7 +519,7 @@ const Attractions = () => {
                     className="attractions-component-info-window-image"
                     loading="lazy"
                   />
-                ) : null} {/* Removed placeholder image */}
+                ) : null}
                 {selected.reviews && selected.reviews.length > 0 && (
                   <div className="attractions-component-reviews">
                     <h4>User Reviews</h4>
@@ -580,18 +542,21 @@ const Attractions = () => {
                     View on Google Maps
                   </a>
                 )}
-                {/* Removed "View Details" button from InfoWindow */}
                 <div className="attractions-component-info-buttons">
                   <button
                     onClick={() => {
                       const favoriteData = {
-                        type: 'attraction', // Adjust type based on context or place types
-                        placeId: selected.place_id || selected.id, // Handle both Google Places and created attractions
+                        type: 'attraction',
+                        placeId: selected.place_id || selected.id,
                         name: selected.name,
                         address: selected.formatted_address || selected.location || '',
                         rating: selected.rating || null,
                         priceLevel: selected.price_level || selected.priceLevel || null,
-                        photoReference: selected.photos && selected.photos.length > 0 ? selected.photos[0].photo_reference : selected.images && selected.images.length > 0 ? selected.images[0] : null
+                        photoReference: selected.photos && selected.photos.length > 0
+                          ? selected.photos[0].photo_reference
+                          : selected.images && selected.images.length > 0
+                          ? selected.images[0]
+                          : null
                       };
                       addFavoriteToDB(favoriteData);
                     }}
@@ -627,7 +592,7 @@ const Attractions = () => {
                       className="attractions-component-placeholder"
                       loading="lazy"
                     />
-                  ) : null} {/* Removed placeholder image */}
+                  ) : null}
                 </button>
                 <div className="attractions-component-info">
                   <h3>{attraction.name}</h3>
@@ -645,13 +610,15 @@ const Attractions = () => {
                     <button
                       onClick={() => {
                         const favoriteData = {
-                          type: 'attraction', // Adjust type based on context or place types
+                          type: 'attraction',
                           placeId: attraction.place_id,
                           name: attraction.name,
                           address: attraction.vicinity || attraction.formatted_address || '',
                           rating: attraction.rating || null,
                           priceLevel: attraction.price_level || null,
-                          photoReference: attraction.photos && attraction.photos.length > 0 ? attraction.photos[0].photo_reference : null
+                          photoReference: attraction.photos && attraction.photos.length > 0
+                            ? attraction.photos[0].photo_reference
+                            : null
                         };
                         addFavoriteToDB(favoriteData);
                       }}
@@ -672,7 +639,7 @@ const Attractions = () => {
       {/* Created Attractions Section */}
       {createdAttractions.length > 0 && (
         <div className="attractions-component-approved-attractions-section">
-          <h2>Our Partner Attractions in {selectedCity}</h2> {/* Updated Section Title */}
+          <h2>Our Partner Attractions in {selectedCity}</h2>
           <div className="attractions-component-approved-grid">
             {createdAttractions.map((attraction) => (
               <div key={attraction.AttractionID} className="attractions-component-approved-item">
@@ -684,10 +651,10 @@ const Attractions = () => {
                       loading="lazy"
                       onError={(e) => {
                         e.target.onerror = null;
-                        e.target.src = null; // Do not set a placeholder
+                        e.target.src = null;
                       }}
                     />
-                  ) : null} {/* Removed placeholder image */}
+                  ) : null}
                 </div>
                 <div className="attractions-component-approved-details">
                   <h3>{attraction.name}</h3>
@@ -705,13 +672,15 @@ const Attractions = () => {
                     <button
                       onClick={() => {
                         const favoriteData = {
-                          type: 'attraction', // Adjust type based on context or place types
+                          type: 'attraction',
                           placeId: attraction.AttractionID,
                           name: attraction.name,
-                          address: `${attraction.location}`, // Assuming 'location' contains the address
+                          address: `${attraction.location}`,
                           rating: attraction.rating || null,
                           priceLevel: attraction.priceLevel || null,
-                          photoReference: attraction.images && attraction.images.length > 0 ? attraction.images[0] : null
+                          photoReference: attraction.images && attraction.images.length > 0
+                            ? attraction.images[0]
+                            : null
                         };
                         addFavoriteToDB(favoriteData);
                       }}
@@ -729,16 +698,13 @@ const Attractions = () => {
 
       {/* Favorites Section */}
       <div className="attractions-component-favorites-section">
-        <h2>Your Favorites</h2>
-        {favorites.length > 0 ? (
+        <h2>Your Favorite Attractions</h2>
+        {favorites.filter(fav => fav.type === 'attraction').length > 0 ? (
           <div className="attractions-component-favorites-grid">
-            {favorites.map((fav) => (
+            {favorites.filter(fav => fav.type === 'attraction').map((fav) => (
               <div key={fav.id} className="attractions-component-favorite-item">
                 <button
-                  onClick={() => {
-                    navigate(`/attractions/${fav.placeId}`);
-                    // Optionally, you can scroll to the map section after navigation
-                  }}
+                  onClick={() => handleViewDetails(fav)}
                   className="attractions-component-favorite-image-button"
                   aria-label={`View details for ${fav.name}`}
                 >
@@ -749,7 +715,7 @@ const Attractions = () => {
                       className="attractions-component-placeholder"
                       loading="lazy"
                     />
-                  ) : null} {/* Removed placeholder image */}
+                  ) : null}
                 </button>
                 <div className="attractions-component-favorite-info">
                   <h3>{fav.name}</h3>

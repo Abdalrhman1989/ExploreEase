@@ -18,13 +18,16 @@ const createHotel = async (req, res) => {
     const {
       name,
       location,
+      city, // New field
       basePrice,
       description,
       roomTypes,
       seasonalPricing,
       amenities,
-      images, // Expecting an array of Base64 strings
-      availability, // Date-wise availability
+      images, 
+      availability, 
+      latitude, 
+      longitude, 
     } = req.body;
 
     // Validate and process images
@@ -70,11 +73,17 @@ const createHotel = async (req, res) => {
       throw new Error('Availability must be an object with date keys in YYYY-MM-DD format and boolean values.');
     }
 
+    // Validate latitude and longitude
+    if (typeof latitude !== 'number' || typeof longitude !== 'number') {
+      throw new Error('Latitude and Longitude must be numbers.');
+    }
+
     // Create new hotel with status 'Pending'
     const newHotel = await Hotel.create({
       FirebaseUID: req.user.uid,
       name,
       location,
+      city, // Assign city
       basePrice,
       description,
       roomTypes: processedRoomTypes, // Directly assign the array
@@ -83,6 +92,8 @@ const createHotel = async (req, res) => {
       images: processedImages,
       status: 'Pending',
       availability: processedAvailability, // Set availability from request
+      latitude, // Include latitude
+      longitude, // Include longitude
     });
 
     res.status(201).json({
@@ -95,19 +106,60 @@ const createHotel = async (req, res) => {
     res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
   }
 };
-
+/**
+ * Get approved hotels, optionally filtered by location
+ */
 /**
  * Get approved hotels, optionally filtered by location
  */
 const getApprovedHotels = async (req, res) => {
   try {
-    const { location } = req.query; // Get location from query params
+    const { lat, lng, radius = 10000 } = req.query; // Get lat, lng, radius from query params
     let whereClause = { status: 'Approved' };
 
-    if (location) {
-      whereClause.location = { [Op.iLike]: `%${location}%` }; // Case-insensitive partial match
+    if (lat && lng) {
+      // Convert lat and lng to floats
+      const latitude = parseFloat(lat);
+      const longitude = parseFloat(lng);
+      const radiusInMeters = parseInt(radius, 10); // Ensure radius is integer
+
+      if (isNaN(latitude) || isNaN(longitude) || isNaN(radiusInMeters)) {
+        return res.status(400).json({ success: false, message: 'Invalid latitude, longitude, or radius.' });
+      }
+
+      // Assuming you have PostGIS enabled in your PostgreSQL database
+      // and your Hotel model has a 'location' field of type POINT
+      // Alternatively, calculate distance using the Haversine formula
+
+      // Using Sequelize's raw query to calculate distance
+      const sequelize = require('../models').sequelize;
+
+      const hotels = await Hotel.findAll({
+        where: whereClause,
+        attributes: {
+          include: [
+            [
+              sequelize.literal(`(
+                6371000 * acos(
+                  cos(radians(${latitude}))
+                  * cos(radians(latitude))
+                  * cos(radians(longitude) - radians(${longitude}))
+                  + sin(radians(${latitude}))
+                  * sin(radians(latitude))
+                )
+              )`),
+              'distance',
+            ],
+          ],
+        },
+        having: sequelize.where(sequelize.col('distance'), '<=', radiusInMeters),
+        order: [['distance', 'ASC']],
+      });
+
+      return res.status(200).json({ success: true, hotels });
     }
 
+    // If no location filtering
     const hotels = await Hotel.findAll({ where: whereClause });
     res.status(200).json({ success: true, hotels });
   } catch (error) {
@@ -115,6 +167,7 @@ const getApprovedHotels = async (req, res) => {
     res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
   }
 };
+
 
 /**
  * Get pending hotels (Admin Only)

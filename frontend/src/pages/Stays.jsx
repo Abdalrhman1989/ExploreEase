@@ -9,10 +9,10 @@ import {
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
 import '../styles/Stays.css';
-import hotelPlaceholder from '../assets/hotel1.jpg'; // Placeholder image
-import bannerHotel from '../assets/hotel.jpg'; // Updated banner image
+import hotelPlaceholder from '../assets/hotel1.jpg'; 
+import bannerHotel from '../assets/hotel.jpg'; 
 
-import ApprovedHotels from '../components/ApprovedHotels'; // Import ApprovedHotels
+import ApprovedHotels from '../components/ApprovedHotels'; 
 import { toast } from 'react-toastify';
 
 const libraries = ['places'];
@@ -720,32 +720,112 @@ const Stays = () => {
       </div>
 
       {/* Dynamic Stays Section */}
-      <div className="stays-component-dynamic-stays">
-        <h2>{selectedCategory ? `${selectedCategory} Stays` : 'Available Stays'}</h2>
-        {isLoading && (
-          <div className="stays-component-spinner">
-            <div className="spinner"></div>
-            <p>Loading stays...</p>
-          </div>
-        )}
-        {error && <div className="stays-component-error-message">{error}</div>}
-        <div className="stays-component-grid">
-          {places.length > 0 ? (
-            places.map((stay) => {
-              const primaryType = stay.types.find(type => typeMapping[type]) || 'hotel';
-              const mappedType = typeMapping[primaryType] || 'hotel';
+      {places.length > 0 && (
+        <div className="stays-component-dynamic-stays">
+          <h2>{selectedCategory ? `${selectedCategory} Stays` : 'Available Stays'}</h2>
+          {isLoading && (
+            <div className="stays-component-spinner">
+              <div className="spinner"></div>
+              <p>Loading stays...</p>
+            </div>
+          )}
+          {error && <div className="stays-component-error-message">{error}</div>}
+          <div className="stays-component-grid">
+            {places.length > 0 ? (
+              places.map((stay) => {
+                const primaryType = stay.types.find(type => typeMapping[type]) || 'hotel';
+                const mappedType = typeMapping[primaryType] || 'hotel';
 
-              return (
-                <div key={stay.place_id} className="stays-component-item">
+                return (
+                  <div key={stay.place_id} className="stays-component-item">
+                    <button
+                      onClick={() => fetchPlaceDetails(stay.place_id)}
+                      className="stays-component-image-button"
+                      aria-label={`View details for ${stay.name}`}
+                    >
+                      {stay.photos && stay.photos.length > 0 ? (
+                        <img
+                          src={getPhotoUrl(stay.photos[0].photo_reference)}
+                          alt={`${stay.name} photo`}
+                          className="stays-component-placeholder"
+                          loading="lazy"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = hotelPlaceholder;
+                          }}
+                        />
+                      ) : (
+                        <div className="stays-component-placeholder no-image">
+                          <p>No image available.</p>
+                        </div>
+                      )}
+                    </button>
+                    <div className="stays-component-info">
+                      <h3>{stay.name}</h3>
+                      {stay.rating && <p>Rating: {stay.rating} ⭐</p>}
+                      {stay.price_level !== undefined && (
+                        <p>Price Level: {'$'.repeat(stay.price_level)}</p>
+                      )}
+                      <p>{stay.vicinity || stay.formatted_address || 'No address available'}</p>
+                      <div className="stays-component-actions">
+                        <button
+                          onClick={() => handleViewDetails(stay.place_id)}
+                          className="stays-component-view-details-button"
+                          aria-label={`View details for ${stay.name}`}
+                        >
+                          View Details
+                        </button>
+                        <button
+                          onClick={() => {
+                            const favoriteData = {
+                              type: mappedType, // Use the correct mapped type
+                              placeId: stay.place_id,
+                              name: stay.name,
+                              address: stay.vicinity || stay.formatted_address || '',
+                              rating: stay.rating || null,
+                              priceLevel: stay.price_level || null,
+                              photoReference: stay.photos && stay.photos.length > 0 ? stay.photos[0].photo_reference : null
+                            };
+                            addFavoriteToDB(favoriteData);
+                          }}
+                          className="stays-component-add-favorite-button"
+                          aria-label={`Add ${stay.name} to Favorites`}
+                        >
+                          Add to Favorites
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              !isLoading && <p className="no-stays-message">No stays to display.</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Approved Hotels Section */}
+      <ApprovedHotels currentLocation={mapCenter} />
+
+      {/* Favorites Section */}
+      {favorites.length > 0 && (
+        <div className="stays-component-favorites-section">
+          <h2>Your Favorites</h2>
+          <div className="stays-component-favorites-grid">
+            {favorites
+              .filter(fav => fav.type === 'hotel') // Only show favorites of type 'hotel'
+              .map((fav) => (
+                <div key={fav.id} className="stays-component-favorite-item">
                   <button
-                    onClick={() => fetchPlaceDetails(stay.place_id)}
-                    className="stays-component-image-button"
-                    aria-label={`View details for ${stay.name}`}
+                    onClick={() => fetchPlaceDetails(fav.placeId)}
+                    className="stays-component-favorite-image-button"
+                    aria-label={`View details for ${fav.name}`}
                   >
-                    {stay.photos && stay.photos.length > 0 ? (
+                    {fav.photoReference ? (
                       <img
-                        src={getPhotoUrl(stay.photos[0].photo_reference)}
-                        alt={`${stay.name} photo`}
+                        src={getPhotoUrl(fav.photoReference)}
+                        alt={`${fav.name} photo`}
                         className="stays-component-placeholder"
                         loading="lazy"
                         onError={(e) => {
@@ -759,115 +839,37 @@ const Stays = () => {
                       </div>
                     )}
                   </button>
-                  <div className="stays-component-info">
-                    <h3>{stay.name}</h3>
-                    {stay.rating && <p>Rating: {stay.rating} ⭐</p>}
-                    {stay.price_level !== undefined && (
-                      <p>Price Level: {'$'.repeat(stay.price_level)}</p>
+                  <div className="stays-component-favorite-info">
+                    <h3>{fav.name}</h3>
+                    {fav.rating && <p>Rating: {fav.rating} ⭐</p>}
+                    {fav.priceLevel !== undefined && (
+                      <p>Price Level: {'$'.repeat(fav.priceLevel)}</p>
                     )}
-                    <p>{stay.vicinity || stay.formatted_address || 'No address available'}</p>
-                    <div className="stays-component-actions">
-                      <button
-                        onClick={() => handleViewDetails(stay.place_id)}
-                        className="stays-component-view-details-button"
-                        aria-label={`View details for ${stay.name}`}
-                      >
-                        View Details
-                      </button>
+                    <div className="stays-component-favorite-actions">
                       <button
                         onClick={() => {
-                          const favoriteData = {
-                            type: mappedType, // Use the correct mapped type
-                            placeId: stay.place_id,
-                            name: stay.name,
-                            address: stay.vicinity || stay.formatted_address || '',
-                            rating: stay.rating || null,
-                            priceLevel: stay.price_level || null,
-                            photoReference: stay.photos && stay.photos.length > 0 ? stay.photos[0].photo_reference : null
-                          };
-                          addFavoriteToDB(favoriteData);
+                          const mapsUrl = `https://www.google.com/maps/place/?q=place_id:${fav.placeId}`;
+                          window.open(mapsUrl, '_blank');
                         }}
-                        className="stays-component-add-favorite-button"
-                        aria-label={`Add ${stay.name} to Favorites`}
+                        className="stays-component-google-maps-button"
+                        aria-label={`View ${fav.name} on Google Maps`}
                       >
-                        Add to Favorites
+                        View in Maps
+                      </button>
+                      <button
+                        onClick={() => removeFavoriteFromDB(fav.id)}
+                        className="stays-component-delete-favorite-button"
+                        aria-label={`Delete ${fav.name} from Favorites`}
+                      >
+                        Delete
                       </button>
                     </div>
                   </div>
                 </div>
-              );
-            })
-          ) : (
-            !isLoading && <p className="no-stays-message">No stays to display.</p>
-          )}
-        </div>
-      </div>
-
-      {/* Approved Hotels Section */}
-      <ApprovedHotels />
-
-      {/* Favorites Section */}
-      <div className="stays-component-favorites-section">
-        <h2>Your Favorites</h2>
-        {favorites.length > 0 ? (
-          <div className="stays-component-favorites-grid">
-            {favorites.map((fav) => (
-              <div key={fav.id} className="stays-component-favorite-item">
-                <button
-                  onClick={() => fetchPlaceDetails(fav.placeId)}
-                  className="stays-component-favorite-image-button"
-                  aria-label={`View details for ${fav.name}`}
-                >
-                  {fav.photoReference ? (
-                    <img
-                      src={getPhotoUrl(fav.photoReference)}
-                      alt={`${fav.name} photo`}
-                      className="stays-component-placeholder"
-                      loading="lazy"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = hotelPlaceholder;
-                      }}
-                    />
-                  ) : (
-                    <div className="stays-component-placeholder no-image">
-                      <p>No image available.</p>
-                    </div>
-                  )}
-                </button>
-                <div className="stays-component-favorite-info">
-                  <h3>{fav.name}</h3>
-                  {fav.rating && <p>Rating: {fav.rating} ⭐</p>}
-                  {fav.priceLevel !== undefined && (
-                    <p>Price Level: {'$'.repeat(fav.priceLevel)}</p>
-                  )}
-                  <div className="stays-component-favorite-actions">
-                    <button
-                      onClick={() => {
-                        const mapsUrl = `https://www.google.com/maps/place/?q=place_id:${fav.placeId}`;
-                        window.open(mapsUrl, '_blank');
-                      }}
-                      className="stays-component-google-maps-button"
-                      aria-label={`View ${fav.name} on Google Maps`}
-                    >
-                      View in Maps
-                    </button>
-                    <button
-                      onClick={() => removeFavoriteFromDB(fav.id)}
-                      className="stays-component-delete-favorite-button"
-                      aria-label={`Delete ${fav.name} from Favorites`}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
+              ))}
           </div>
-        ) : (
-          <p className="no-favorites-message">You have no favorite stays yet.</p>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

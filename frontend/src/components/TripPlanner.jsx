@@ -1,6 +1,6 @@
 // src/components/TripPlanner.jsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import axios from 'axios';
@@ -24,6 +24,7 @@ import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import '../styles/TripPlanner.css'; // Import the custom styles
+import { AuthContext } from '../context/AuthContext';
 
 // Initialize localizer
 const localizer = momentLocalizer(moment);
@@ -31,7 +32,8 @@ const localizer = momentLocalizer(moment);
 // Initialize drag-and-drop functionality
 const DragAndDropCalendar = withDragAndDrop(Calendar);
 
-const TripPlanner = ({ idToken }) => {
+const TripPlanner = () => { // Removed idToken from props, use context instead
+  const { idToken, isAuthenticated, loading: authLoading } = useContext(AuthContext);
   const [events, setEvents] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState(null);
@@ -51,6 +53,8 @@ const TripPlanner = ({ idToken }) => {
 
   // Fetch existing trips
   useEffect(() => {
+    if (!idToken) return; // Wait until idToken is available
+
     const fetchTrips = async () => {
       setLoading(true);
       try {
@@ -345,6 +349,24 @@ const TripPlanner = ({ idToken }) => {
     }
   };
 
+  // Prevent rendering if authentication is still loading
+  if (authLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  // Prevent rendering if user is not authenticated
+  if (!isAuthenticated) {
+    return (
+      <Box sx={{ p: 4 }}>
+        <Alert severity="warning">You must be logged in to view your trips.</Alert>
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{ p: { xs: 1, sm: 2, md: 3 } }}>
       {tripError && <Alert severity="error" sx={{ mb: 2 }}>{tripError}</Alert>}
@@ -497,7 +519,7 @@ const TripPlanner = ({ idToken }) => {
               textTransform: 'none',
               transition: 'background-color var(--transition-duration), color var(--transition-duration)',
               '&:hover': {
-                backgroundColor: 'darken(var(--primary-color), 10%)',
+                backgroundColor: '#1976d2', // MUI primary darken color
                 color: '#fff',
               },
             }}

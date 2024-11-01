@@ -1,8 +1,7 @@
-// backend/models/favorite.js
-
+'use strict';
 module.exports = (sequelize, DataTypes) => {
   const Favorite = sequelize.define('Favorite', {
-    id: { // Use 'id' as the primary key
+    id: { 
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
@@ -10,6 +9,12 @@ module.exports = (sequelize, DataTypes) => {
     userId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: 'Users', 
+        key: 'UserID',  
+      },
+      onDelete: 'CASCADE', 
+      onUpdate: 'CASCADE', 
     },
     type: {
       type: DataTypes.STRING,
@@ -35,7 +40,7 @@ module.exports = (sequelize, DataTypes) => {
     photoReference: {
       type: DataTypes.STRING,
     },
-    createdAt: { // Ensure timestamps are correctly defined
+    createdAt: { 
       type: DataTypes.DATE,
       allowNull: false,
     },
@@ -45,11 +50,12 @@ module.exports = (sequelize, DataTypes) => {
     },
   }, {
     tableName: 'Favorites',
-    timestamps: true, // Ensure Sequelize manages timestamps
+    timestamps: true, 
   });
 
   Favorite.associate = (models) => {
-    Favorite.belongsTo(models.User, { foreignKey: 'userId' });
+    Favorite.belongsTo(models.User, { foreignKey: 'userId',targetKey: 'UserID',
+      as: 'user' });
   };
 
   return Favorite;

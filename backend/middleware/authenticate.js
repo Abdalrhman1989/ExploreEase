@@ -1,8 +1,8 @@
-// middleware/authenticate.js
-const admin = require('firebase-admin');
-const { User } = require('../models');
+// backend/middleware/authenticate.js
 
-module.exports = async (req, res, next) => {
+const admin = require('../firebaseAdmin'); // Adjust the path as needed
+
+const authenticate = async (req, res, next) => {
   const authHeader = req.headers.authorization;
   console.log('authHeader:', authHeader);
 
@@ -19,27 +19,14 @@ module.exports = async (req, res, next) => {
     const decodedToken = await admin.auth().verifyIdToken(token);
     console.log('Decoded token:', decodedToken);
 
-    const firebaseUID = decodedToken.uid;
-    console.log('Authenticated user UID:', firebaseUID);
-
-    // Fetch the user from the database using FirebaseUID
-    const user = await User.findOne({ where: { FirebaseUID: firebaseUID } });
-
-    if (!user) {
-      return res.status(401).json({ message: 'Unauthorized: User not found in database' });
-    }
-
-    // Attach the user to the request object
-    req.user = {
-      id: user.UserID,       // Database UserID
-      uid: firebaseUID,      // Firebase UID
-      email: user.Email,     // User's email
-      // You can add other user properties as needed
-    };
+    // Attach the decoded token to the request object
+    req.user = decodedToken;
 
     next();
   } catch (error) {
-    console.error('Error verifying token or fetching user:', error);
+    console.error('Error verifying token:', error);
     return res.status(401).json({ message: 'Unauthorized: Invalid token' });
   }
 };
+
+module.exports = authenticate;

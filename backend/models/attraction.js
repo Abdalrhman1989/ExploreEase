@@ -7,8 +7,7 @@ module.exports = (sequelize, DataTypes) => {
      * Define associations here.
      */
     static associate(models) {
-      // Example: Attraction belongs to User
-      // Attraction.belongsTo(models.User, { foreignKey: 'FirebaseUID', targetKey: 'FirebaseUID' });
+      Attraction.belongsTo(models.User, { foreignKey: 'FirebaseUID', targetKey: 'FirebaseUID', as: 'user' });
     }
   }
 
@@ -23,6 +22,10 @@ module.exports = (sequelize, DataTypes) => {
       FirebaseUID: {
         type: DataTypes.STRING(255),
         allowNull: false,
+        references: {
+          model: 'Users',
+          key: 'FirebaseUID',
+        },
       },
       name: {
         type: DataTypes.STRING(100),
@@ -31,9 +34,9 @@ module.exports = (sequelize, DataTypes) => {
       location: {
         type: DataTypes.STRING(255),
         allowNull: false,
-        // You can remove this field if you prefer separate latitude and longitude
+        
       },
-      city: { // Added city field
+      city: { 
         type: DataTypes.STRING(100),
         allowNull: false,
       },
@@ -42,7 +45,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       entryFee: {
-        type: DataTypes.FLOAT, // Using FLOAT for entry fees that may include decimals
+        type: DataTypes.FLOAT, 
         allowNull: false,
       },
       openingHours: {
@@ -54,11 +57,11 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
       },
       amenities: {
-        type: DataTypes.JSON, // Stores an array or object of amenities
+        type: DataTypes.JSON, 
         allowNull: true,
       },
       images: {
-        type: DataTypes.TEXT, // Stores an array of image URLs or Base64 strings
+        type: DataTypes.TEXT, 
         allowNull: true,
         get() {
           const rawValue = this.getDataValue('images');
@@ -68,11 +71,11 @@ module.exports = (sequelize, DataTypes) => {
           this.setDataValue('images', JSON.stringify(value));
         },
       },
-      latitude: { // Added latitude field
+      latitude: { 
         type: DataTypes.FLOAT,
         allowNull: false,
       },
-      longitude: { // Added longitude field
+      longitude: { 
         type: DataTypes.FLOAT,
         allowNull: false,
       },

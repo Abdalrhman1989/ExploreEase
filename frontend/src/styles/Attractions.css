@@ -1,6 +1,3 @@
-/* src/styles/Attractions.css */
-
-/* Import Global Variables */
 @import './variables.css';
 
 /* Global Styles */
@@ -8,7 +5,7 @@
     font-family: var(--font-family);
     color: var(--text-color);
     background-color: var(--background-color);
-    overflow-x: hidden; /* Prevent horizontal scrollbar */
+    overflow-x: hidden; 
     padding-bottom: 50px;
 }
 
@@ -16,14 +13,13 @@
 .attractions-component-banner {
     position: relative;
     height: 60vh;
-    background-image: url('../assets/hotel.jpg'); /* Ensure the path is correct */
+    background-image: url('../assets/hotel.jpg'); 
     background-size: cover;
     background-position: center;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 20px;
-    border-radius: var(--border-radius);
     margin-bottom: 40px;
     transition: background-image var(--transition-speed);
 }
@@ -36,7 +32,6 @@
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.4);
-    border-radius: var(--border-radius);
 }
 
 .attractions-component-banner-content {
@@ -145,12 +140,12 @@
 }
 
 .attractions-component-category-icon {
-    font-size: 2rem; /* Reduced font size */
-    margin-bottom: 10px; /* Reduced margin */
+    font-size: 2rem; 
+    margin-bottom: 10px; 
 }
 
 .attractions-component-category-item h3 {
-    font-size: 1.2rem; /* Reduced font size */
+    font-size: 1.2rem; 
     font-weight: 600;
     margin: 0;
 }
@@ -211,7 +206,7 @@
 /* Map Section */
 .attractions-component-map-section {
     padding: 40px 20px;
-    position: relative; /* Ensures the map has a min height to accommodate content */
+    position: relative; 
 }
 
 /* InfoWindow Styling */
@@ -357,7 +352,7 @@
 }
 
 .attractions-component-info {
-    flex-grow: 1; /* Allows the info section to take up available space */
+    flex-grow: 1; 
     display: flex;
     flex-direction: column;
 }
@@ -377,7 +372,6 @@
 .attractions-component-info p {
     margin: 6px 0;
     font-size: 1rem;
-    /* Optional: Limit text to 3 lines */
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;  
@@ -387,7 +381,7 @@
 .attractions-component-actions {
     display: flex;
     gap: 10px;
-    margin-top: auto; /* Pushes actions to the bottom */
+    margin-top: auto; 
 }
 
 /* Approved Attractions Section */
@@ -729,7 +723,7 @@
 .attractions-component-favorite-actions {
     display: flex;
     gap: 10px;
-    margin-top: auto; /* Pushes actions to the bottom */
+    margin-top: auto; 
 }
 
 /* No Favorites Message */
@@ -925,6 +919,3 @@
         gap: 20px;
     }
 }
-
-/* Extra Small Devices (Very Small Phones, less than 480px) */
-/* Further adjustments can be made within the above media queries */

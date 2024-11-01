@@ -1,11 +1,12 @@
 // frontend/src/components/AttractionForm.jsx
 
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useRef, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
 import '../styles/AttractionForm.css'; // Ensure this path is correct
-import { useNavigate } from 'react-router-dom';
-import { GoogleMap, Marker, useLoadScript } from '@react-google-maps/api';
+import { GoogleMap, Marker, useLoadScript, Autocomplete } from '@react-google-maps/api';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const libraries = ['places'];
 
@@ -14,10 +15,15 @@ const mapContainerStyle = {
   height: '300px',
 };
 
+const defaultCenter = {
+  lat: 48.8566, // Fallback to Paris
+  lng: 2.3522,
+};
+
+const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
+
 const AttractionForm = () => {
   const { isAuthenticated, userRole, user, idToken, loading } = useContext(AuthContext);
-  const navigate = useNavigate();
-  
   const [attraction, setAttraction] = useState({
     name: '',
     location: '',
@@ -36,19 +42,90 @@ const AttractionForm = () => {
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
   const [markerPosition, setMarkerPosition] = useState(null);
+  const [mapCenter, setMapCenter] = useState(defaultCenter);
 
-  // Load Google Maps script
   const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: process.env.REACT_APP_GOOGLE_GEOCODING_API_KEY,
+    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
     libraries,
   });
 
-  // Handle map click to set marker
+  const autocompleteRef = useRef(null);
+  const mapRef = useRef(null);
+
+  // Effect to get user's current location
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setMapCenter({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.error('Error fetching user location:', error);
+          // Notify the user about the fallback
+          toast.info('Unable to retrieve your location. Defaulting to Paris.');
+        }
+      );
+    } else {
+      console.error('Geolocation not supported by this browser.');
+      toast.info('Geolocation is not supported by your browser. Defaulting to Paris.');
+    }
+  }, []);
+
+  // Handle map click to set marker position
   const handleMapClick = (event) => {
     const lat = event.latLng.lat();
     const lng = event.latLng.lng();
     setMarkerPosition({ lat, lng });
     setAttraction({ ...attraction, latitude: lat, longitude: lng });
+    // Optionally, reverse geocode to get address
+    reverseGeocode(lat, lng);
+  };
+
+  // Handle Place Selection from Autocomplete
+  const handlePlaceChanged = () => {
+    const place = autocompleteRef.current.getPlace();
+    if (place.geometry) {
+      const lat = place.geometry.location.lat();
+      const lng = place.geometry.location.lng();
+      setMarkerPosition({ lat, lng });
+      setMapCenter({ lat, lng });
+      setAttraction({
+        ...attraction,
+        location: place.formatted_address || place.name || '',
+        latitude: lat,
+        longitude: lng,
+      });
+    } else {
+      toast.error('No details available for the selected location.');
+    }
+  };
+
+  // Reverse Geocoding: Get address from coordinates
+  const reverseGeocode = async (lat, lng) => {
+    try {
+      const geocodeResponse = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', {
+        params: {
+          latlng: `${lat},${lng}`,
+          key: GOOGLE_MAPS_API_KEY,
+        },
+      });
+
+      if (geocodeResponse.data.status === 'OK') {
+        const address = geocodeResponse.data.results[0]?.formatted_address || '';
+        setAttraction((prevAttraction) => ({
+          ...prevAttraction,
+          location: address,
+        }));
+      } else {
+        toast.error('Failed to retrieve address from coordinates.');
+      }
+    } catch (err) {
+      console.error('Reverse geocoding error:', err);
+      toast.error('Error retrieving address from coordinates.');
+    }
   };
 
   // Handle form field changes
@@ -76,7 +153,7 @@ const AttractionForm = () => {
       })
       .catch((err) => {
         console.error('Error converting images:', err);
-        setError('Failed to process images.');
+        toast.error('Failed to process images.');
       });
   };
 
@@ -94,94 +171,110 @@ const AttractionForm = () => {
     );
   };
 
-  // Optionally: Handle geocoding to auto-fill latitude and longitude
-  const handleGeocode = async () => {
-    if (!attraction.location || !attraction.city) {
-      setError('Please enter both location and city to geocode.');
-      return;
-    }
-
-    try {
-      const geocodingApiKey = process.env.REACT_APP_GOOGLE_GEOCODING_API_KEY;
-      const geocodeResponse = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', {
-        params: {
-          address: `${attraction.location}, ${attraction.city}`,
-          key: geocodingApiKey,
-        },
-      });
-
-      if (geocodeResponse.data.status === 'OK') {
-        const { lat, lng } = geocodeResponse.data.results[0].geometry.location;
-        setAttraction({ ...attraction, latitude: lat, longitude: lng });
-        setMarkerPosition({ lat, lng }); // Update marker position on the map
-        setError(null);
-      } else {
-        setError('Failed to geocode the provided location.');
-      }
-    } catch (err) {
-      console.error('Error during geocoding:', err);
-      setError('Error during geocoding. Please try again later.');
-    }
-  };
-
   // Handle Form Submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage(null);
     setError(null);
+    toast.dismiss(); // Dismiss existing toasts
 
     try {
       if (loading) {
         setError('Authentication is still loading. Please wait.');
+        toast.error('Authentication is still loading. Please wait.');
         return;
       }
 
       if (!isAuthenticated || !userRole) {
         setError('Authentication required. Please log in.');
+        toast.error('Authentication required. Please log in.');
         return;
       }
 
       // Ensure the user has the right role
       if (!['User', 'BusinessAdministrator'].includes(userRole)) {
         setError('You do not have permission to perform this action.');
+        toast.error('You do not have permission to perform this action.');
         return;
       }
 
       if (!idToken) {
         setError('Authentication token is missing. Please log in again.');
+        toast.error('Authentication token is missing. Please log in again.');
+        return;
+      }
+
+      // Validate required fields
+      const {
+        name,
+        location,
+        city,
+        type,
+        entryFee,
+        openingHours,
+        description,
+        amenities,
+        images: attractionImages,
+        latitude,
+        longitude,
+      } = attraction;
+
+      if (
+        !name ||
+        !location ||
+        !city ||
+        !type ||
+        !entryFee ||
+        !openingHours ||
+        !description ||
+        !latitude ||
+        !longitude
+      ) {
+        setError('Please fill in all required fields.');
+        toast.error('Please fill in all required fields.');
         return;
       }
 
       // Validate latitude and longitude
-      const latitude = parseFloat(attraction.latitude);
-      const longitude = parseFloat(attraction.longitude);
+      const lat = parseFloat(latitude);
+      const lng = parseFloat(longitude);
       if (
-        isNaN(latitude) ||
-        isNaN(longitude) ||
-        latitude < -90 ||
-        latitude > 90 ||
-        longitude < -180 ||
-        longitude > 180
+        isNaN(lat) ||
+        isNaN(lng) ||
+        lat < -90 ||
+        lat > 90 ||
+        lng < -180 ||
+        lng > 180
       ) {
         setError('Please enter valid latitude and longitude values.');
+        toast.error('Please enter valid latitude and longitude values.');
         return;
       }
 
-      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
+      // Validate entryFee
+      const fee = parseFloat(entryFee);
+      if (isNaN(fee) || fee < 0) {
+        setError('Entry fee must be a non-negative number.');
+        toast.error('Entry fee must be a non-negative number.');
+        return;
+      }
 
+      // Construct the payload
       const payload = {
-        name: attraction.name,
-        location: attraction.location,
-        city: attraction.city,
-        type: attraction.type,
-        entryFee: parseFloat(attraction.entryFee),
-        openingHours: attraction.openingHours,
-        description: attraction.description,
-        amenities: attraction.amenities,
-        images: attraction.images,
-        latitude: latitude,
-        longitude: longitude,
+        name,
+        location,
+        city,
+        type,
+        entryFee: fee,
+        openingHours,
+        description,
+        amenities,
+        images: attractionImages,
+        latitude: lat,
+        longitude: lng,
       };
+
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
 
       const response = await axios.post(`${backendUrl}/api/attractions`, payload, {
         headers: {
@@ -191,6 +284,8 @@ const AttractionForm = () => {
       });
 
       setMessage(response.data.message);
+      toast.success(response.data.message);
+
       // Reset form fields
       setAttraction({
         name: '',
@@ -208,21 +303,24 @@ const AttractionForm = () => {
       setImages([]);
       setSelectedAmenities([]);
       setMarkerPosition(null); // Reset marker
-      // Optionally, scroll to the message
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setMapCenter(defaultCenter); // Reset map center
+      // Optionally, navigate to another page
+      // navigate('/attractions');
     } catch (err) {
       console.error('Error submitting attraction:', err);
       if (err.response && err.response.data) {
         setError(err.response.data.message || 'Failed to submit attraction');
+        toast.error(err.response.data.message || 'Failed to submit attraction');
       } else {
         setError('Failed to submit attraction');
+        toast.error('Failed to submit attraction');
       }
     }
   };
 
   // Optional: Show loading state
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className="attraction-loading">Loading...</div>;
   }
 
   if (loadError) return <div className="attractions-error">Error loading maps</div>;
@@ -234,6 +332,7 @@ const AttractionForm = () => {
       {message && <p className="success-message">{message}</p>}
       {error && <p className="error-message">{error}</p>}
 
+      {/* Attraction Name */}
       <input
         type="text"
         name="name"
@@ -243,15 +342,20 @@ const AttractionForm = () => {
         required
       />
 
-      <input
-        type="text"
-        name="location"
-        placeholder="Location"
-        value={attraction.location}
-        onChange={handleChange}
-        required
-      />
+      {/* Location Autocomplete Search Box */}
+      <Autocomplete onLoad={(autocomplete) => (autocompleteRef.current = autocomplete)} onPlaceChanged={handlePlaceChanged}>
+        <input
+          type="text"
+          name="location"
+          placeholder="Search Location"
+          value={attraction.location}
+          onChange={handleChange}
+          required
+          className="autocomplete-input"
+        />
+      </Autocomplete>
 
+      {/* City Input */}
       <input
         type="text"
         name="city"
@@ -261,15 +365,17 @@ const AttractionForm = () => {
         required
       />
 
+      {/* Type Input */}
       <input
         type="text"
         name="type"
-        placeholder="Type"
+        placeholder="Type (e.g., Museum, Park)"
         value={attraction.type}
         onChange={handleChange}
         required
       />
 
+      {/* Entry Fee Input */}
       <input
         type="number"
         name="entryFee"
@@ -281,15 +387,17 @@ const AttractionForm = () => {
         required
       />
 
+      {/* Opening Hours Input */}
       <input
         type="text"
         name="openingHours"
-        placeholder="Opening Hours"
+        placeholder="Opening Hours (e.g., 9 AM - 5 PM)"
         value={attraction.openingHours}
         onChange={handleChange}
         required
       />
 
+      {/* Description Textarea */}
       <textarea
         name="description"
         placeholder="Description"
@@ -298,7 +406,7 @@ const AttractionForm = () => {
         required
       />
 
-      {/* Amenities */}
+      {/* Amenities Selection */}
       <div className="amenities">
         <h3>Amenities</h3>
         <label>
@@ -361,6 +469,7 @@ const AttractionForm = () => {
             onChange={handleChange}
             step="0.0001"
             required
+            disabled
           />
           <input
             type="number"
@@ -370,6 +479,7 @@ const AttractionForm = () => {
             onChange={handleChange}
             step="0.0001"
             required
+            disabled
           />
         </div>
         {/* Map Picker */}
@@ -378,25 +488,24 @@ const AttractionForm = () => {
           <GoogleMap
             mapContainerStyle={mapContainerStyle}
             zoom={markerPosition ? 15 : 12}
-            center={markerPosition || { lat: 48.8566, lng: 2.3522 }} // Default to Paris
+            center={mapCenter} // Dynamic map center based on user's location
             onClick={handleMapClick}
             options={{
-              disableDefaultUI: true,
+              disableDefaultUI: false,
               zoomControl: true,
             }}
+            onLoad={(map) => (mapRef.current = map)}
           >
             {markerPosition && <Marker position={markerPosition} />}
           </GoogleMap>
         </div>
-        {/* Geocode Button */}
-        <button type="button" onClick={handleGeocode} className="geocode-button">
-          Geocode Address
-        </button>
       </div>
 
       <button type="submit" className="submit-button">
         Add Attraction
       </button>
+
+      <ToastContainer />
     </form>
   );
 };

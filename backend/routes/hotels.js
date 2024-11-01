@@ -1,5 +1,3 @@
-// backend/routes/hotels.js
-
 const express = require('express');
 const { body } = require('express-validator');
 const hotelController = require('../controllers/hotelController');
@@ -9,7 +7,7 @@ const router = express.Router();
 
 // 1. Specific Routes First
 
-// Route to get approved hotels with optional location filter (Public Access)
+// Route to get approved hotels with optional city and location filter (Public Access)
 router.get('/approved', hotelController.getApprovedHotels);
 
 // Route to get pending hotels (Admin Only)
@@ -40,9 +38,11 @@ router.post(
   [
     body('name').notEmpty().withMessage('Hotel name is required'),
     body('location').notEmpty().withMessage('Location is required'),
+    body('city').notEmpty().withMessage('City is required'), // Validate city
     body('basePrice').isFloat({ gt: 0 }).withMessage('Base price must be a positive number'),
     body('description').notEmpty().withMessage('Description is required'),
-    // Additional validations can be added here
+    body('latitude').isFloat({ min: -90, max: 90 }).withMessage('Invalid latitude value'),
+    body('longitude').isFloat({ min: -180, max: 180 }).withMessage('Invalid longitude value'),
     body('availability').isObject().withMessage('Availability must be an object'),
   ],
   hotelController.createHotel
@@ -72,20 +72,19 @@ router.put(
   hotelController.updateHotelAvailability
 );
 
-// **New Routes for Updating and Deleting Hotels**
-
-// Route to update a hotel by ID (Protected: Owner or Admin)
+// Route to update hotel details (Full Update) (Protected: Owner or Admin)
 router.put(
   '/:id',
-  authorize(['Admin', 'User', 'BusinessAdministrator']), // Adjust roles as necessary
+  authorize(['Admin', 'User', 'BusinessAdministrator']),
   [
     body('name').notEmpty().withMessage('Hotel name is required'),
     body('location').notEmpty().withMessage('Location is required'),
+    body('city').notEmpty().withMessage('City is required'), // Validate city
     body('basePrice').isFloat({ gt: 0 }).withMessage('Base price must be a positive number'),
     body('description').notEmpty().withMessage('Description is required'),
-    // Additional validations can be added here
+    body('latitude').isFloat({ min: -90, max: 90 }).withMessage('Invalid latitude value'),
+    body('longitude').isFloat({ min: -180, max: 180 }).withMessage('Invalid longitude value'),
     body('availability').isObject().withMessage('Availability must be an object'),
-    // Add other fields as necessary
   ],
   hotelController.updateHotel
 );
@@ -93,7 +92,7 @@ router.put(
 // Route to delete a hotel by ID (Protected: Owner or Admin)
 router.delete(
   '/:id',
-  authorize(['Admin', 'User', 'BusinessAdministrator']), // Adjust roles as necessary
+  authorize(['Admin', 'User', 'BusinessAdministrator']),
   hotelController.deleteHotel
 );
 

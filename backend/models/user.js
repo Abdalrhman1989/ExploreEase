@@ -9,10 +9,12 @@ module.exports = (sequelize, DataTypes) => {
       // Define associations here
       User.hasMany(models.Favorite, { foreignKey: 'userId', as: 'favorites' });
       User.hasMany(models.Trip, { foreignKey: 'userId', as: 'trips' });
-      User.hasMany(models.Testimonial, { foreignKey: 'UserID', as: 'testimonials' });
+      User.hasMany(models.Testimonial, { foreignKey: 'userId', as: 'testimonials' });
       User.hasMany(models.Attraction, { foreignKey: 'FirebaseUID', as: 'attractions' });
-
-
+      User.hasMany(models.Itinerary, { foreignKey: 'userId', as: 'itineraries' });
+      User.hasMany(models.Hotel, { foreignKey: 'FirebaseUID', sourceKey: 'FirebaseUID', as: 'hotels' });
+      User.hasMany(models.Restaurant, { foreignKey: 'FirebaseUID', sourceKey: 'FirebaseUID', as: 'restaurants' });
+      User.hasMany(models.Payment, { foreignKey: 'userId', as: 'payments' });
     }
   }
 

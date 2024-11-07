@@ -1,5 +1,3 @@
-// backend/routes/flight.js
-
 const express = require('express');
 const router = express.Router();
 const { searchFlights } = require('../controllers/flightController');

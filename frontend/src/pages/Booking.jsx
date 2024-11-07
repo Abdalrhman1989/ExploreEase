@@ -38,125 +38,32 @@ const Booking = () => {
     nationality: '',
   });
 
-  const [bookingStatus, setBookingStatus] = useState({
-    loading: false,
-    success: null,
-    message: '',
-  });
+  const [formErrors, setFormErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleConfirmBooking = async (e) => {
+  const validateForm = () => {
+    const errors = {};
+    for (const [key, value] of Object.entries(formData)) {
+      if (!value) {
+        errors[key] = 'This field is required.';
+      }
+    }
+    // Additional validations can be added here (e.g., email format, phone number format)
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleConfirmBooking = (e) => {
     e.preventDefault();
-    setBookingStatus({ loading: true, success: null, message: '' });
-
-    try {
-      // Basic Frontend Validation
-      for (const [key, value] of Object.entries(formData)) {
-        if (!value) {
-          throw new Error(`Please fill out the ${key} field.`);
-        }
-      }
-
-      // Ensure flightDetails contains all necessary fields
-      const requiredFields = [
-        'type',
-        'id',
-        'source',
-        'itineraries',
-        'lastTicketingDate',
-        'numberOfBookableSeats',
-        'oneWay',
-        'price',
-        'pricingOptions',
-        'validatingAirlineCodes',
-        'travelerPricings',
-      ];
-
-      const missingFields = requiredFields.filter((field) => !(field in flightDetails));
-      if (missingFields.length > 0) {
-        throw new Error(`Missing flight details fields: ${missingFields.join(', ')}`);
-      }
-
-      // Prepare flightOffer as per Amadeus API expectations
-      // Exclude 'lastTicketingDateTime' if present
-      const { lastTicketingDateTime, ...serializableFlightOffer } = flightDetails;
-
-      console.log('Serializable Flight Offer:', serializableFlightOffer); // Debugging line
-
-      // Step 1: Confirm Flight Pricing
-      const confirmResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/flights/confirm-price`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ flightOffer: serializableFlightOffer }),
-      });
-
-      console.log('Confirm Response Status:', confirmResponse.status); // Debugging line
-
-      if (!confirmResponse.ok) {
-        // Attempt to parse error message
-        const errorData = await confirmResponse.json().catch(() => null);
-        const errorMsg = errorData?.error || 'Failed to confirm flight pricing.';
-        throw new Error(errorMsg);
-      }
-      const confirmedPrice = await confirmResponse.json();
-
-      console.log('Confirmed Price:', confirmedPrice); // Debugging line
-
-      // Step 2: Submit Traveler Information
-      const travelerResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/flights/traveler-info`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      console.log('Traveler Response Status:', travelerResponse.status); // Debugging line
-
-      if (!travelerResponse.ok) {
-        const errorData = await travelerResponse.json().catch(() => null);
-        const errorMsg = errorData?.error || 'Failed to submit traveler information.';
-        throw new Error(errorMsg);
-      }
-      const travelerInfo = await travelerResponse.json();
-
-      console.log('Traveler Info:', travelerInfo); // Debugging line
-
-      // Step 3: Place the Order
-      const orderData = {
-        flightOffer: serializableFlightOffer,
-        confirmedPrice: confirmedPrice.data,
-        travelerId: travelerInfo.data.id,
-      };
-
-      console.log('Order Data:', orderData); // Debugging line
-
-      const orderResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/flights/book-flight`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData),
-      });
-
-      console.log('Order Response Status:', orderResponse.status); // Debugging line
-
-      if (!orderResponse.ok) {
-        const errorData = await orderResponse.json().catch(() => null);
-        const errorMsg = errorData?.error || 'Failed to place flight order.';
-        throw new Error(errorMsg);
-      }
-      const bookingConfirmation = await orderResponse.json();
-
-      console.log('Booking Confirmation:', bookingConfirmation); // Debugging line
-
-      setBookingStatus({ loading: false, success: true, message: 'Booking Confirmed!' });
-
-      // Navigate to confirmation page with booking data
-      navigate('/confirmation', { state: { booking: bookingConfirmation.data } });
-    } catch (error) {
-      console.error('Booking Error:', error);
-      setBookingStatus({ loading: false, success: false, message: error.message });
+    if (validateForm()) {
+      setIsSubmitting(true);
+      // Redirect to Payment Page with flightDetails and formData
+      navigate('/payment', { state: { flightDetails, traveler: formData } });
     }
   };
 
@@ -316,6 +223,8 @@ const Booking = () => {
                   variant="outlined"
                   fullWidth
                   required
+                  error={!!formErrors.firstName}
+                  helperText={formErrors.firstName}
                 />
               </Grid>
 
@@ -329,6 +238,8 @@ const Booking = () => {
                   variant="outlined"
                   fullWidth
                   required
+                  error={!!formErrors.lastName}
+                  helperText={formErrors.lastName}
                 />
               </Grid>
 
@@ -343,6 +254,8 @@ const Booking = () => {
                   variant="outlined"
                   fullWidth
                   required
+                  error={!!formErrors.email}
+                  helperText={formErrors.email}
                 />
               </Grid>
 
@@ -357,6 +270,8 @@ const Booking = () => {
                   variant="outlined"
                   fullWidth
                   required
+                  error={!!formErrors.phone}
+                  helperText={formErrors.phone}
                 />
               </Grid>
 
@@ -374,6 +289,8 @@ const Booking = () => {
                     shrink: true,
                   }}
                   required
+                  error={!!formErrors.dateOfBirth}
+                  helperText={formErrors.dateOfBirth}
                 />
               </Grid>
 
@@ -387,6 +304,8 @@ const Booking = () => {
                   variant="outlined"
                   fullWidth
                   required
+                  error={!!formErrors.passportNumber}
+                  helperText={formErrors.passportNumber}
                 />
               </Grid>
 
@@ -404,6 +323,8 @@ const Booking = () => {
                     shrink: true,
                   }}
                   required
+                  error={!!formErrors.issuanceDate}
+                  helperText={formErrors.issuanceDate}
                 />
               </Grid>
 
@@ -421,6 +342,8 @@ const Booking = () => {
                     shrink: true,
                   }}
                   required
+                  error={!!formErrors.expiryDate}
+                  helperText={formErrors.expiryDate}
                 />
               </Grid>
 
@@ -436,6 +359,8 @@ const Booking = () => {
                   required
                   placeholder="e.g., US"
                   inputProps={{ maxLength: 2 }}
+                  error={!!formErrors.issuanceCountry}
+                  helperText={formErrors.issuanceCountry}
                 />
               </Grid>
 
@@ -451,6 +376,8 @@ const Booking = () => {
                   required
                   placeholder="e.g., US"
                   inputProps={{ maxLength: 2 }}
+                  error={!!formErrors.nationality}
+                  helperText={formErrors.nationality}
                 />
               </Grid>
 
@@ -462,23 +389,11 @@ const Booking = () => {
                   color="primary"
                   size="large"
                   fullWidth
-                  disabled={bookingStatus.loading}
+                  disabled={isSubmitting}
                 >
-                  {bookingStatus.loading ? <CircularProgress size={24} color="inherit" /> : 'Confirm Booking'}
+                  {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'Confirm Booking'}
                 </Button>
               </Grid>
-
-              {/* Booking Status */}
-              {bookingStatus.message && (
-                <Grid item xs={12}>
-                  <Typography
-                    variant="body1"
-                    color={bookingStatus.success ? 'green' : 'red'}
-                  >
-                    {bookingStatus.message}
-                  </Typography>
-                </Grid>
-              )}
             </Grid>
           </form>
         </CardContent>

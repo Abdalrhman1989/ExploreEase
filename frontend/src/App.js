@@ -1,4 +1,4 @@
-// src/App.jsx
+// frontend/src/App.jsx
 
 import React, { useContext } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
@@ -36,6 +36,7 @@ import HotelBook from './pages/HotelBook.jsx';
 import ManageAttractions from './pages/ManageAttractions.jsx';
 import ManageRestaurants from './pages/ManageRestaurants.jsx';
 import ManageHotels from './pages/ManageHotels.jsx';
+import PaymentPage from './pages/PaymentPage.jsx'; // Import PaymentPage
 
 // Components
 import Navbar from './components/NavBar.jsx';
@@ -135,6 +136,9 @@ function App() {
 
         {/* Add the /results route */}
         <Route path="/results" element={<FlightResults />} />
+
+        {/* Add the /payment route */}
+        <Route path="/payment" element={<PaymentPage />} />
 
         {/* Add the /confirmation route */}
         <Route path="/confirmation" element={<Confirmation />} />

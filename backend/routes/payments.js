@@ -1,26 +1,34 @@
+// backend/routes/payments.js
+
 const express = require('express');
 const router = express.Router();
-const authenticate = require('../middleware/authenticate');
-const { body } = require('express-validator');
-const paymentController = require('../controllers/paymentController');
+const Stripe = require('stripe');
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
-// Apply authentication middleware to all payment routes
-router.use(authenticate);
+// Create Payment Intent
+router.post('/create-payment-intent', async (req, res) => {
+  const { amount, currency } = req.body;
 
-// Get all payment methods
-router.get('/methods', paymentController.getPaymentMethods);
+  // Validate input
+  if (typeof amount !== 'number' || amount <= 0) {
+    return res.status(400).json({ error: 'Invalid amount.' });
+  }
 
-// Add a new payment method
-router.post(
-  '/methods',
-  [
-    body('cardHolder').notEmpty().withMessage('Card holder name is required'),
-    body('cardNumber').matches(/^[0-9]{16}$/).withMessage('Card number must be 16 digits'),
-    body('expiryDate').matches(/^(0[1-9]|1[0-2])\/[0-9]{2}$/).withMessage('Expiry date must be in MM/YY format'),
-    body('cvv').matches(/^[0-9]{3,4}$/).withMessage('CVV must be 3 or 4 digits'),
-  ],
-  paymentController.addPaymentMethod
-);
+  if (typeof currency !== 'string') {
+    return res.status(400).json({ error: 'Invalid currency.' });
+  }
 
-// Other routes...
+  try {
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amount, // Amount in cents
+      currency: currency,
+    });
+
+    res.status(200).json({ clientSecret: paymentIntent.client_secret });
+  } catch (error) {
+    console.error('Error creating payment intent:', error);
+    res.status(500).json({ error: 'Failed to create payment intent.' });
+  }
+});
+
 module.exports = router;

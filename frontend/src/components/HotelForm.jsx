@@ -3,8 +3,8 @@ import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
 import '../styles/HotelForm.css';
 import { DateRange } from 'react-date-range';
-import 'react-date-range/dist/styles.css'; // Main style file
-import 'react-date-range/dist/theme/default.css'; // Theme CSS
+import 'react-date-range/dist/styles.css'; 
+import 'react-date-range/dist/theme/default.css'; 
 import { format } from 'date-fns';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -21,7 +21,7 @@ const mapContainerStyle = {
 };
 
 const defaultCenter = {
-  lat: 48.8566, // Fallback to Paris
+  lat: 48.8566, 
   lng: 2.3522,
 };
 
@@ -30,11 +30,11 @@ const libraries = ['places'];
 const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
 
 const HotelForm = () => {
-  const { user } = useContext(AuthContext); // Access user from context
+  const { user } = useContext(AuthContext); 
   const [hotelDetails, setHotelDetails] = useState({
     name: '',
     location: '',
-    city: '', // New field
+    city: '', 
     basePrice: '',
     description: '',
     roomTypes: [{ type: '', price: '', availability: 'Available' }],
@@ -42,7 +42,7 @@ const HotelForm = () => {
     amenities: [],
   });
   const [images, setImages] = useState([]);
-  const [availability, setAvailability] = useState([]); // Array of date strings
+  const [availability, setAvailability] = useState([]); 
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
   const [dateRange, setDateRange] = useState([
@@ -52,8 +52,8 @@ const HotelForm = () => {
       key: 'selection',
     },
   ]);
-  const [selectedPosition, setSelectedPosition] = useState(null); // New state for position
-  const [mapCenter, setMapCenter] = useState(defaultCenter); // Dynamic map center
+  const [selectedPosition, setSelectedPosition] = useState(null); 
+  const [mapCenter, setMapCenter] = useState(defaultCenter); 
 
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: GOOGLE_MAPS_API_KEY,
@@ -196,7 +196,7 @@ const HotelForm = () => {
     });
     setHotelDetails({
       ...hotelDetails,
-      location: '', // Optionally, clear location string if using map selection
+      location: '', 
     });
   };
 
@@ -207,11 +207,11 @@ const HotelForm = () => {
       const lat = place.geometry.location.lat();
       const lng = place.geometry.location.lng();
       setSelectedPosition({ lat, lng });
-      setMapCenter({ lat, lng }); // Center the map to the selected place
+      setMapCenter({ lat, lng }); 
       setHotelDetails({
         ...hotelDetails,
         location: place.formatted_address || place.name || '',
-        city: place.address_components.find(comp => comp.types.includes('locality'))?.long_name || '', // Extract city
+        city: place.address_components.find(comp => comp.types.includes('locality'))?.long_name || '', 
       });
     } else {
       toast.error('No details available for the selected location.');
@@ -223,7 +223,7 @@ const HotelForm = () => {
     e.preventDefault();
     setMessage(null);
     setError(null);
-    toast.dismiss(); // Dismiss existing toasts
+    toast.dismiss(); 
 
     // Ensure that position is selected
     if (!selectedPosition) {
@@ -235,23 +235,23 @@ const HotelForm = () => {
     // Convert availability array to JSON object
     const availabilityObj = {};
     availability.forEach((date) => {
-      availabilityObj[date] = true; // Mark as available
+      availabilityObj[date] = true; 
     });
 
     // Construct the payload
     const payload = {
       name: hotelDetails.name,
       location: hotelDetails.location,
-      city: hotelDetails.city, // Include city
+      city: hotelDetails.city, 
       basePrice: parseFloat(hotelDetails.basePrice),
       description: hotelDetails.description,
-      roomTypes: hotelDetails.roomTypes, // Array of room types
-      seasonalPricing: hotelDetails.seasonalPricing, // Array of seasonal pricing
-      amenities: hotelDetails.amenities, // Array of amenities
-      images: images, // Array of Base64 strings
-      availability: availabilityObj, // Date-wise availability
-      latitude: selectedPosition.lat, // Latitude from map
-      longitude: selectedPosition.lng, // Longitude from map
+      roomTypes: hotelDetails.roomTypes, 
+      seasonalPricing: hotelDetails.seasonalPricing, 
+      amenities: hotelDetails.amenities, 
+      images: images, 
+      availability: availabilityObj, 
+      latitude: selectedPosition.lat, 
+      longitude: selectedPosition.lng, 
     };
 
     try {
@@ -268,7 +268,7 @@ const HotelForm = () => {
       const response = await axios.post(`${backendUrl}/api/hotels`, payload, {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${idToken}`, // Include the token
+          Authorization: `Bearer ${idToken}`, 
         },
       });
 
@@ -278,7 +278,7 @@ const HotelForm = () => {
       setHotelDetails({
         name: '',
         location: '',
-        city: '', // Reset city
+        city: '', 
         basePrice: '',
         description: '',
         roomTypes: [{ type: '', price: '', availability: 'Available' }],
@@ -295,7 +295,7 @@ const HotelForm = () => {
         },
       ]);
       setSelectedPosition(null);
-      setMapCenter(defaultCenter); // Reset map center
+      setMapCenter(defaultCenter); 
     } catch (err) {
       console.error('Error submitting hotel:', err);
       if (err.response && err.response.data) {
@@ -559,7 +559,7 @@ const HotelForm = () => {
         <GoogleMap
           mapContainerStyle={mapContainerStyle}
           zoom={selectedPosition ? 15 : 12}
-          center={mapCenter} // Dynamic map center based on user's location
+          center={mapCenter} 
           onClick={handleMapClick}
         >
           {selectedPosition && <Marker position={selectedPosition} />}

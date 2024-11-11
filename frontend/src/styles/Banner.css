@@ -1,76 +1,91 @@
+@import './variables.css';
+
+/* Banner Section */
 .banner {
-    height: 75vh;
-    background-size: cover;
-    background-position: center;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    padding: 20px;
-  }
-  
-  .banner-overlay {
-    background-color: rgba(0, 0, 0, 0.5);
-    padding: 20px;
-    border-radius: 10px;
-    width: 100%;
-    max-width: 1200px;
-    text-align: center;
-  }
-  
+  height: 75vh;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-color);
+  padding: 20px;
+}
+
+.banner-overlay {
+  background-color: rgba(0, 0, 0, 0.5); /* You can create a variable for overlay if reused */
+  padding: 20px;
+  border-radius: var(--border-radius);
+  width: 100%;
+  max-width: 1200px;
+  text-align: center;
+}
+
+.banner h1 {
+  font-size: 3rem; /* You can map this to a variable if desired */
+  margin-bottom: 10px;
+  font-size: var(--font-size-large);
+}
+
+.banner p {
+  font-size: 1.25rem; /* You can map this to a variable if desired */
+  margin-bottom: 20px;
+  font-size: var(--font-size-medium);
+}
+
+/* Banner Button Styles */
+.banner-button {
+  background: var(--secondary-gradient);
+  color: var(--accent-color);
+  padding: 12px 25px;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-medium);
+  cursor: pointer;
+  transition: background-color var(--transition-speed), transform var(--transition-speed), box-shadow var(--transition-speed);
+  box-shadow: var(--box-shadow);
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.banner-button:hover {
+  background: var(--secondary-gradient);
+  transform: scale(1.05);
+  box-shadow: var(--hover-shadow);
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
   .banner h1 {
-    font-size: 3rem;
-    margin-bottom: 10px;
+    font-size: 2rem;
   }
-  
+
   .banner p {
-    font-size: 1.25rem;
-    margin-bottom: 20px;
+    font-size: var(--font-size-medium);
   }
-  
+
   .banner-button {
-    padding: 12px 25px;
-    background-color: #ff7e5f;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+    padding: 10px 20px;
+    font-size: 0.9rem;
   }
-  
-  .banner-button:hover {
-    background-color: #ff4500;
+}
+
+@media (max-width: 480px) {
+  .banner h1 {
+    font-size: 1.5rem;
   }
-  
-  @media (max-width: 768px) {
-    .banner h1 {
-      font-size: 2rem;
-    }
-  
-    .banner p {
-      font-size: 1rem;
-    }
-  
-    .banner-button {
-      padding: 10px 20px;
-      font-size: 0.9rem;
-    }
+
+  .banner p {
+    font-size: 0.9rem;
   }
-  
-  @media (max-width: 480px) {
-    .banner h1 {
-      font-size: 1.5rem;
-    }
-  
-    .banner p {
-      font-size: 0.9rem;
-    }
-  
-    .banner-button {
-      padding: 8px 15px;
-      font-size: 0.8rem;
-    }
+
+  .banner-button {
+    padding: 8px 15px;
+    font-size: 0.8rem;
   }
-  
+}

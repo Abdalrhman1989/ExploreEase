@@ -1,9 +1,7 @@
-/* src/styles/Home.css */
-
 /* Import Variables */
 @import './variables.css';
 
-/* General Styles */
+
 html {
   font-size: 16px;
 }
@@ -51,7 +49,7 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.4); /* Consider defining a variable for overlays */
+  background: rgba(0, 0, 0, 0.4); 
 }
 
 .slide-content {
@@ -86,7 +84,7 @@ body {
 }
 
 .cta-button:hover {
-  background: var(--primary-gradient); /* Updated to use gradient */
+  background: var(--primary-gradient); 
   transform: scale(1.05);
 }
 
@@ -176,7 +174,7 @@ body {
 }
 
 .service-button:hover {
-  background: var(--secondary-gradient); /* Updated to use gradient */
+  background: var(--secondary-gradient); 
   transform: scale(1.05);
 }
 
@@ -323,7 +321,7 @@ body {
 }
 
 .explore-button:hover {
-  background: var(--secondary-gradient); /* Updated to use gradient */
+  background: var(--secondary-gradient); 
   transform: scale(1.05);
 }
 
@@ -437,7 +435,7 @@ body {
 
 .testimonial-form .form-group textarea:focus {
   border-color: var(--primary-color);
-  box-shadow: 0 0 8px rgba(30, 60, 114, 0.3); /* Consider defining a variable */
+  box-shadow: 0 0 8px rgba(30, 60, 114, 0.3); 
   outline: none;
 }
 
@@ -454,7 +452,7 @@ body {
 }
 
 .testimonial-form .cta-button:hover {
-  background: var(--secondary-gradient); /* Updated to use gradient */
+  background: var(--secondary-gradient); 
   transform: scale(1.05);
 }
 
@@ -510,7 +508,7 @@ body {
 .form-group textarea {
   width: 100%;
   padding: 15px 15px 15px 10px;
-  border: 2px solid var(--input-border-color); /* Consider defining this variable */
+  border: 2px solid var(--input-border-color); 
   border-radius: var(--border-radius);
   font-size: var(--font-size-medium);
   transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
@@ -520,7 +518,7 @@ body {
 .form-group input:focus,
 .form-group textarea:focus {
   border-color: var(--primary-color);
-  box-shadow: 0 0 8px rgba(30, 60, 114, 0.3); /* Consider defining a variable */
+  box-shadow: 0 0 8px rgba(30, 60, 114, 0.3); 
   outline: none;
 }
 
@@ -566,14 +564,14 @@ body {
 }
 
 .contact-form .cta-button:hover {
-  background: var(--secondary-gradient); /* Updated to use gradient */
+  background: var(--secondary-gradient); 
   transform: scale(1.05);
 }
 
 /* Newsletter Subscription Section */
 .newsletter {
   padding: 80px 20px;
-  background: var(--primary-gradient); /* Changed from solid color to gradient */
+  background: var(--primary-gradient); 
   color: var(--accent-color);
   text-align: center;
   background-size: cover;
@@ -593,7 +591,7 @@ body {
   content: '';
   width: 60px;
   height: 4px;
-  background: var(--secondary-gradient); /* Using gradient for the underline */
+  background: var(--secondary-gradient); 
   display: block;
   margin: 10px auto 0;
   border-radius: 2px;
@@ -627,7 +625,7 @@ body {
 }
 
 .newsletter-form .cta-button {
-  background: var(--secondary-gradient); /* Updated to use gradient */
+  background: var(--secondary-gradient); 
   border: none;
   color: var(--accent-color);
   padding: 15px 30px;
@@ -639,7 +637,7 @@ body {
 }
 
 .newsletter-form .cta-button:hover {
-  background: var(--primary-gradient); /* Switch gradients on hover for variety */
+  background: var(--primary-gradient); 
   transform: scale(1.05);
 }
 
@@ -785,7 +783,7 @@ body {
 
 @media (max-width: 768px) {
   .slide-content h1 {
-    font-size: 1.75rem; /* You can define a new variable if needed */
+    font-size: 1.75rem; 
   }
 
   .slide-content p {
@@ -806,7 +804,7 @@ body {
   }
 
   .service-icon {
-    font-size: 1.5rem; /* Consider defining a new variable if needed */
+    font-size: 1.5rem; 
   }
 
   .service-content h3,
@@ -857,7 +855,7 @@ body {
 
 @media (max-width: 480px) {
   .slide-content h1 {
-    font-size: 1.5rem; /* Consider defining a new variable if needed */
+    font-size: 1.5rem; 
   }
 
   .slide-content p {
@@ -878,7 +876,7 @@ body {
   }
 
   .service-icon {
-    font-size: 1.5rem; /* Consider defining a new variable if needed */
+    font-size: 1.5rem; 
   }
 
   .service-content h3,

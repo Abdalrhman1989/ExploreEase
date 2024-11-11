@@ -1,5 +1,4 @@
 // src/components/RestaurantForm.jsx
-
 import React, { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
@@ -10,7 +9,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const RestaurantForm = () => {
-  const { user } = useContext(AuthContext); // Access user from context
+  const { user } = useContext(AuthContext);
   const [restaurantDetails, setRestaurantDetails] = useState({
     name: '',
     location: '',
@@ -20,13 +19,13 @@ const RestaurantForm = () => {
     description: '',
     amenities: [],
   });
-  const [availability, setAvailability] = useState([]); // Array of date strings
-  const [images, setImages] = useState([]); // Array of Base64 strings
+  const [availability, setAvailability] = useState([]);
+  const [images, setImages] = useState([]);
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
   const [selectedRange, setSelectedRange] = useState({
-    startDate: new Date(),
-    endDate: new Date(),
+    startDate: null,
+    endDate: null,
   });
 
   // Handle form field changes
@@ -142,7 +141,7 @@ const RestaurantForm = () => {
       const response = await axios.post(`${backendUrl}/api/restaurants`, payload, {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${idToken}`, // Include the token
+          Authorization: `Bearer ${idToken}`,
         },
       });
 
@@ -162,8 +161,8 @@ const RestaurantForm = () => {
       setImages([]);
       setAvailability([]);
       setSelectedRange({
-        startDate: new Date(),
-        endDate: new Date(),
+        startDate: null,
+        endDate: null,
       });
     } catch (err) {
       console.error('Error submitting restaurant:', err);

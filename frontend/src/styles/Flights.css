@@ -1,25 +1,28 @@
-/* src/styles/Flights.css */
+@import './variables.css';
 
+/* Global Styles */
 .flights {
-  font-family: 'Helvetica Neue', Arial, sans-serif;
-  color: #222;
-  background-color: #f4f6f8;
+  font-family: var(--font-family);
+  color: var(--text-color);
+  background-color: var(--background-color);
 }
 
+/* Search Bar Container */
 .search-bar-container {
-  background-color: #ffffff;
+  background-color: var(--accent-color);
   padding: 60px 20px;
   display: flex;
   justify-content: center;
   align-items: center;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid #e0e0e0; /* Consider adding a variable for border color */
 }
 
+/* Search Form */
 .search-form {
-  background: #fff;
+  background: var(--card-background);
   padding: 40px;
-  border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -34,23 +37,24 @@
 }
 
 .search-button {
-  background-color: #0069d9;
-  color: #ffffff;
+  background-color: var(--primary-color);
+  color: var(--accent-color);
   padding: 15px 25px;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-medium);
   font-weight: bold;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 105, 217, 0.2);
+  transition: all var(--transition-speed) ease;
+  box-shadow: var(--box-shadow);
 }
 
 .search-button:hover {
-  background-color: #004a99;
+  background-color: var(--secondary-color);
   transform: translateY(-2px);
 }
 
+/* Loading Indicator */
 .loading-indicator {
   display: flex;
   flex-direction: column;
@@ -58,39 +62,43 @@
   margin-top: 20px;
 }
 
+/* Error Message */
 .error-message {
-  background-color: #ffe6e6;
-  color: #cc0000;
+  background-color: #ffe6e6; /* Consider adding a variable for error background */
+  color: var(--error-color);
   padding: 15px 20px;
   margin: 20px auto;
   max-width: 800px;
-  border-left: 5px solid #cc0000;
-  border-radius: 5px;
+  border-left: 5px solid var(--error-color);
+  border-radius: var(--border-radius);
   font-weight: 500;
 }
 
+/* Content Wrapper */
 .content-wrapper,
 .faqs-section {
   padding: 60px 20px;
-  background-color: #f9fafb;
+  background-color: var(--background-color);
 }
 
+/* Flight Results Container */
 .flight-results-container,
 .results-container {
   padding: 60px 20px;
 }
 
+/* Flight Card */
 .flight-card {
   display: flex;
-  background: #fff;
-  border-radius: 12px;
+  background: var(--card-background);
+  border-radius: var(--border-radius);
   padding: 20px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.3s ease;
+  box-shadow: var(--box-shadow);
+  transition: box-shadow var(--transition-speed);
 }
 
 .flight-card:hover {
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--hover-shadow);
 }
 
 .flight-card-content {
@@ -107,9 +115,10 @@
 .price-info {
   text-align: right;
   font-weight: 700;
-  font-size: 18px;
+  font-size: var(--font-size-medium);
 }
 
+/* Pagination Controls */
 .pagination-controls {
   display: flex;
   justify-content: center;
@@ -118,6 +127,7 @@
   margin-top: 40px;
 }
 
+/* Responsive Design */
 @media (max-width: 768px) {
   .form-row {
     flex-direction: column;
@@ -140,23 +150,23 @@
 
 .MuiTextField-root,
 .MuiFormControl-root {
-  background: #f7f8fa;
-  border-radius: 8px;
+  background: var(--background-color);
+  border-radius: var(--border-radius);
 }
 
 .MuiInputLabel-root {
-  color: #333;
+  color: var(--text-color);
 }
 
 .MuiInputBase-root {
-  border-radius: 8px;
+  border-radius: var(--border-radius);
 }
 
 .MuiSelect-root {
-  background-color: #f7f8fa;
+  background-color: var(--background-color);
   padding: 12px;
 }
 
 .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
-  border-color: #0069d9;
+  border-color: var(--primary-color);
 }

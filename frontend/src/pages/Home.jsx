@@ -1,11 +1,8 @@
-// src/components/Home.jsx
+// src/pages/Home.jsx
 
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/Home.css';
-// Removed unused slick-carousel imports since we're handling the slider manually
-// import 'slick-carousel/slick/slick.css';
-// import 'slick-carousel/slick/slick-theme.css';
 
 import { FaHotel, FaPlane, FaCar, FaTrain, FaBus, FaUtensils } from 'react-icons/fa';
 import axios from 'axios';
@@ -114,7 +111,7 @@ const Home = () => {
     e.preventDefault();
     setContactFormStatus('Sending...');
     try {
-      const response = await axios.post('http://localhost:3001/api/contact', contactFormData);
+      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/contact`, contactFormData);
       if (response.data.success) {
         setContactFormStatus('Message sent successfully!');
         setContactFormData({ name: '', email: '', message: '' });
@@ -132,7 +129,7 @@ const Home = () => {
     e.preventDefault();
     setNewsletterStatus('Subscribing...');
     try {
-      const response = await axios.post('http://localhost:3001/api/subscribe', {
+      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/subscribe`, {
         email: newsletterEmail,
       });
       if (response.data.success) {
@@ -163,10 +160,15 @@ const Home = () => {
         >
           <div className="slide-overlay"></div>
           <div className="slide-content">
-            <h1>{slides[currentSlide].title}</h1>
+            <h1 data-testid="hero-slide-title">{slides[currentSlide].title}</h1>
             <p>{slides[currentSlide].subtitle}</p>
             {/* Styled Link as Button */}
-            <Link to={slides[currentSlide].link} className="cta-button" aria-label={slides[currentSlide].buttonText}>
+            <Link
+              to={slides[currentSlide].link}
+              className="cta-button"
+              aria-label={slides[currentSlide].buttonText}
+              data-testid="hero-cta-button"
+            >
               {slides[currentSlide].buttonText}
             </Link>
           </div>
@@ -181,10 +183,15 @@ const Home = () => {
             <div className="service-card" key={index}>
               <div className="service-icon">{service.icon}</div>
               <div className="service-content">
-                <h3>{service.title}</h3>
+                <h3 data-testid={`service-title-${index}`}>{service.title}</h3>
                 <p>{service.subtitle}</p>
                 {/* Styled Link as Button */}
-                <Link to={service.link} className="service-button" aria-label={service.buttonText}>
+                <Link
+                  to={service.link}
+                  className="service-button"
+                  aria-label={service.buttonText}
+                  data-testid={`service-cta-button-${index}`}
+                >
                   {service.buttonText}
                 </Link>
               </div>
@@ -232,7 +239,12 @@ const Home = () => {
               <div className="destination-info">
                 <h3>{dest.name}</h3>
                 {/* Styled Link as Button */}
-                <Link to={`/destination/${dest.name.toLowerCase()}`} className="explore-button" aria-label={`Explore ${dest.name}`}>
+                <Link
+                  to={`/destination/${dest.name.toLowerCase()}`}
+                  className="explore-button"
+                  aria-label={`Explore ${dest.name}`}
+                  data-testid={`explore-button-${index}`}
+                >
                   Explore {dest.name}
                 </Link>
               </div>

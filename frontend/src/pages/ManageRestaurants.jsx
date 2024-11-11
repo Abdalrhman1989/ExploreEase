@@ -1,5 +1,3 @@
-// src/components/ManageRestaurants.jsx
-
 import React, { useEffect, useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
@@ -22,7 +20,7 @@ const ManageRestaurants = () => {
     description: '',
     amenities: [],
     images: [],
-    status: '', // To display current status
+    status: '', 
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState('');
@@ -120,9 +118,9 @@ const ManageRestaurants = () => {
         priceRange: restaurant.priceRange,
         rating: restaurant.rating,
         description: restaurant.description,
-        amenities: restaurant.amenities, // Assuming amenities is already an array
+        amenities: restaurant.amenities, 
         images: restaurant.images,
-        status: restaurant.status, // Display current status
+        status: restaurant.status, 
       });
       setIsEditing(false);
     }
@@ -177,7 +175,7 @@ const ManageRestaurants = () => {
   // Handle Form Submission for Edit
   const handleSubmit = async (e) => {
     e.preventDefault();
-    toast.dismiss(); // Dismiss existing toasts
+    toast.dismiss(); 
     setError('');
 
     // Prepare payload
@@ -188,8 +186,8 @@ const ManageRestaurants = () => {
       priceRange: formData.priceRange,
       rating: formData.rating,
       description: formData.description,
-      amenities: formData.amenities, // Send as array, not JSON string
-      images: formData.images, // Array of Base64 strings
+      amenities: formData.amenities, 
+      images: formData.images, 
       // availability is optional and handled separately
     };
 

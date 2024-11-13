@@ -6,6 +6,8 @@ module.exports = (sequelize, DataTypes) => {
 
     static associate(models) {
       Hotel.belongsTo(models.User, { foreignKey: 'FirebaseUID', targetKey: 'FirebaseUID', as: 'user' });  
+      Hotel.hasMany(models.Booking, { foreignKey: 'HotelID', as: 'bookings' });
+
     }
   }
 
@@ -33,7 +35,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(255),
         allowNull: false,
       },
-      city: { // New field
+      city: { 
         type: DataTypes.STRING(100),
         allowNull: false,
       },

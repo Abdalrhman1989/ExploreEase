@@ -1,5 +1,3 @@
-// src/pages/ManageHotels.jsx
-
 import React, { useEffect, useState, useContext, useRef } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
@@ -22,7 +20,7 @@ const mapContainerStyle = {
 };
 
 const defaultCenter = {
-  lat: 48.8566, // Default to Paris
+  lat: 48.8566, 
   lng: 2.3522,
 };
 
@@ -74,20 +72,20 @@ const ManageHotels = () => {
     try {
       const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
       let url = '';
-
+  
       if (userRole === 'Admin') {
-        url = `${backendUrl}/api/hotels/pending`; // Fetch pending hotels for Admin
+        url = `${backendUrl}/api/hotels/pending`;
       } else {
-        url = `${backendUrl}/api/hotels/user`; // Fetch user's approved hotels
+        url = `${backendUrl}/api/hotels/user`;
       }
-
+  
       const response = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${idToken}`,
         },
       });
       setHotels(response.data.hotels);
-      console.log('Fetched Hotels:', response.data.hotels); // Debugging line
+      console.log('Fetched Hotels:', response.data.hotels); 
     } catch (err) {
       console.error('Error fetching hotels:', err);
       setError('Failed to fetch hotels.');
@@ -138,7 +136,7 @@ const ManageHotels = () => {
         description: hotel.description || '',
         amenities: hotel.amenities || [],
         images: hotel.images || [],
-        availability: hotel.availability || {}, // Ensure availability is an object
+        availability: hotel.availability || {}, 
         latitude: hotel.latitude || '',
         longitude: hotel.longitude || '',
       });
@@ -205,7 +203,7 @@ const ManageHotels = () => {
         longitude: lng,
       });
       setMarkerPosition({ lat, lng });
-      setMapCenter({ lat, lng }); // Center the map to the selected place
+      setMapCenter({ lat, lng }); 
     } else {
       toast.error('No details available for the selected location.');
     }
@@ -249,7 +247,7 @@ const ManageHotels = () => {
   // Handle Form Submission for Edit
   const handleSubmit = async (e) => {
     e.preventDefault();
-    toast.dismiss(); // Dismiss existing toasts
+    toast.dismiss();
     setError('');
 
     // Prepare payload
@@ -258,14 +256,14 @@ const ManageHotels = () => {
       location: formData.location,
       type: formData.type,
       basePrice: parseFloat(formData.basePrice),
-      rating: parseFloat(formData.rating), // Ensure rating is a float
+      rating: parseFloat(formData.rating), 
       description: formData.description,
-      amenities: formData.amenities, // Assuming backend accepts array
-      images: formData.images, // Array of Base64 strings
+      amenities: formData.amenities, 
+      images: formData.images, 
       // availability is optional; include it only if editing
       ...(isEditing && { availability: formData.availability }),
-      latitude: formData.latitude, // Include latitude
-      longitude: formData.longitude, // Include longitude
+      latitude: formData.latitude, 
+      longitude: formData.longitude, 
     };
 
     try {

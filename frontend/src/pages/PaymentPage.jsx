@@ -1,6 +1,6 @@
-// frontend/src/pages/PaymentPage.jsx
+// src/pages/PaymentPage.jsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Button,
@@ -9,43 +9,17 @@ import {
   Typography,
   Box,
   Alert,
-  Grid,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-
-// Load Stripe with your publishable key from .env file
-const stripePublishableKey = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY;
-
-// Initialize Stripe
-const stripePromise = loadStripe(stripePublishableKey);
-
-// Define Card Element styling
-const CARD_ELEMENT_OPTIONS = {
-  style: {
-    base: {
-      fontSize: '16px',
-      color: '#424770',
-      fontFamily: 'Roboto, Open Sans, Segoe UI, sans-serif',
-      '::placeholder': {
-        color: '#aab7c4',
-      },
-      iconColor: '#aab7c4',
-    },
-    invalid: {
-      color: '#9e2146',
-      iconColor: '#9e2146',
-    },
-  },
-};
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { AuthContext } from '../context/AuthContext'; // Import AuthContext
 
 // Payment Form Component
-const PaymentForm = ({ flightDetails, traveler }) => {
-  const stripe = useStripe();
-  const elements = useElements();
+const PaymentForm = ({ bookingId, amount }) => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useContext(AuthContext); // Access AuthContext
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -55,71 +29,30 @@ const PaymentForm = ({ flightDetails, traveler }) => {
     setError(null);
 
     try {
-      // Step 1: Create a Payment Intent on the backend
-      const amount = Math.round(parseFloat(flightDetails.price.total) * 100); // Convert to cents
-      const currency = flightDetails.price.currency.toLowerCase();
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
 
-      console.log('Creating Payment Intent with amount:', amount, 'and currency:', currency);
-
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/payments/create-payment-intent`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount, currency }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        console.error('Error creating payment intent:', errorData);
-        throw new Error(errorData?.error || 'Failed to create payment intent.');
-      }
-
-      const { clientSecret } = await response.json();
-      console.log('Client Secret received:', clientSecret);
-
-      // Step 2: Confirm the Card Payment
-      const result = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-          card: elements.getElement(CardElement),
-          billing_details: {
-            name: `${traveler.firstName} ${traveler.lastName}`,
-            email: traveler.email,
+      // Send payment data to backend
+      const response = await axios.post(
+        `${backendUrl}/api/payments/fake-payment`,
+        { bookingId, amount },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('authToken')}`,
           },
-        },
-      });
-
-      if (result.error) {
-        console.error('Stripe Payment Error:', result.error.message);
-        setError(result.error.message);
-        setLoading(false);
-      } else if (result.paymentIntent.status === 'succeeded') {
-        console.log('Payment succeeded:', result.paymentIntent);
-
-        // Step 3: Create Booking on the backend
-        const bookingResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/flights/book-flight`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            flightOffer: flightDetails,
-            traveler: traveler,
-            paymentIntentId: result.paymentIntent.id,
-          }),
-        });
-
-        if (!bookingResponse.ok) {
-          const bookingErrorData = await bookingResponse.json().catch(() => null);
-          console.error('Error creating booking:', bookingErrorData);
-          throw new Error(bookingErrorData?.error || 'Failed to create booking.');
         }
+      );
 
-        const bookingConfirmation = await bookingResponse.json();
-        console.log('Booking Confirmation:', bookingConfirmation); // Debugging line
-
-        // Step 4: Navigate to confirmation page with booking data
-        navigate('/confirmation', { state: { booking: bookingConfirmation.data } });
+      if (response.status === 200 && response.data.success) {
+        toast.success('Payment successful! Your booking is confirmed.');
+        // Redirect to confirmation page
+        navigate('/confirmation', { state: { bookingId } });
+      } else {
+        toast.error(response.data.message || 'Payment failed. Please try again.');
       }
     } catch (err) {
       console.error('Payment Error:', err);
-      setError(err.message);
+      setError('Payment failed. Please try again.');
+    } finally {
       setLoading(false);
     }
   };
@@ -149,10 +82,10 @@ const PaymentForm = ({ flightDetails, traveler }) => {
         {/* Add more logos as needed */}
       </Box>
 
-      {/* Card Details */}
+      {/* Fake Payment Details */}
       <Box sx={{ marginBottom: '1.5rem' }}>
         <Typography variant="h6" gutterBottom>
-          Enter Your Card Details
+          Enter Your Payment Details (Fake Payment)
         </Typography>
         <Box
           sx={{
@@ -162,7 +95,10 @@ const PaymentForm = ({ flightDetails, traveler }) => {
             backgroundColor: '#ffffff',
           }}
         >
-          <CardElement options={CARD_ELEMENT_OPTIONS} />
+          <Typography variant="body1">
+            Since this is a fake payment, please enter any dummy card information.
+          </Typography>
+          {/* Optionally, add input fields for card details */}
         </Box>
       </Box>
 
@@ -179,7 +115,7 @@ const PaymentForm = ({ flightDetails, traveler }) => {
         variant="contained"
         color="primary"
         fullWidth
-        disabled={!stripe || loading}
+        disabled={loading}
         size="large"
         sx={{
           height: '3rem',
@@ -199,20 +135,105 @@ const PaymentPage = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const { flightDetails, traveler } = location.state || {};
+  const { bookingId } = location.state || {};
+  const { isAuthenticated } = useContext(AuthContext); // Access AuthContext
 
-  if (!flightDetails || !traveler) {
+  const [booking, setBooking] = useState(null);
+  const [loadingBooking, setLoadingBooking] = useState(true);
+  const [errorBooking, setErrorBooking] = useState(null);
+
+  useEffect(() => {
+    if (!bookingId) {
+      toast.error('Missing booking details. Please go back and try again.');
+      navigate('/');
+      return;
+    }
+
+    const fetchBooking = async () => {
+      try {
+        const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
+        const response = await axios.get(`${backendUrl}/api/bookings/${bookingId}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+          },
+        });
+
+        if (response.status === 200 && response.data.booking) {
+          setBooking(response.data.booking);
+        } else {
+          setErrorBooking('Failed to fetch booking details.');
+          toast.error('Failed to fetch booking details.');
+        }
+      } catch (error) {
+        console.error('Error fetching booking:', error);
+        setErrorBooking('An error occurred while fetching booking details.');
+        toast.error('An error occurred while fetching booking details.');
+      } finally {
+        setLoadingBooking(false);
+      }
+    };
+
+    fetchBooking();
+  }, [bookingId, navigate]);
+
+  // Calculate amount based on booking details
+  const calculateAmount = () => {
+    if (!booking) return 0;
+
+    const checkInDate = new Date(booking.checkIn);
+    const checkOutDate = new Date(booking.checkOut);
+    const timeDiff = checkOutDate - checkInDate;
+    const numberOfNights = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+    // Example room prices
+    const roomPrices = {
+      'Single': 100,
+      'Double': 150,
+      'Suite': 200,
+    };
+
+    const pricePerNight = roomPrices[booking.roomType] || 100;
+    return numberOfNights * pricePerNight;
+  };
+
+  if (!bookingId) {
     return (
       <Container maxWidth="sm" sx={{ marginTop: '2rem' }}>
         <Typography variant="h6" align="center" gutterBottom>
-          Missing flight or traveler details. Please go back and try again.
+          Missing booking details. Please go back and try again.
         </Typography>
         <Button variant="contained" color="primary" fullWidth onClick={() => navigate('/')}>
-          Go to Booking
+          Go to Home
         </Button>
       </Container>
     );
   }
+
+  if (loadingBooking) {
+    return (
+      <Container maxWidth="sm" sx={{ marginTop: '2rem', textAlign: 'center' }}>
+        <CircularProgress />
+        <Typography variant="h6" align="center" gutterBottom>
+          Loading booking details...
+        </Typography>
+      </Container>
+    );
+  }
+
+  if (errorBooking) {
+    return (
+      <Container maxWidth="sm" sx={{ marginTop: '2rem', textAlign: 'center' }}>
+        <Typography variant="h6" color="error" gutterBottom>
+          {errorBooking}
+        </Typography>
+        <Button variant="contained" color="primary" fullWidth onClick={() => navigate('/')}>
+          Go to Home
+        </Button>
+      </Container>
+    );
+  }
+
+  const amount = calculateAmount(); // amount in dollars
 
   return (
     <Container
@@ -231,7 +252,7 @@ const PaymentPage = () => {
           Complete Your Payment
         </Typography>
         <Typography variant="h6" color="textSecondary">
-          Amount to be paid: {flightDetails.price.currency.toUpperCase()} {flightDetails.price.total}
+          Amount to be paid: USD ${amount.toFixed(2)}
         </Typography>
       </Box>
 
@@ -248,9 +269,7 @@ const PaymentPage = () => {
           },
         }}
       >
-        <Elements stripe={stripePromise}>
-          <PaymentForm flightDetails={flightDetails} traveler={traveler} />
-        </Elements>
+        <PaymentForm bookingId={bookingId} amount={amount} />
       </Box>
     </Container>
   );

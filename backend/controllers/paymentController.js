@@ -1,137 +1,103 @@
-const { PaymentMethod, BillingHistory } = require('../models');
+// backend/controllers/paymentsController.js
+
+const { Payment, Booking, User } = require('../models');
 const { validationResult } = require('express-validator');
+const nodemailer = require('nodemailer');
 
-// Get all payment methods for a user
-const getPaymentMethods = async (req, res) => {
-  const userId = req.user.id;
+// Configure Nodemailer transporter (use Mailtrap for testing or another SMTP server)
+const transporter = nodemailer.createTransport({
+  host: 'smtp.mailtrap.io',
+  port: 2525,
+  auth: {
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASS,
+  },
+});
 
+// Helper function to send emails
+const sendEmail = async (to, subject, html) => {
   try {
-    const paymentMethods = await PaymentMethod.findAll({
-      where: { userId },
-      order: [['createdAt', 'ASC']],
+    await transporter.sendMail({
+      from: '"ExploreEase" <no-reply@exploreease.com>',
+      to,
+      subject,
+      html,
     });
-
-    const defaultPaymentMethod = await PaymentMethod.findOne({
-      where: { userId, isDefault: true },
-    });
-
-    res.status(200).json({
-      success: true,
-      paymentMethods,
-      defaultPaymentMethodId: defaultPaymentMethod ? defaultPaymentMethod.id : null,
-    });
+    console.log(`Email sent to ${to}`);
   } catch (error) {
-    console.error('Error fetching payment methods:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error('Error sending email:', error);
   }
 };
 
-// Add a new payment method
-const addPaymentMethod = async (req, res) => {
+// Simulate Payment (for testing)
+const simulatePayment = async (req, res) => {
+  const { bookingId, amount } = req.body;
+  console.log('Received bookingId:', bookingId, 'and amount:', amount); 
+
+  // Validate input
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ success: false, errors: errors.array() });
+    console.log('Validation errors:', errors.array());
+    return res.status(400).json({ errors: errors.array() });
   }
 
-  const { cardHolder, cardNumber, expiryDate, cvv } = req.body;
-  const userId = req.user.id;
+  if (!bookingId || !amount) {
+    return res.status(400).json({ error: 'Booking ID and amount are required.' });
+  }
 
   try {
-    const paymentMethod = await PaymentMethod.create({
-      cardHolder,
-      cardNumber,
-      expiryDate,
-      cvv,
-      userId,
+    const booking = await Booking.findOne({
+      where: { BookingID: bookingId },
+      include: [{ model: User, as: 'user' }],
     });
 
-    res.status(201).json({ success: true, paymentMethod });
-  } catch (error) {
-    console.error('Error adding payment method:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-};
-
-// Update a payment method
-const updatePaymentMethod = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ success: false, errors: errors.array() });
-  }
-
-  const { cardHolder, cardNumber, expiryDate, cvv, isDefault } = req.body;
-  const { id } = req.params;
-
-  try {
-    const paymentMethod = await PaymentMethod.findOne({ where: { id, userId: req.user.id } });
-
-    if (!paymentMethod) {
-      return res.status(404).json({ success: false, message: 'Payment method not found' });
+    if (!booking) {
+      return res.status(404).json({ error: 'Booking not found.' });
     }
 
-    await paymentMethod.update({
-      cardHolder,
-      cardNumber,
-      expiryDate,
-      cvv,
-      isDefault: isDefault ?? paymentMethod.isDefault,
+    if (booking.status !== 'Pending') {
+      return res.status(400).json({ error: 'Booking is not pending.' });
+    }
+
+    // Simulate a successful payment
+    const payment = await Payment.create({
+      // Providing a simulated stripePaymentIntentId
+      stripePaymentIntentId: `simulated_${Date.now()}`,
+      amount,
+      currency: 'usd',
+      status: 'Succeeded',
+      paymentMethod: 'Simulated Card',
+      receiptUrl: `https://fake-receipt-url.com/${booking.BookingID}`,
+      userId: booking.UserID,
+      BookingID: booking.BookingID,
     });
 
-    // Set other methods to non-default if this is set as default
-    if (isDefault) {
-      await PaymentMethod.update(
-        { isDefault: false },
-        { where: { userId: req.user.id, id: { [Op.ne]: id } } }
-      );
-    }
+    booking.status = 'Approved';
+    booking.PaymentID = payment.id;
+    await booking.save();
 
-    res.status(200).json({ success: true, paymentMethod });
+    // Send confirmation email to user
+    await sendEmail(
+      booking.user.email, // Corrected access to user email
+      'Booking Approved',
+      `<p>Dear ${booking.user.fullName},</p>
+       <p>Your booking (ID: ${booking.BookingID}) has been approved.</p>
+       <p>Payment Details:</p>
+       <ul>
+         <li>Amount: $${(payment.amount / 100).toFixed(2)}</li>
+         <li>Payment Method: ${payment.paymentMethod}</li>
+         <li>Receipt: <a href="${payment.receiptUrl}" target="_blank" rel="noopener noreferrer">View Receipt</a></li>
+       </ul>
+       <p>Thank you for choosing ExploreEase!</p>`
+    );
+
+    res.status(200).json({ success: true, payment });
   } catch (error) {
-    console.error('Error updating payment method:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-};
-
-// Delete a payment method
-const deletePaymentMethod = async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const paymentMethod = await PaymentMethod.findOne({ where: { id, userId: req.user.id } });
-
-    if (!paymentMethod) {
-      return res.status(404).json({ success: false, message: 'Payment method not found' });
-    }
-
-    await paymentMethod.destroy();
-    res.status(200).json({ success: true, message: 'Payment method deleted' });
-  } catch (error) {
-    console.error('Error deleting payment method:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-};
-
-// Get billing history
-const getBillingHistory = async (req, res) => {
-  const userId = req.user.id;
-
-  try {
-    const billingHistory = await BillingHistory.findAll({
-      where: { userId },
-      order: [['createdAt', 'DESC']],
-    });
-
-    res.status(200).json({ success: true, billingHistory });
-  } catch (error) {
-    console.error('Error fetching billing history:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error('Error simulating payment:', error);
+    res.status(500).json({ error: 'Failed to simulate payment.' });
   }
 };
 
 module.exports = {
-  getPaymentMethods,
-  addPaymentMethod,
-  updatePaymentMethod,
-  deletePaymentMethod,
-  getBillingHistory,
+  simulatePayment,
 };

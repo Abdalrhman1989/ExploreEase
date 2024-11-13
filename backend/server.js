@@ -7,8 +7,6 @@ const { body, validationResult } = require('express-validator');
 const rateLimit = require('express-rate-limit');
 const winston = require('winston');
 const mysql = require('mysql2/promise'); 
-
-// Import Routes
 const authRoutes = require('./routes/auth'); 
 const protectedRoutes = require('./routes/protected'); 
 const adminRoutes = require('./routes/admin');
@@ -22,17 +20,18 @@ const attractionRoutes = require('./routes/attraction');
 const itinerariesRouter = require('./routes/itineraries'); 
 const paymentsRouter = require('./routes/payments'); 
 const userRoutes = require('./routes/user');
+const bookingsRoutes = require('./routes/bookings');
 const app = express();
+
 const PORT = process.env.PORT || 3001;
 
 
 
-// ... other routes ...
 
 
 // Setup Winston logger for logging events and errors
 const logger = winston.createLogger({
-  level: 'info', // Log all levels (info, warn, error, etc.)
+  level: 'info', 
   format: winston.format.json(),
   transports: [
     // Log all levels to combined.log
@@ -50,11 +49,11 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Middleware Configuration
-app.use(express.json()); // To parse JSON bodies
+app.use(express.json()); 
 
 // Configure CORS
 app.use(cors({
-  origin: 'http://localhost:3000', // Update this to your frontend URL in production
+  origin: 'http://localhost:3000', // Update this to frontend URL in production
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -105,8 +104,6 @@ initDB().then(() => {
   });
 });
 
-
-
 // Use Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/protected', protectedRoutes);
@@ -121,6 +118,7 @@ app.use('/api/attractions', attractionRoutes);
 app.use('/api/itineraries', itinerariesRouter); 
 app.use('/api/payments', paymentsRouter); 
 app.use('/api/user', userRoutes);
+app.use('/api/bookings', bookingsRoutes);
 
 
 // Health Check Endpoint
@@ -168,7 +166,7 @@ app.post('/api/subscribe',
       let transporter;
       try {
         transporter = nodemailer.createTransport({
-          service: 'Gmail', // Use 'Gmail' or another email service
+          service: 'Gmail', 
           auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS,
@@ -185,8 +183,8 @@ app.post('/api/subscribe',
 
       // Welcome Email to Subscriber
       const mailOptionsToSubscriber = {
-        from: `"ExploreEase" <${process.env.EMAIL_USER}>`, // Sender address
-        to: email, // Subscriber's email
+        from: `"ExploreEase" <${process.env.EMAIL_USER}>`, 
+        to: email, 
         subject: 'Welcome to ExploreEase!',
         text: `Hello,
 
@@ -212,7 +210,7 @@ ExploreEase Team`,
       } catch (error) {
         logger.error(`Error sending welcome email to ${email}:`, error);
         // Optionally, inform the user that welcome email failed
-        // For now, proceed
+      
       }
 
       // Notification Email to Admin
@@ -237,7 +235,6 @@ Email: ${email}`,
         logger.info(`Notification email sent to admin: ${adminEmail}. Message ID: ${adminInfo.messageId}`);
       } catch (error) {
         logger.error(`Error sending notification email to admin: ${adminEmail}:`, error);
-        // Optionally, decide how to handle this
       }
 
       res.json({ success: true, message: 'Subscription successful! Welcome email sent.' });
@@ -276,7 +273,7 @@ app.post('/api/contact',
     let transporter;
     try {
       transporter = nodemailer.createTransport({
-        service: 'Gmail', // Use 'Gmail' or another email service
+        service: 'Gmail', 
         auth: {
           user: process.env.EMAIL_USER,
           pass: process.env.EMAIL_PASS,
@@ -293,8 +290,8 @@ app.post('/api/contact',
 
     // Email to site owner
     const mailOptionsToOwner = {
-      from: `"${name}" <${email}>`, // Sender address
-      to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER, // Site owner's email
+      from: `"${name}" <${email}>`, 
+      to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER, 
       subject: 'New Contact Form Submission',
       text: `You have a new contact form submission:
 
@@ -313,8 +310,8 @@ ${message}`,
 
     // Confirmation email to sender
     const mailOptionsToSender = {
-      from: `"ExploreEase" <${process.env.EMAIL_USER}>`, // Sender address
-      to: email, // Sender's email
+      from: `"ExploreEase" <${process.env.EMAIL_USER}>`,
+      to: email, 
       subject: 'Thank you for contacting ExploreEase!',
       text: `Hello ${name},
 

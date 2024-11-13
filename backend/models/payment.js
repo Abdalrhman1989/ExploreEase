@@ -1,3 +1,5 @@
+// backend/models/payment.js
+
 'use strict';
 const { Model } = require('sequelize');
 
@@ -6,6 +8,9 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // A Payment belongs to a User
       Payment.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
+      
+      // A Payment belongs to a Booking
+      Payment.belongsTo(models.Booking, { foreignKey: 'BookingID', as: 'booking' });
     }
   }
 
@@ -19,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       stripePaymentIntentId: {
         type: DataTypes.STRING(255),
-        allowNull: false,
+        allowNull: true,
         unique: true,
       },
       amount: {
@@ -48,6 +53,15 @@ module.exports = (sequelize, DataTypes) => {
         references: {
           model: 'Users',
           key: 'UserID',
+        },
+        onDelete: 'CASCADE',
+      },
+      BookingID: { // Added BookingID
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'Bookings',
+          key: 'BookingID',
         },
         onDelete: 'CASCADE',
       },

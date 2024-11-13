@@ -1,7 +1,9 @@
-// src/components/AdminBookings.jsx
+// frontend/src/components/AdminBookings.jsx
 
 import React, { useState, useEffect } from 'react';
 import '../styles/AdminBookings.css';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const AdminBookings = () => {
   const [bookings, setBookings] = useState([]);
@@ -9,69 +11,115 @@ const AdminBookings = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchBookings();
-    fetchPendingBookings();
+    fetchAllBookings();
   }, []);
 
-  const fetchBookings = async () => {
-    // Replace with actual API call
-    const data = [
-      { id: 1, user: 'John Doe', date: '2024-04-15', status: 'Confirmed' },
-      { id: 2, user: 'Jane Smith', date: '2024-04-20', status: 'Confirmed' },
-    ];
-    // Simulate API call delay
-    setTimeout(() => {
-      setBookings(data);
+  const fetchAllBookings = async () => {
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
+      const token = localStorage.getItem('token'); // Ensure admin is logged in
+
+      const response = await axios.get(`${backendUrl}/api/bookings`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 200) {
+        const allBookings = response.data.bookings;
+        setBookings(allBookings.filter(booking => booking.status === 'Approved'));
+        setPendingBookings(allBookings.filter(booking => booking.status === 'Pending'));
+      }
+    } catch (err) {
+      console.error('Error fetching bookings:', err.response ? err.response.data : err.message);
+      toast.error('Failed to fetch bookings.');
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
-  const fetchPendingBookings = async () => {
-    // Replace with actual API call
-    const data = [
-      { id: 3, user: 'Alice Johnson', date: '2024-04-25', status: 'Pending' },
-      { id: 4, user: 'Bob Brown', date: '2024-04-30', status: 'Pending' },
-    ];
-    // Simulate API call delay
-    setTimeout(() => {
-      setPendingBookings(data);
-      setLoading(false);
-    }, 1000);
+  // Handlers for managing bookings
+  const handleApprove = async (id) => {
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
+      const token = localStorage.getItem('token');
+
+      const response = await axios.put(
+        `${backendUrl}/api/bookings/${id}`,
+        { status: 'Approved' },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (response.status === 200) {
+        toast.success(`Booking ${id} approved.`);
+        // Update state
+        const approvedBooking = pendingBookings.find(b => b.BookingID === id);
+        setPendingBookings(pendingBookings.filter(b => b.BookingID !== id));
+        setBookings([...bookings, { ...approvedBooking, status: 'Approved' }]);
+      }
+    } catch (err) {
+      console.error('Error approving booking:', err.response ? err.response.data : err.message);
+      toast.error('Failed to approve booking.');
+    }
   };
 
-  // Manage Bookings Handlers
+  const handleReject = async (id) => {
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
+      const token = localStorage.getItem('token');
+
+      const response = await axios.put(
+        `${backendUrl}/api/bookings/${id}`,
+        { status: 'Rejected' },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (response.status === 200) {
+        toast.success(`Booking ${id} rejected.`);
+        // Update state
+        setPendingBookings(pendingBookings.filter(b => b.BookingID !== id));
+      }
+    } catch (err) {
+      console.error('Error rejecting booking:', err.response ? err.response.data : err.message);
+      toast.error('Failed to reject booking.');
+    }
+  };
+
   const handleEdit = (id) => {
+    // Implement edit functionality, such as opening a modal with booking details
     console.log(`Editing booking ${id}`);
-    // Implement edit functionality (e.g., open a modal with booking details)
+    // You can redirect to an edit page or open a modal to handle editing
   };
 
-  const handleCancel = (id) => {
-    console.log(`Cancelling booking ${id}`);
-    // Implement cancel functionality (e.g., API call to cancel booking)
-    setBookings(bookings.filter((booking) => booking.id !== id));
-  };
+  const handleCancel = async (id) => {
+    try {
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
+      const token = localStorage.getItem('token');
 
-  // Confirm Bookings Handlers
-  const handleApprove = (id) => {
-    console.log(`Booking ${id} approved`);
-    // Implement approve functionality (e.g., API call to approve booking)
-    setPendingBookings(pendingBookings.filter((booking) => booking.id !== id));
-    // Optionally, move to confirmed bookings
-    setBookings([
-      ...bookings,
-      {
-        id,
-        user: pendingBookings.find((b) => b.id === id).user,
-        date: pendingBookings.find((b) => b.id === id).date,
-        status: 'Confirmed',
-      },
-    ]);
-  };
-
-  const handleReject = (id) => {
-    console.log(`Booking ${id} rejected`);
-    // Implement reject functionality (e.g., API call to reject booking)
-    setPendingBookings(pendingBookings.filter((booking) => booking.id !== id));
+      const response = await axios.put(
+        `${backendUrl}/api/bookings/${id}`,
+        { status: 'Cancelled' },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (response.status === 200) {
+        toast.success(`Booking ${id} cancelled.`);
+        // Remove from confirmed bookings
+        setBookings(bookings.filter(b => b.BookingID !== id));
+      }
+    } catch (err) {
+      console.error('Error cancelling booking:', err.response ? err.response.data : err.message);
+      toast.error('Failed to cancel booking.');
+    }
   };
 
   return (
@@ -91,32 +139,46 @@ const AdminBookings = () => {
               <table className="bookings-table">
                 <thead>
                   <tr>
-                    <th>ID</th>
+                    <th>BookingID</th>
                     <th>User</th>
-                    <th>Date</th>
+                    <th>Hotel</th>
+                    <th>Check-In</th>
+                    <th>Check-Out</th>
+                    <th>Guests</th>
+                    <th>Room Type</th>
                     <th>Status</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {pendingBookings.map((booking) => (
-                    <tr key={booking.id}>
-                      <td>{booking.id}</td>
-                      <td>{booking.user}</td>
-                      <td>{booking.date}</td>
+                    <tr key={booking.BookingID}>
+                      <td>{booking.BookingID}</td>
+                      <td>{booking.user.UserName}</td>
+                      <td>{booking.hotel.name}</td>
+                      <td>{booking.checkIn}</td>
+                      <td>{booking.checkOut}</td>
+                      <td>{booking.guests}</td>
+                      <td>{booking.roomType}</td>
                       <td>{booking.status}</td>
                       <td>
                         <button
                           className="btn-approve"
-                          onClick={() => handleApprove(booking.id)}
+                          onClick={() => handleApprove(booking.BookingID)}
                         >
                           Approve
                         </button>
                         <button
                           className="btn-reject"
-                          onClick={() => handleReject(booking.id)}
+                          onClick={() => handleReject(booking.BookingID)}
                         >
                           Reject
+                        </button>
+                        <button
+                          className="btn-edit"
+                          onClick={() => handleEdit(booking.BookingID)}
+                        >
+                          Edit
                         </button>
                       </td>
                     </tr>
@@ -135,32 +197,40 @@ const AdminBookings = () => {
               <table className="bookings-table">
                 <thead>
                   <tr>
-                    <th>ID</th>
+                    <th>BookingID</th>
                     <th>User</th>
-                    <th>Date</th>
+                    <th>Hotel</th>
+                    <th>Check-In</th>
+                    <th>Check-Out</th>
+                    <th>Guests</th>
+                    <th>Room Type</th>
                     <th>Status</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {bookings.map((booking) => (
-                    <tr key={booking.id}>
-                      <td>{booking.id}</td>
-                      <td>{booking.user}</td>
-                      <td>{booking.date}</td>
+                    <tr key={booking.BookingID}>
+                      <td>{booking.BookingID}</td>
+                      <td>{booking.user.UserName}</td>
+                      <td>{booking.hotel.name}</td>
+                      <td>{booking.checkIn}</td>
+                      <td>{booking.checkOut}</td>
+                      <td>{booking.guests}</td>
+                      <td>{booking.roomType}</td>
                       <td>{booking.status}</td>
                       <td>
                         <button
-                          className="btn-edit"
-                          onClick={() => handleEdit(booking.id)}
-                        >
-                          Edit
-                        </button>
-                        <button
                           className="btn-cancel"
-                          onClick={() => handleCancel(booking.id)}
+                          onClick={() => handleCancel(booking.BookingID)}
                         >
                           Cancel
+                        </button>
+                        <button
+                          className="btn-edit"
+                          onClick={() => handleEdit(booking.BookingID)}
+                        >
+                          Edit
                         </button>
                       </td>
                     </tr>

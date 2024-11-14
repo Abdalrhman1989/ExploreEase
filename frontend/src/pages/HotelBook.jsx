@@ -1,10 +1,11 @@
 // frontend/src/pages/HotelBook.jsx
 
 import React, { useState, useEffect, useContext } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/HotelBook.css';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; // Import CSS for toast
 import { AuthContext } from '../context/AuthContext';
 import {
   Button,
@@ -15,12 +16,16 @@ import {
   Container,
   useMediaQuery,
   useTheme,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from '@mui/material';
 
 const HotelBook = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
-  const { isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, user } = useContext(AuthContext);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [hotel, setHotel] = useState(null);
@@ -36,9 +41,14 @@ const HotelBook = () => {
     checkIn: '',
     checkOut: '',
     guests: 1,
+    roomType: 'Single', // Default value or as required
   });
   const [amount, setAmount] = useState(0);
   const [paymentError, setPaymentError] = useState(null);
+
+  // Confirmation Dialog State
+  const [openDialog, setOpenDialog] = useState(false);
+  const [bookingDetails, setBookingDetails] = useState(null);
 
   useEffect(() => {
     fetchHotelDetails();
@@ -86,7 +96,7 @@ const HotelBook = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { checkIn, checkOut } = formData;
+    const { checkIn, checkOut, email, fullName, roomType } = formData;
     if (new Date(checkIn) >= new Date(checkOut)) {
       toast.error('Check-Out date must be after Check-In date.');
       return;
@@ -101,18 +111,18 @@ const HotelBook = () => {
 
     try {
       const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
-      
+
       // Create Booking
       const bookingResponse = await axios.post(
         `${backendUrl}/api/bookings`,
-        { hotelId: id, ...formData, amount },
+        { hotelId: id, ...formData },
         { headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` } }
       );
 
       console.log('Booking Response:', bookingResponse.data);
 
       if (bookingResponse.status === 201 && bookingResponse.data.success) {
-        // Adjust extraction based on your actual booking response structure
+        // Extract Booking ID
         const bookingId = bookingResponse.data.booking?.BookingID || bookingResponse.data.booking?.id;
 
         if (!bookingId) {
@@ -122,18 +132,51 @@ const HotelBook = () => {
         console.log("Booking ID:", bookingId);
         console.log("Amount:", amount);
 
+        // Convert amount to cents (assuming 'amount' is in dollars)
+        const amountInCents = Math.round(amount * 100);
+
         // Simulate Payment
         const paymentResponse = await axios.post(
           `${backendUrl}/api/payments/simulate-payment`,
-          { bookingId, amount },
+          { bookingId, amount: amountInCents, bookingType: 'hotel' }, // <-- Added bookingType and amount conversion
           { headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` } }
         );
 
         console.log('Payment Response:', paymentResponse.data);
 
         if (paymentResponse.status === 200 && paymentResponse.data.success) {
-          toast.success('Booking and payment successful!');
-          navigate(`/confirmation?bookingId=${bookingId}`);
+          // Fetch Booking Details to Display in Confirmation
+          const confirmedBooking = bookingResponse.data.booking;
+          setBookingDetails({
+            bookingId: bookingId,
+            hotelName: hotel.name,
+            checkIn: confirmedBooking.checkIn,
+            checkOut: confirmedBooking.checkOut,
+            guests: confirmedBooking.guests,
+            roomType: confirmedBooking.roomType, // Include roomType
+
+            amount: (paymentResponse.data.payment.amount / 100).toFixed(2),
+            paymentMethod: paymentResponse.data.payment.paymentMethod,
+            receiptUrl: paymentResponse.data.payment.receiptUrl,
+            fullName: confirmedBooking.fullName, // Ensure fullName is included
+          });
+
+          // Open Confirmation Dialog
+          setOpenDialog(true);
+
+          // Reset Form
+          setFormData({
+            fullName: '',
+            email: '',
+            phone: '',
+            checkIn: '',
+            checkOut: '',
+            guests: 1,
+            roomType: 'Single', // Reset roomType as well
+          });
+          setAmount(0);
+
+          toast.success('Booking and payment successful! Confirmation email sent.');
         } else {
           toast.error(paymentResponse.data.message || 'Payment failed.');
         }
@@ -147,6 +190,11 @@ const HotelBook = () => {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setBookingDetails(null);
   };
 
   if (loading) return <LoadingSpinner />;
@@ -164,6 +212,9 @@ const HotelBook = () => {
         alignItems: 'center',
       }}
     >
+      {/* Toast Container for Notifications */}
+      <ToastContainer position="top-right" autoClose={5000} hideProgressBar />
+
       <Box sx={{ textAlign: 'center', marginBottom: '2rem', width: '100%' }}>
         <Typography variant={isMobile ? 'h5' : 'h4'} gutterBottom>
           Book Your Stay at {hotel.name}
@@ -231,6 +282,19 @@ const HotelBook = () => {
             onChange={handleChange}
             required
           />
+          <FormGroup
+            id="roomType"
+            label="Room Type"
+            value={formData.roomType}
+            onChange={handleChange}
+            required
+            type="select"
+          >
+            <option value="Single">Single</option>
+            <option value="Double">Double</option>
+            <option value="Suite">Suite</option>
+            {/* Add other room types as needed */}
+          </FormGroup>
 
           {/* Payment Section */}
           <Box sx={{ marginTop: '2rem' }}>
@@ -254,6 +318,7 @@ const HotelBook = () => {
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
                 <input
                   type="text"
+                  name="cardNumber"
                   placeholder="Card Number"
                   maxLength="16"
                   className="payment-input"
@@ -262,6 +327,7 @@ const HotelBook = () => {
                 <Box sx={{ display: 'flex', gap: '1rem' }}>
                   <input
                     type="text"
+                    name="expirationDate"
                     placeholder="Expiration Date (MM/YY)"
                     maxLength="5"
                     className="payment-input"
@@ -269,6 +335,7 @@ const HotelBook = () => {
                   />
                   <input
                     type="text"
+                    name="cvv"
                     placeholder="CVV"
                     maxLength="3"
                     className="payment-input"
@@ -322,6 +389,61 @@ const HotelBook = () => {
           </Button>
         </form>
       </Box>
+
+      {/* Confirmation Dialog */}
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        aria-labelledby="confirmation-dialog-title"
+        aria-describedby="confirmation-dialog-description"
+      >
+        <DialogTitle id="confirmation-dialog-title">Booking Confirmed!</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="confirmation-dialog-description">
+            <Typography variant="body1" gutterBottom>
+              Thank you, <strong>{bookingDetails?.fullName || formData.fullName}</strong>, for booking with us!
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              Your booking ID is <strong>{bookingDetails?.bookingId}</strong>.
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              <strong>Hotel:</strong> {bookingDetails?.hotelName}
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              <strong>Room Type:</strong> {bookingDetails?.roomType}
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              <strong>Check-In:</strong> {new Date(bookingDetails?.checkIn).toLocaleDateString()}
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              <strong>Check-Out:</strong> {new Date(bookingDetails?.checkOut).toLocaleDateString()}
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              <strong>Guests:</strong> {bookingDetails?.guests}
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              <strong>Amount Paid:</strong> USD ${bookingDetails?.amount}
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              <strong>Payment Method:</strong> {bookingDetails?.paymentMethod}
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              <strong>Receipt:</strong>{' '}
+              <a href={bookingDetails?.receiptUrl} target="_blank" rel="noopener noreferrer">
+                View Receipt
+              </a>
+            </Typography>
+            <Typography variant="body2" gutterBottom>
+              A confirmation email has been sent to <strong>{formData.email}</strong>.
+            </Typography>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="primary" autoFocus>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };
@@ -344,17 +466,29 @@ const NoHotelMessage = () => (
   <p className="booking-no-hotel-message">Hotel not found.</p>
 );
 
-const FormGroup = ({ id, label, value, onChange, type = 'text', required = false }) => (
+const FormGroup = ({ id, label, value, onChange, type = 'text', required = false, children }) => (
   <div className="form-group">
-    <input
-      type={type}
-      id={id}
-      name={id}
-      value={value}
-      onChange={onChange}
-      required={required}
-      placeholder=" "
-    />
+    {type === 'select' ? (
+      <select
+        id={id}
+        name={id}
+        value={value}
+        onChange={onChange}
+        required={required}
+      >
+        {children}
+      </select>
+    ) : (
+      <input
+        type={type}
+        id={id}
+        name={id}
+        value={value}
+        onChange={onChange}
+        required={required}
+        placeholder=" "
+      />
+    )}
     <label htmlFor={id}>
       {label}
       {required && <span className="required">*</span>}

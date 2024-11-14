@@ -5,28 +5,38 @@ const { validationResult } = require('express-validator');
 const nodemailer = require('nodemailer'); // For sending emails
 require('dotenv').config(); // Ensure environment variables are loaded
 
-// Configure Nodemailer transporter
+// Check if essential environment variables are present
+if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+  console.error('Error: Missing EMAIL_USER or EMAIL_PASS in environment variables.');
+  process.exit(1); // Exit the application if SMTP config is missing
+}
+
+// Configure Nodemailer transporter using Gmail SMTP
 const transporter = nodemailer.createTransport({
-  host: 'smtp.mailtrap.io', // Replace with your SMTP server
-  port: 2525,
+  service: 'Gmail',
   auth: {
-    user: process.env.MAIL_USER, // Set in your .env
-    pass: process.env.MAIL_PASS, // Set in your .env
+    user: process.env.EMAIL_USER, // Your Gmail address
+    pass: process.env.EMAIL_PASS, // Your Gmail App Password
   },
 });
+
+// Verify transporter configuration
+transporter.verify()
+  .then(() => console.log('Nodemailer transporter is ready'))
+  .catch((error) => console.error('Nodemailer transporter error:', error));
 
 // Helper function to send emails
 const sendEmail = async (to, subject, html) => {
   try {
     await transporter.sendMail({
-      from: '"ExploreEase" <no-reply@exploreease.com>', // Replace with your sender address
+      from: `"ExploreEase" <${process.env.EMAIL_USER}>`, // Sender address
       to,
       subject,
       html,
     });
     console.log(`Email sent to ${to}`);
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error(`Error sending email to ${to}:`, error);
   }
 };
 
@@ -37,14 +47,15 @@ const calculateBookingAmount = (booking) => {
   const timeDiff = checkOutDate - checkInDate;
   const numberOfNights = Math.ceil(timeDiff / (1000 * 3600 * 24));
 
-  // Example room prices
+  // Define room prices based on room type
   const roomPrices = {
     'Single': 100,
     'Double': 150,
     'Suite': 200,
+    // Add other room types and their prices as needed
   };
 
-  const pricePerNight = roomPrices[booking.roomType] || 100;
+  const pricePerNight = roomPrices[booking.roomType] || 100; // Default to $100 if roomType not found
   return numberOfNights * pricePerNight;
 };
 
@@ -65,6 +76,7 @@ const createBooking = async (req, res) => {
     checkOut,
     guests,
     hotelId,
+    roomType, // Ensure roomType is provided in the request body
   } = req.body;
 
   try {
@@ -82,7 +94,13 @@ const createBooking = async (req, res) => {
     }
 
     // Optionally, check room availability here
+    // Example:
+    // const isAvailable = await checkRoomAvailability(hotelId, roomType, checkIn, checkOut);
+    // if (!isAvailable) {
+    //   return res.status(400).json({ success: false, message: 'Selected room is not available for the chosen dates.' });
+    // }
 
+    // Create the booking with status 'Pending'
     const booking = await Booking.create({
       UserID: userId, // Use the retrieved UserID
       HotelID: hotelId,
@@ -92,25 +110,43 @@ const createBooking = async (req, res) => {
       checkIn,
       checkOut,
       guests,
+      roomType,
       status: 'Pending', // Initial status
     });
 
     console.log('Booking created:', booking);
 
-    // Optionally, send a confirmation email to the user
-    /*
-    const user = await User.findByPk(userId);
-    if (user) {
+    // Fetch associated hotel details
+    const hotel = await Hotel.findByPk(hotelId);
+    if (!hotel) {
+      return res.status(404).json({ success: false, message: 'Hotel not found.' });
+    }
+
+    // Send a notification email to the user about the booking creation
+    await sendEmail(
+      user.Email,
+      'Booking Received',
+      `<p>Dear ${user.UserName},</p>
+       <p>We have received your booking request for a <strong>${booking.roomType}</strong> room at <strong>${hotel.name}</strong> from <strong>${new Date(booking.checkIn).toLocaleDateString()}</strong> to <strong>${new Date(booking.checkOut).toLocaleDateString()}</strong>.</p>
+       <p>Your booking is currently pending approval. You will receive a confirmation email once the booking is approved.</p>
+       <p>Thank you for choosing ExploreEase!</p>`
+    );
+
+    // Send a notification email to the admin
+    if (process.env.ADMIN_EMAIL) {
       await sendEmail(
-        user.Email,
-        'Booking Received',
-        `<p>Dear ${user.UserName},</p>
-         <p>We have received your booking request for a ${booking.roomType} room at Hotel ID ${hotelId} from ${checkIn} to ${checkOut}.</p>
-         <p>Your booking is currently pending approval.</p>
-         <p>Thank you for choosing ExploreEase!</p>`
+        process.env.ADMIN_EMAIL,
+        'New Booking Received',
+        `<p>A new booking has been received:</p>
+         <p><strong>Booking ID:</strong> ${booking.BookingID}</p>
+         <p><strong>User:</strong> ${user.UserName} (${user.Email})</p>
+         <p><strong>Hotel:</strong> ${hotel.name}</p>
+         <p><strong>Room Type:</strong> ${booking.roomType}</p>
+         <p><strong>Check-In:</strong> ${new Date(booking.checkIn).toLocaleDateString()}</p>
+         <p><strong>Check-Out:</strong> ${new Date(booking.checkOut).toLocaleDateString()}</p>
+         <p><strong>Guests:</strong> ${booking.guests}</p>`
       );
     }
-    */
 
     // Respond with the booking details, including BookingID
     res.status(201).json({ success: true, booking });
@@ -175,7 +211,7 @@ const getBookingById = async (req, res) => {
 const updateBooking = async (req, res) => {
   const bookingId = req.params.id;
   const userId = req.userData.UserID;
-  const isAdmin = req.userData.UserType === 'Admin';
+  const userRole = req.userData.UserType; // ensure userData has UserType
   const { status } = req.body;
 
   try {
@@ -192,46 +228,40 @@ const updateBooking = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Booking not found.' });
     }
 
-    if (isAdmin) {
+    if (userRole === 'Admin') {
       // Admin can update status and other details
       if (status && ['Approved', 'Rejected', 'Cancelled'].includes(status)) {
         booking.status = status;
 
-        // Simulate fake payment upon approval
-        if (status === 'Approved' && !booking.payment) {
-          const amount = calculateBookingAmount(booking);
-          const payment = await Payment.create({
-            stripePaymentIntentId: `fake_pi_${Date.now()}`,
-            amount: amount * 100, // Convert to cents
-            currency: 'USD',
-            status: 'Succeeded',
-            paymentMethod: 'Fake Card',
-            receiptUrl: `https://fake-receipt-url.com/${booking.BookingID}`,
-            userId: booking.UserID,
-            BookingID: booking.BookingID,
-          });
-
-          // Associate payment with booking
-          booking.PaymentID = payment.id;
-
-          // Send an approval email to the user
-          const user = await User.findByPk(booking.UserID);
-          if (user) {
-            await sendEmail(
-              user.Email,
-              'Booking Approved',
-              `<p>Dear ${user.UserName},</p>
-               <p>Your booking (ID: ${booking.BookingID}) for a ${booking.roomType} room at ${booking.hotel.name} from ${booking.checkIn} to ${booking.checkOut} has been approved.</p>
-               <p>Payment Details:</p>
-               <ul>
-                 <li>Amount: $${(payment.amount / 100).toFixed(2)}</li>
-                 <li>Payment Method: ${payment.paymentMethod}</li>
-                 <li>Receipt: <a href="${payment.receiptUrl}" target="_blank" rel="noopener noreferrer">View Receipt</a></li>
-               </ul>
-               <p>Thank you for choosing ExploreEase!</p>`
-            );
-          }
+        if (status === 'Approved') {
+          // Send approval email to user
+          await sendEmail(
+            booking.user.Email,
+            'Booking Approved',
+            `<p>Dear ${booking.user.UserName},</p>
+             <p>Your booking (ID: ${booking.BookingID}) for a <strong>${booking.roomType}</strong> room at <strong>${booking.hotel.name}</strong> from <strong>${new Date(booking.checkIn).toLocaleDateString()}</strong> to <strong>${new Date(booking.checkOut).toLocaleDateString()}</strong> has been approved.</p>
+             <p>Payment Details:</p>
+             <ul>
+               <li>Amount: $${(booking.payment.amount / 100).toFixed(2)}</li>
+               <li>Payment Method: ${booking.payment.paymentMethod}</li>
+               <li>Receipt: <a href="${booking.payment.receiptUrl}" target="_blank" rel="noopener noreferrer">View Receipt</a></li>
+             </ul>
+             <p>Thank you for choosing ExploreEase!</p>`
+          );
+        } else if (status === 'Rejected') {
+          // Send rejection email to user
+          await sendEmail(
+            booking.user.Email,
+            'Booking Rejected',
+            `<p>Dear ${booking.user.UserName},</p>
+             <p>We regret to inform you that your booking (ID: ${booking.BookingID}) for a <strong>${booking.roomType}</strong> room at <strong>${booking.hotel.name}</strong> from <strong>${new Date(booking.checkIn).toLocaleDateString()}</strong> to <strong>${new Date(booking.checkOut).toLocaleDateString()}</strong> has been rejected.</p>
+             <p>If you have any questions, please contact our support team.</p>
+             <p>Thank you for choosing ExploreEase.</p>`
+          );
         }
+
+        // For 'Cancelled' status, send appropriate email if needed
+        // Implement as per requirements
       }
 
       await booking.save();
@@ -247,8 +277,18 @@ const updateBooking = async (req, res) => {
         return res.status(400).json({ success: false, message: 'Cannot edit booking that is not pending.' });
       }
 
-      // Update allowed fields
-      // Add other fields as needed
+      // Update allowed fields (e.g., phone, checkIn, checkOut, guests, roomType)
+      const { phone, checkIn, checkOut, guests, roomType } = req.body;
+
+      if (phone) booking.phone = phone;
+      if (checkIn) booking.checkIn = checkIn;
+      if (checkOut) booking.checkOut = checkOut;
+      if (guests) booking.guests = guests;
+      if (roomType) booking.roomType = roomType;
+
+      // Optionally, recalculate the amount if roomType or dates have changed
+      // Not implemented here; can be added as needed
+
       await booking.save();
 
       res.status(200).json({ success: true, booking });
@@ -263,7 +303,7 @@ const updateBooking = async (req, res) => {
 const deleteBooking = async (req, res) => {
   const bookingId = req.params.id;
   const userId = req.userData.UserID;
-  const isAdmin = req.userData.UserType === 'Admin';
+  const userRole = req.userData.UserType;
 
   try {
     const booking = await Booking.findOne({ where: { BookingID: bookingId } });
@@ -273,7 +313,7 @@ const deleteBooking = async (req, res) => {
     }
 
     // Allow deletion if admin or the user who made the booking
-    if (!isAdmin && booking.UserID !== userId) {
+    if (userRole !== 'Admin' && booking.UserID !== userId) {
       return res.status(403).json({ success: false, message: 'Access denied.' });
     }
 

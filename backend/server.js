@@ -21,6 +21,8 @@ const itinerariesRouter = require('./routes/itineraries');
 const paymentsRouter = require('./routes/payments'); 
 const userRoutes = require('./routes/user');
 const bookingsRoutes = require('./routes/bookings');
+const flightBookingsRouter = require('./routes/flightBookings');
+
 const app = express();
 
 const PORT = process.env.PORT || 3001;
@@ -119,6 +121,8 @@ app.use('/api/itineraries', itinerariesRouter);
 app.use('/api/payments', paymentsRouter); 
 app.use('/api/user', userRoutes);
 app.use('/api/bookings', bookingsRoutes);
+app.use('/api/flight-bookings', flightBookingsRouter);
+
 
 
 // Health Check Endpoint

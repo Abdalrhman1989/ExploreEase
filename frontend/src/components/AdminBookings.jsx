@@ -1,35 +1,90 @@
 // frontend/src/components/AdminBookings.jsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import '../styles/AdminBookings.css';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import {
+  Button,
+  CircularProgress,
+  Typography,
+  Box,
+  Alert,
+  Container,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from '@mui/material';
+import { AuthContext } from '../context/AuthContext'; // Ensure AuthContext is properly set up
 
 const AdminBookings = () => {
-  const [bookings, setBookings] = useState([]);
-  const [pendingBookings, setPendingBookings] = useState([]);
+  const { isAuthenticated, user } = useContext(AuthContext);
+
+  // State Variables for Hotel Bookings
+  const [hotelBookings, setHotelBookings] = useState([]); // Approved
+  const [pendingHotelBookings, setPendingHotelBookings] = useState([]); // Pending
+  const [rejectedHotelBookings, setRejectedHotelBookings] = useState([]); // Rejected
+
+  // State Variables for Flight Bookings
+  const [flightBookings, setFlightBookings] = useState([]); // Approved
+  const [pendingFlightBookings, setPendingFlightBookings] = useState([]); // Pending
+  const [rejectedFlightBookings, setRejectedFlightBookings] = useState([]); // Rejected
+
   const [loading, setLoading] = useState(true);
+
+  // Confirmation Dialog State
+  const [openDialog, setOpenDialog] = useState(false);
+  const [currentBooking, setCurrentBooking] = useState(null);
+  const [newStatus, setNewStatus] = useState('');
+  const [bookingType, setBookingType] = useState(''); // 'hotel' or 'flight'
 
   useEffect(() => {
     fetchAllBookings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchAllBookings = async () => {
     try {
       const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
-      const token = localStorage.getItem('token'); // Ensure admin is logged in
+      const token = localStorage.getItem('authToken'); // Ensure admin is logged in
 
-      const response = await axios.get(`${backendUrl}/api/bookings`, {
+      // Fetch Hotel Bookings
+      const hotelResponse = await axios.get(`${backendUrl}/api/bookings`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      if (response.status === 200) {
-        const allBookings = response.data.bookings;
-        setBookings(allBookings.filter(booking => booking.status === 'Approved'));
-        setPendingBookings(allBookings.filter(booking => booking.status === 'Pending'));
+      if (hotelResponse.status === 200) {
+        const allHotelBookings = hotelResponse.data.bookings;
+        setHotelBookings(allHotelBookings.filter(booking => booking.status === 'Approved'));
+        setPendingHotelBookings(allHotelBookings.filter(booking => booking.status === 'Pending'));
+        setRejectedHotelBookings(allHotelBookings.filter(booking => booking.status === 'Rejected'));
       }
+
+      // Fetch Flight Bookings
+      const flightResponse = await axios.get(`${backendUrl}/api/flight-bookings`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (flightResponse.status === 200) {
+        const allFlightBookings = flightResponse.data.flightBookings;
+        setFlightBookings(allFlightBookings.filter(booking => booking.status === 'Approved'));
+        setPendingFlightBookings(allFlightBookings.filter(booking => booking.status === 'Pending'));
+        setRejectedFlightBookings(allFlightBookings.filter(booking => booking.status === 'Rejected'));
+      }
+
     } catch (err) {
       console.error('Error fetching bookings:', err.response ? err.response.data : err.message);
       toast.error('Failed to fetch bookings.');
@@ -38,72 +93,112 @@ const AdminBookings = () => {
     }
   };
 
-  // Handlers for managing bookings
-  const handleApprove = async (id) => {
+  // Handler to Open Confirmation Dialog
+  const handleStatusChange = (booking, type, status) => {
+    setCurrentBooking(booking);
+    setBookingType(type);
+    setNewStatus(status); // Set the desired new status
+    setOpenDialog(true);
+  };
+
+  // Handler to Close Confirmation Dialog
+  const handleDialogClose = () => {
+    setOpenDialog(false);
+    setCurrentBooking(null);
+    setNewStatus('');
+    setBookingType('');
+  };
+
+  // Handler to Update Booking Status
+  const handleStatusUpdate = async () => {
+    if (!currentBooking || !bookingType) return;
+
     try {
       const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('authToken');
+
+      let endpoint = '';
+      let payload = {};
+
+      if (bookingType === 'hotel') {
+        endpoint = `/api/bookings/${currentBooking.BookingID}`;
+        payload = {
+          status: newStatus,
+        };
+      } else if (bookingType === 'flight') {
+        endpoint = `/api/flight-bookings/${currentBooking.FlightBookingID}`;
+        payload = {
+          status: newStatus,
+        };
+      }
 
       const response = await axios.put(
-        `${backendUrl}/api/bookings/${id}`,
-        { status: 'Approved' },
+        `${backendUrl}${endpoint}`,
+        payload,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
+
       if (response.status === 200) {
-        toast.success(`Booking ${id} approved.`);
-        // Update state
-        const approvedBooking = pendingBookings.find(b => b.BookingID === id);
-        setPendingBookings(pendingBookings.filter(b => b.BookingID !== id));
-        setBookings([...bookings, { ...approvedBooking, status: 'Approved' }]);
-      }
-    } catch (err) {
-      console.error('Error approving booking:', err.response ? err.response.data : err.message);
-      toast.error('Failed to approve booking.');
-    }
-  };
+        toast.success(`Booking ID ${bookingType === 'hotel' ? currentBooking.BookingID : currentBooking.FlightBookingID} status updated to ${newStatus}.`);
 
-  const handleReject = async (id) => {
-    try {
-      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
-      const token = localStorage.getItem('token');
+        // Update State Based on Booking Type
+        if (bookingType === 'hotel') {
+          // Remove from all categories
+          setHotelBookings(hotelBookings.filter(b => b.BookingID !== currentBooking.BookingID));
+          setPendingHotelBookings(pendingHotelBookings.filter(b => b.BookingID !== currentBooking.BookingID));
+          setRejectedHotelBookings(rejectedHotelBookings.filter(b => b.BookingID !== currentBooking.BookingID));
 
-      const response = await axios.put(
-        `${backendUrl}/api/bookings/${id}`,
-        { status: 'Rejected' },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          // Add to the appropriate category based on updated status
+          if (newStatus === 'Approved') {
+            setHotelBookings([...hotelBookings, response.data.booking]);
+          } else if (newStatus === 'Pending') {
+            setPendingHotelBookings([...pendingHotelBookings, response.data.booking]);
+          } else if (newStatus === 'Rejected') {
+            setRejectedHotelBookings([...rejectedHotelBookings, response.data.booking]);
+          }
+        } else if (bookingType === 'flight') {
+          // Remove from all categories
+          setFlightBookings(flightBookings.filter(b => b.FlightBookingID !== currentBooking.FlightBookingID));
+          setPendingFlightBookings(pendingFlightBookings.filter(b => b.FlightBookingID !== currentBooking.FlightBookingID));
+          setRejectedFlightBookings(rejectedFlightBookings.filter(b => b.FlightBookingID !== currentBooking.FlightBookingID));
+
+          // Add to the appropriate category based on updated status
+          if (newStatus === 'Approved') {
+            setFlightBookings([...flightBookings, response.data.flightBooking]);
+          } else if (newStatus === 'Pending') {
+            setPendingFlightBookings([...pendingFlightBookings, response.data.flightBooking]);
+          } else if (newStatus === 'Rejected') {
+            setRejectedFlightBookings([...rejectedFlightBookings, response.data.flightBooking]);
+          }
         }
-      );
-      if (response.status === 200) {
-        toast.success(`Booking ${id} rejected.`);
-        // Update state
-        setPendingBookings(pendingBookings.filter(b => b.BookingID !== id));
+
+        handleDialogClose();
       }
     } catch (err) {
-      console.error('Error rejecting booking:', err.response ? err.response.data : err.message);
-      toast.error('Failed to reject booking.');
+      console.error('Error updating booking status:', err.response ? err.response.data : err.message);
+      toast.error('Failed to update booking status.');
     }
   };
 
-  const handleEdit = (id) => {
-    // Implement edit functionality, such as opening a modal with booking details
-    console.log(`Editing booking ${id}`);
-    // You can redirect to an edit page or open a modal to handle editing
-  };
-
-  const handleCancel = async (id) => {
+  // Handler to Cancel a Booking (For Approved Bookings)
+  const handleCancelBooking = async (booking, type) => {
     try {
       const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('authToken');
+
+      let endpoint = '';
+      if (type === 'hotel') {
+        endpoint = `/api/bookings/${booking.BookingID}`;
+      } else if (type === 'flight') {
+        endpoint = `/api/flight-bookings/${booking.FlightBookingID}`;
+      }
 
       const response = await axios.put(
-        `${backendUrl}/api/bookings/${id}`,
+        `${backendUrl}${endpoint}`,
         { status: 'Cancelled' },
         {
           headers: {
@@ -111,10 +206,16 @@ const AdminBookings = () => {
           },
         }
       );
+
       if (response.status === 200) {
-        toast.success(`Booking ${id} cancelled.`);
-        // Remove from confirmed bookings
-        setBookings(bookings.filter(b => b.BookingID !== id));
+        toast.success(`Booking ID ${type === 'hotel' ? booking.BookingID : booking.FlightBookingID} cancelled.`);
+
+        // Update State Based on Booking Type
+        if (type === 'hotel') {
+          setHotelBookings(hotelBookings.filter(b => b.BookingID !== booking.BookingID));
+        } else if (type === 'flight') {
+          setFlightBookings(flightBookings.filter(b => b.FlightBookingID !== booking.FlightBookingID));
+        }
       }
     } catch (err) {
       console.error('Error cancelling booking:', err.response ? err.response.data : err.message);
@@ -122,126 +223,474 @@ const AdminBookings = () => {
     }
   };
 
-  return (
-    <div className="page-content">
-      <h2>Bookings Management</h2>
-      <p>Manage and confirm user bookings.</p>
-      {loading ? (
-        <p>Loading bookings...</p>
-      ) : (
-        <>
-          {/* Pending Bookings Section */}
-          <section className="bookings-section">
-            <h3>Pending Bookings</h3>
-            {pendingBookings.length === 0 ? (
-              <p>No pending bookings to display.</p>
-            ) : (
-              <table className="bookings-table">
-                <thead>
-                  <tr>
-                    <th>BookingID</th>
-                    <th>User</th>
-                    <th>Hotel</th>
-                    <th>Check-In</th>
-                    <th>Check-Out</th>
-                    <th>Guests</th>
-                    <th>Room Type</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pendingBookings.map((booking) => (
-                    <tr key={booking.BookingID}>
-                      <td>{booking.BookingID}</td>
-                      <td>{booking.user.UserName}</td>
-                      <td>{booking.hotel.name}</td>
-                      <td>{booking.checkIn}</td>
-                      <td>{booking.checkOut}</td>
-                      <td>{booking.guests}</td>
-                      <td>{booking.roomType}</td>
-                      <td>{booking.status}</td>
-                      <td>
-                        <button
-                          className="btn-approve"
-                          onClick={() => handleApprove(booking.BookingID)}
-                        >
-                          Approve
-                        </button>
-                        <button
-                          className="btn-reject"
-                          onClick={() => handleReject(booking.BookingID)}
-                        >
-                          Reject
-                        </button>
-                        <button
-                          className="btn-edit"
-                          onClick={() => handleEdit(booking.BookingID)}
-                        >
-                          Edit
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </section>
+  if (loading)
+    return (
+      <Container
+        maxWidth="md"
+        sx={{
+          marginTop: '3rem',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <CircularProgress />
+        <Typography variant="h6" sx={{ marginTop: '1rem' }}>
+          Loading bookings...
+        </Typography>
+      </Container>
+    );
 
-          {/* Confirmed Bookings Section */}
-          <section className="bookings-section">
-            <h3>Confirmed Bookings</h3>
-            {bookings.length === 0 ? (
-              <p>No confirmed bookings to display.</p>
-            ) : (
-              <table className="bookings-table">
-                <thead>
-                  <tr>
-                    <th>BookingID</th>
-                    <th>User</th>
-                    <th>Hotel</th>
-                    <th>Check-In</th>
-                    <th>Check-Out</th>
-                    <th>Guests</th>
-                    <th>Room Type</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {bookings.map((booking) => (
-                    <tr key={booking.BookingID}>
-                      <td>{booking.BookingID}</td>
-                      <td>{booking.user.UserName}</td>
-                      <td>{booking.hotel.name}</td>
-                      <td>{booking.checkIn}</td>
-                      <td>{booking.checkOut}</td>
-                      <td>{booking.guests}</td>
-                      <td>{booking.roomType}</td>
-                      <td>{booking.status}</td>
-                      <td>
-                        <button
-                          className="btn-cancel"
-                          onClick={() => handleCancel(booking.BookingID)}
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          className="btn-edit"
-                          onClick={() => handleEdit(booking.BookingID)}
-                        >
-                          Edit
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </section>
-        </>
-      )}
-    </div>
+  return (
+    <Container maxWidth="lg" sx={{ marginTop: '3rem', marginBottom: '3rem' }}>
+      {/* Toast Container for Notifications */}
+      <ToastContainer position="top-right" autoClose={5000} hideProgressBar />
+
+      <Typography variant="h4" gutterBottom>
+        Bookings Management
+      </Typography>
+      <Typography variant="subtitle1" gutterBottom>
+        Manage and confirm user bookings for both Hotels and Flights.
+      </Typography>
+
+      {/* Pending Hotel Bookings */}
+      <Box sx={{ marginTop: '2rem' }}>
+        <Typography variant="h5" gutterBottom>
+          Pending Hotel Bookings
+        </Typography>
+        {pendingHotelBookings.length === 0 ? (
+          <Alert severity="info">No pending hotel bookings to display.</Alert>
+        ) : (
+          <TableContainer component={Paper}>
+            <Table aria-label="pending hotel bookings table">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Booking ID</TableCell>
+                  <TableCell>User</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Hotel</TableCell>
+                  <TableCell>Room Type</TableCell>
+                  <TableCell>Check-In</TableCell>
+                  <TableCell>Check-Out</TableCell>
+                  <TableCell>Guests</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {pendingHotelBookings.map((booking) => (
+                  <TableRow key={booking.BookingID}>
+                    <TableCell>{booking.BookingID}</TableCell>
+                    <TableCell>{`${booking.user.firstName} ${booking.user.lastName}`}</TableCell>
+                    <TableCell>{booking.email}</TableCell>
+                    <TableCell>{booking.hotel.name}</TableCell>
+                    <TableCell>{booking.roomType}</TableCell>
+                    <TableCell>{new Date(booking.checkIn).toLocaleDateString()}</TableCell>
+                    <TableCell>{new Date(booking.checkOut).toLocaleDateString()}</TableCell>
+                    <TableCell>{booking.guests}</TableCell>
+                    <TableCell>
+                      <Alert severity="warning" sx={{ padding: '0.5rem' }}>
+                        {booking.status}
+                      </Alert>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="contained"
+                        color="success"
+                        size="small"
+                        sx={{ marginRight: '0.5rem', marginBottom: '0.5rem' }}
+                        onClick={() => handleStatusChange(booking, 'hotel', 'Approved')}
+                      >
+                        Approve
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="error"
+                        size="small"
+                        sx={{ marginRight: '0.5rem', marginBottom: '0.5rem' }}
+                        onClick={() => handleStatusChange(booking, 'hotel', 'Rejected')}
+                      >
+                        Reject
+                      </Button>
+                      {/* Optional: Edit Button */}
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        size="small"
+                        onClick={() => handleStatusChange(booking, 'hotel', 'Edit')}
+                      >
+                        Edit
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+      </Box>
+
+      {/* Pending Flight Bookings */}
+      <Box sx={{ marginTop: '4rem' }}>
+        <Typography variant="h5" gutterBottom>
+          Pending Flight Bookings
+        </Typography>
+        {pendingFlightBookings.length === 0 ? (
+          <Alert severity="info">No pending flight bookings to display.</Alert>
+        ) : (
+          <TableContainer component={Paper}>
+            <Table aria-label="pending flight bookings table">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Booking ID</TableCell>
+                  <TableCell>User</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Flight Number</TableCell>
+                  <TableCell>Route</TableCell>
+                  <TableCell>Departure</TableCell>
+                  <TableCell>Arrival</TableCell>
+                  <TableCell>Seat Class</TableCell>
+                  <TableCell>Price</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {pendingFlightBookings.map((booking) => (
+                  <TableRow key={booking.FlightBookingID}>
+                    <TableCell>{booking.FlightBookingID}</TableCell>
+                    <TableCell>{`${booking.firstName} ${booking.lastName}`}</TableCell>
+                    <TableCell>{booking.email}</TableCell>
+                    <TableCell>{booking.flightNumber}</TableCell>
+                    <TableCell>{`${booking.departureAirport} → ${booking.arrivalAirport}`}</TableCell>
+                    <TableCell>{new Date(booking.departureTime).toLocaleString()}</TableCell>
+                    <TableCell>{new Date(booking.arrivalTime).toLocaleString()}</TableCell>
+                    <TableCell>{booking.seatClass}</TableCell>
+                    <TableCell>{`${booking.price.currency} ${booking.price}`}</TableCell>
+                    <TableCell>
+                      <Alert severity="warning" sx={{ padding: '0.5rem' }}>
+                        {booking.status}
+                      </Alert>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="contained"
+                        color="success"
+                        size="small"
+                        sx={{ marginRight: '0.5rem', marginBottom: '0.5rem' }}
+                        onClick={() => handleStatusChange(booking, 'flight', 'Approved')}
+                      >
+                        Approve
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="error"
+                        size="small"
+                        sx={{ marginRight: '0.5rem', marginBottom: '0.5rem' }}
+                        onClick={() => handleStatusChange(booking, 'flight', 'Rejected')}
+                      >
+                        Reject
+                      </Button>
+                      {/* Optional: Edit Button */}
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        size="small"
+                        onClick={() => handleStatusChange(booking, 'flight', 'Edit')}
+                      >
+                        Edit
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+      </Box>
+
+      {/* Approved Hotel Bookings */}
+      <Box sx={{ marginTop: '4rem' }}>
+        <Typography variant="h5" gutterBottom>
+          Approved Hotel Bookings
+        </Typography>
+        {hotelBookings.length === 0 ? (
+          <Alert severity="info">No approved hotel bookings to display.</Alert>
+        ) : (
+          <TableContainer component={Paper}>
+            <Table aria-label="approved hotel bookings table">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Booking ID</TableCell>
+                  <TableCell>User</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Hotel</TableCell>
+                  <TableCell>Room Type</TableCell>
+                  <TableCell>Check-In</TableCell>
+                  <TableCell>Check-Out</TableCell>
+                  <TableCell>Guests</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {hotelBookings.map((booking) => (
+                  <TableRow key={booking.BookingID}>
+                    <TableCell>{booking.BookingID}</TableCell>
+                    <TableCell>{`${booking.user.firstName} ${booking.user.lastName}`}</TableCell>
+                    <TableCell>{booking.email}</TableCell>
+                    <TableCell>{booking.hotel.name}</TableCell>
+                    <TableCell>{booking.roomType}</TableCell>
+                    <TableCell>{new Date(booking.checkIn).toLocaleDateString()}</TableCell>
+                    <TableCell>{new Date(booking.checkOut).toLocaleDateString()}</TableCell>
+                    <TableCell>{booking.guests}</TableCell>
+                    <TableCell>
+                      <Alert severity="success" sx={{ padding: '0.5rem' }}>
+                        {booking.status}
+                      </Alert>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="contained"
+                        color="error"
+                        size="small"
+                        sx={{ marginRight: '0.5rem' }}
+                        onClick={() => handleCancelBooking(booking, 'hotel')}
+                      >
+                        Cancel
+                      </Button>
+                      {/* Optional: Edit Button */}
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        size="small"
+                        onClick={() => handleStatusChange(booking, 'hotel', 'Edit')}
+                      >
+                        Edit
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+      </Box>
+
+      {/* Approved Flight Bookings */}
+      <Box sx={{ marginTop: '4rem' }}>
+        <Typography variant="h5" gutterBottom>
+          Approved Flight Bookings
+        </Typography>
+        {flightBookings.length === 0 ? (
+          <Alert severity="info">No approved flight bookings to display.</Alert>
+        ) : (
+          <TableContainer component={Paper}>
+            <Table aria-label="approved flight bookings table">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Booking ID</TableCell>
+                  <TableCell>User</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Flight Number</TableCell>
+                  <TableCell>Route</TableCell>
+                  <TableCell>Departure</TableCell>
+                  <TableCell>Arrival</TableCell>
+                  <TableCell>Seat Class</TableCell>
+                  <TableCell>Price</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {flightBookings.map((booking) => (
+                  <TableRow key={booking.FlightBookingID}>
+                    <TableCell>{booking.FlightBookingID}</TableCell>
+                    <TableCell>{`${booking.firstName} ${booking.lastName}`}</TableCell>
+                    <TableCell>{booking.email}</TableCell>
+                    <TableCell>{booking.flightNumber}</TableCell>
+                    <TableCell>{`${booking.departureAirport} → ${booking.arrivalAirport}`}</TableCell>
+                    <TableCell>{new Date(booking.departureTime).toLocaleString()}</TableCell>
+                    <TableCell>{new Date(booking.arrivalTime).toLocaleString()}</TableCell>
+                    <TableCell>{booking.seatClass}</TableCell>
+                    <TableCell>{`${booking.price.currency} ${booking.price}`}</TableCell>
+                    <TableCell>
+                      <Alert severity="success" sx={{ padding: '0.5rem' }}>
+                        {booking.status}
+                      </Alert>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="contained"
+                        color="error"
+                        size="small"
+                        sx={{ marginRight: '0.5rem' }}
+                        onClick={() => handleCancelBooking(booking, 'flight')}
+                      >
+                        Cancel
+                      </Button>
+                      {/* Optional: Edit Button */}
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        size="small"
+                        onClick={() => handleStatusChange(booking, 'flight', 'Edit')}
+                      >
+                        Edit
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+      </Box>
+
+      {/* Rejected Hotel Bookings */}
+      <Box sx={{ marginTop: '4rem' }}>
+        <Typography variant="h5" gutterBottom>
+          Rejected Hotel Bookings
+        </Typography>
+        {rejectedHotelBookings.length === 0 ? (
+          <Alert severity="info">No rejected hotel bookings to display.</Alert>
+        ) : (
+          <TableContainer component={Paper}>
+            <Table aria-label="rejected hotel bookings table">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Booking ID</TableCell>
+                  <TableCell>User</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Hotel</TableCell>
+                  <TableCell>Room Type</TableCell>
+                  <TableCell>Check-In</TableCell>
+                  <TableCell>Check-Out</TableCell>
+                  <TableCell>Guests</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {rejectedHotelBookings.map((booking) => (
+                  <TableRow key={booking.BookingID}>
+                    <TableCell>{booking.BookingID}</TableCell>
+                    <TableCell>{`${booking.user.firstName} ${booking.user.lastName}`}</TableCell>
+                    <TableCell>{booking.email}</TableCell>
+                    <TableCell>{booking.hotel.name}</TableCell>
+                    <TableCell>{booking.roomType}</TableCell>
+                    <TableCell>{new Date(booking.checkIn).toLocaleDateString()}</TableCell>
+                    <TableCell>{new Date(booking.checkOut).toLocaleDateString()}</TableCell>
+                    <TableCell>{booking.guests}</TableCell>
+                    <TableCell>
+                      <Alert severity="error" sx={{ padding: '0.5rem' }}>
+                        {booking.status}
+                      </Alert>
+                    </TableCell>
+                    <TableCell>
+                      {/* Optional: Edit Button */}
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        size="small"
+                        onClick={() => handleStatusChange(booking, 'hotel', 'Edit')}
+                      >
+                        Edit
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+      </Box>
+
+      {/* Rejected Flight Bookings */}
+      <Box sx={{ marginTop: '4rem' }}>
+        <Typography variant="h5" gutterBottom>
+          Rejected Flight Bookings
+        </Typography>
+        {rejectedFlightBookings.length === 0 ? (
+          <Alert severity="info">No rejected flight bookings to display.</Alert>
+        ) : (
+          <TableContainer component={Paper}>
+            <Table aria-label="rejected flight bookings table">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Booking ID</TableCell>
+                  <TableCell>User</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Flight Number</TableCell>
+                  <TableCell>Route</TableCell>
+                  <TableCell>Departure</TableCell>
+                  <TableCell>Arrival</TableCell>
+                  <TableCell>Seat Class</TableCell>
+                  <TableCell>Price</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {rejectedFlightBookings.map((booking) => (
+                  <TableRow key={booking.FlightBookingID}>
+                    <TableCell>{booking.FlightBookingID}</TableCell>
+                    <TableCell>{`${booking.firstName} ${booking.lastName}`}</TableCell>
+                    <TableCell>{booking.email}</TableCell>
+                    <TableCell>{booking.flightNumber}</TableCell>
+                    <TableCell>{`${booking.departureAirport} → ${booking.arrivalAirport}`}</TableCell>
+                    <TableCell>{new Date(booking.departureTime).toLocaleString()}</TableCell>
+                    <TableCell>{new Date(booking.arrivalTime).toLocaleString()}</TableCell>
+                    <TableCell>{booking.seatClass}</TableCell>
+                    <TableCell>{`${booking.price.currency} ${booking.price}`}</TableCell>
+                    <TableCell>
+                      <Alert severity="error" sx={{ padding: '0.5rem' }}>
+                        {booking.status}
+                      </Alert>
+                    </TableCell>
+                    <TableCell>
+                      {/* Optional: Edit Button */}
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        size="small"
+                        onClick={() => handleStatusChange(booking, 'flight', 'Edit')}
+                      >
+                        Edit
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+      </Box>
+
+      {/* Status Update Confirmation Dialog */}
+      <Dialog
+        open={openDialog}
+        onClose={handleDialogClose}
+        aria-labelledby="status-update-dialog-title"
+      >
+        <DialogTitle id="status-update-dialog-title">Update Booking Status</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">
+            Are you sure you want to change the status of Booking ID{' '}
+            <strong>{bookingType === 'hotel' ? currentBooking?.BookingID : currentBooking?.FlightBookingID}</strong> to{' '}
+            <strong>{newStatus}</strong>?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleStatusUpdate} color="primary" variant="contained">
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Container>
   );
 };
 

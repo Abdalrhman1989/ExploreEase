@@ -1,16 +1,13 @@
-// backend/models/payment.js
-
 'use strict';
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
   class Payment extends Model {
     static associate(models) {
-      // A Payment belongs to a User
       Payment.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
-      
-      // A Payment belongs to a Booking
       Payment.belongsTo(models.Booking, { foreignKey: 'BookingID', as: 'booking' });
+      Payment.belongsTo(models.FlightBooking, { foreignKey: 'FlightBookingID', as: 'flightBooking' });
+      
     }
   }
 
@@ -56,12 +53,21 @@ module.exports = (sequelize, DataTypes) => {
         },
         onDelete: 'CASCADE',
       },
-      BookingID: { // Added BookingID
+      BookingID: { 
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true, 
         references: {
           model: 'Bookings',
           key: 'BookingID',
+        },
+        onDelete: 'CASCADE',
+      },
+      FlightBookingID: { 
+        type: DataTypes.INTEGER,
+        allowNull: true, 
+        references: {
+          model: 'FlightBookings',
+          key: 'FlightBookingID',
         },
         onDelete: 'CASCADE',
       },

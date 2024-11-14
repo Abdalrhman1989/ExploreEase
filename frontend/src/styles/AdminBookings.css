@@ -1,5 +1,6 @@
-/* src/styles/AdminBookings.css */
+/* AdminBookings.css */
 
+/* General Page Styling */
 .page-content {
   padding: 20px;
 }
@@ -10,33 +11,46 @@
 
 .bookings-section h3 {
   margin-bottom: 10px;
+  font-size: 1.5rem;
 }
 
+/* Responsive Table Styling */
 .bookings-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: auto;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .bookings-table th,
 .bookings-table td {
   border: 1px solid #ddd;
-  padding: 12px;
+  padding: 8px 12px;
   text-align: left;
+  vertical-align: top;
+  /* Ensure text wraps and doesn't cause overflow */
+  white-space: normal;
+  word-break: break-word;
 }
 
 .bookings-table th {
   background-color: #f2f2f2;
+  font-size: 1rem;
 }
 
+/* Button Styling */
 .btn-approve,
 .btn-reject,
 .btn-edit,
 .btn-cancel {
   padding: 6px 12px;
   margin-right: 5px;
+  margin-bottom: 5px; /* Added margin-bottom for better spacing on small screens */
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  font-size: 0.875rem;
 }
 
 .btn-approve {
@@ -73,4 +87,79 @@
 
 .btn-cancel:hover {
   background-color: #fb8c00;
+}
+
+/* Responsive Styles */
+
+/* Medium Devices (Tablets, 768px and up) */
+@media screen and (max-width: 1200px) {
+  .bookings-table th,
+  .bookings-table td {
+    padding: 8px 10px;
+    font-size: 0.95rem;
+  }
+}
+
+/* Small Devices (Large Phones, 992px and down) */
+@media screen and (max-width: 992px) {
+  .bookings-table th,
+  .bookings-table td {
+    padding: 6px 8px;
+    font-size: 0.85rem;
+  }
+}
+
+/* Extra Small Devices (Phones, 768px and down) */
+@media screen and (max-width: 768px) {
+  .bookings-section h3 {
+    font-size: 1.25rem;
+  }
+
+  .bookings-table th,
+  .bookings-table td {
+    padding: 4px 6px;
+    font-size: 0.75rem;
+  }
+
+  /* Hide less important columns to prevent horizontal scrolling */
+  /* Adjust the nth-child indices based on your table structure */
+
+  /* Example: Hide User, Email, and some other columns */
+  .bookings-table th:nth-child(2),
+  .bookings-table td:nth-child(2), /* User */
+  .bookings-table th:nth-child(3),
+  .bookings-table td:nth-child(3), /* Email */
+  .bookings-table th:nth-child(4),
+  .bookings-table td:nth-child(4), /* Hotel / Flight Number */
+  .bookings-table th:nth-child(5),
+  .bookings-table td:nth-child(5), /* Room Type / Route */
+  .bookings-table th:nth-child(8),
+  .bookings-table td:nth-child(8), /* Guests / Seat Class */
+  .bookings-table th:nth-child(9),
+  .bookings-table td:nth-child(9)  /* Status */
+  {
+    display: none;
+  }
+
+  /* Adjust Actions Column */
+  .bookings-table th:nth-child(10),
+  .bookings-table td:nth-child(10) { /* Actions */
+    display: block;
+    width: 100%;
+  }
+}
+
+/* Very Small Devices (Portrait Phones, 480px and down) */
+@media screen and (max-width: 480px) {
+  .bookings-section h3 {
+    font-size: 1.15rem;
+  }
+
+  .btn-approve,
+  .btn-reject,
+  .btn-edit,
+  .btn-cancel {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
 }

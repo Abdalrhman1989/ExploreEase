@@ -1,0 +1,272 @@
+/* src/styles/Careers.css */
+
+.careers {
+    font-family: Arial, sans-serif;
+    color: #333;
+  }
+  
+  /* Hero Section */
+  .careers-hero {
+    background-image: url('/images/careers-hero.jpg');
+    background-size: cover;
+    background-position: center;
+    color: #fff;
+    padding: 100px 20px;
+    text-align: center;
+  }
+  
+  .careers-hero h1 {
+    font-size: 3em;
+    margin-bottom: 20px;
+  }
+  
+  .careers-hero p {
+    font-size: 1.2em;
+  }
+  
+  /* Company Culture Section */
+  .company-culture {
+    padding: 60px 20px;
+    background-color: #f9f9f9;
+    text-align: center;
+  }
+  
+  .company-culture h2 {
+    font-size: 2em;
+    margin-bottom: 20px;
+  }
+  
+  .company-culture p {
+    max-width: 800px;
+    margin: 0 auto 30px auto;
+    line-height: 1.6;
+  }
+  
+  .culture-images {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  
+  .culture-images img {
+    width: 300px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+  
+  /* Current Openings Section */
+  .current-openings {
+    padding: 60px 20px;
+  }
+  
+  .current-openings h2 {
+    text-align: center;
+    font-size: 2em;
+    margin-bottom: 30px;
+  }
+  
+  .job-filter {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  
+  .job-filter label {
+    margin-right: 10px;
+    font-weight: bold;
+  }
+  
+  .job-filter select {
+    padding: 5px 10px;
+    font-size: 1em;
+  }
+  
+  .job-listings {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  
+  .job-listing {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    background-color: #fff;
+    transition: box-shadow 0.3s ease;
+  }
+  
+  .job-listing:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .job-listing h3 {
+    margin-top: 0;
+    color: #007bff;
+  }
+  
+  .job-listing p {
+    margin: 10px 0;
+  }
+  
+  .job-listing button {
+    padding: 10px 15px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .job-listing button:hover {
+    background-color: #218838;
+  }
+  
+  /* Employee Benefits Section */
+  .employee-benefits {
+    padding: 60px 20px;
+    background-color: #f9f9f9;
+  }
+  
+  .employee-benefits h2 {
+    text-align: center;
+    font-size: 2em;
+    margin-bottom: 30px;
+  }
+  
+  .employee-benefits ul {
+    max-width: 800px;
+    margin: 0 auto;
+    list-style-type: disc;
+    padding-left: 20px;
+    line-height: 1.8;
+  }
+  
+  /* Employee Testimonials Section */
+  .employee-testimonials {
+    padding: 60px 20px;
+  }
+  
+  .employee-testimonials h2 {
+    text-align: center;
+    font-size: 2em;
+    margin-bottom: 30px;
+  }
+  
+  .testimonials {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  
+  .testimonial {
+    max-width: 400px;
+    padding: 20px;
+    background-color: #fff;
+    border-left: 4px solid #007bff;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .testimonial p {
+    font-style: italic;
+    margin-bottom: 15px;
+  }
+  
+  .testimonial h4 {
+    margin: 0;
+    text-align: right;
+    font-weight: normal;
+  }
+  
+  /* Modal Styles */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .apply-modal {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+  }
+  
+  .close-button {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+  }
+  
+  .apply-modal h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .apply-modal form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .apply-modal label {
+    margin-bottom: 15px;
+    font-weight: bold;
+  }
+  
+  .apply-modal input,
+  .apply-modal textarea {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .apply-modal textarea {
+    resize: vertical;
+    height: 100px;
+  }
+  
+  .apply-modal button {
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  
+  .apply-modal button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .culture-images {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .testimonials {
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+  

@@ -1,5 +1,3 @@
-// backend/models/booking.js
-
 'use strict';
 const { Model } = require('sequelize');
 
@@ -8,24 +6,20 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // A Booking belongs to a User
       Booking.belongsTo(models.User, { foreignKey: 'UserID', as: 'user' });
-      
-      // A Booking belongs to a Hotel
       Booking.belongsTo(models.Hotel, { foreignKey: 'HotelID', as: 'hotel' });
-      
-      // A Booking has one Payment
       Booking.hasOne(models.Payment, { foreignKey: 'BookingID', as: 'payment' });
     }
   }
 
   Booking.init(
     {
-      BookingID: { // Updated to match the migration
+      BookingID: { 
         type: DataTypes.INTEGER,
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
       },
-      UserID: { // Updated to match the migration
+      UserID: { 
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
@@ -34,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         onDelete: 'CASCADE',
       },
-      HotelID: { // Updated to match the migration
+      HotelID: { 
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
@@ -80,7 +74,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: 'Pending',
       },
-      // Additional fields can be added as needed
+      
     },
     {
       sequelize,

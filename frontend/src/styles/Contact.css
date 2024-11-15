@@ -1,16 +1,42 @@
 /* src/styles/Contact.css */
 
-/* CSS Variables for Consistent Theming */
+/* Updated CSS Variables for Consistent Theming */
 :root {
-    --primary-color: #2980b9;
-    --secondary-color: #1a6ab9;
-    --accent-color: #ffffff;
-    --background-color: #f9f9f9;
-    --text-color: #333333;
-    --light-gray: #ecf0f1;
-    --dark-gray: #7f8c8d;
-    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    /* Color Palette */
+    --primary-color: #1e3c72; 
+    --secondary-color: #2a5298; 
+    --accent-color: #ffffff; 
+    --background-color: #f4f6f8; 
+    --card-background: #ffffff; 
+    --text-color: #333333; 
+    --secondary-text-color: #555555; 
+    --error-color: #dc3545; 
+    --success-color: #28a745; 
+  
+    /* Gradients */
+    --primary-gradient: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    --secondary-gradient: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+  
+    /* Shadows */
+    --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    --hover-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  
+    /* Border Radius */
+    --border-radius: 12px;
+  
+    /* Transitions */
     --transition-speed: 0.3s;
+  
+    /* Font Sizes */
+    --font-size-small: 0.9rem;
+    --font-size-medium: 1rem;
+    --font-size-large: 1.5rem;
+    --font-size-xlarge: 2.5rem;
+  
+    /* Z-Index for layering */
+    --z-index-modal: 1000;
+  
+    /* Typography */
     --font-family: 'Roboto', sans-serif;
 }
 
@@ -62,21 +88,22 @@
     animation: fadeInUp 1s ease-in-out;
 }
 
+/* Updated Button Styles to Use Gradients */
 .contact-btn {
     padding: 0.75rem 2rem;
-    background-color: var(--primary-color);
+    background: var(--primary-gradient);
     color: var(--accent-color);
     border: none;
     border-radius: 50px;
     text-decoration: none;
     font-size: 1rem;
     font-weight: bold;
-    transition: background-color var(--transition-speed);
+    transition: background var(--transition-speed);
     display: inline-block;
 }
 
 .contact-btn:hover {
-    background-color: var(--secondary-color);
+    background: var(--secondary-gradient);
 }
 
 /* Animations */
@@ -159,9 +186,9 @@
 .contact-form-content {
     max-width: 800px;
     margin: 0 auto;
-    background-color: var(--accent-color);
+    background-color: var(--card-background);
     padding: 3rem 2rem;
-    border-radius: 10px;
+    border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
 }
 
@@ -226,18 +253,18 @@
 .submit-btn {
     width: 100%;
     padding: 0.75rem;
-    background-color: var(--primary-color);
+    background: var(--primary-gradient);
     color: var(--accent-color);
     border: none;
     border-radius: 5px;
     font-size: 1rem;
     font-weight: bold;
     cursor: pointer;
-    transition: background-color var(--transition-speed);
+    transition: background var(--transition-speed);
 }
 
 .submit-btn:hover {
-    background-color: var(--secondary-color);
+    background: var(--secondary-gradient);
 }
 
 .form-status {
@@ -280,7 +307,7 @@
 .hours-item {
     background-color: var(--light-gray);
     padding: 1.5rem;
-    border-radius: 10px;
+    border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
     transition: transform var(--transition-speed), box-shadow var(--transition-speed);
 }
@@ -335,7 +362,7 @@
 .option-item {
     background-color: var(--light-gray);
     padding: 2rem;
-    border-radius: 10px;
+    border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
     transition: transform var(--transition-speed), box-shadow var(--transition-speed);
     flex: 1;
@@ -361,19 +388,19 @@
 .option-btn {
     margin-top: 1rem;
     padding: 0.5rem 1.5rem;
-    background-color: var(--primary-color);
+    background: var(--primary-gradient);
     color: var(--accent-color);
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color var(--transition-speed);
+    transition: background var(--transition-speed);
     text-decoration: none;
     font-size: 1rem;
     display: inline-block;
 }
 
 .option-btn:hover {
-    background-color: var(--secondary-color);
+    background: var(--secondary-gradient);
 }
 
 /* Social Media Section */
@@ -417,12 +444,12 @@
     transform: scale(1.2);
 }
 
-/* Live Chat Button */
+/* Updated Live Chat Button to Use Gradient */
 .live-chat-btn {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background-color: var(--primary-color);
+    background: var(--primary-gradient);
     color: var(--accent-color);
     border: none;
     border-radius: 50%;
@@ -431,7 +458,7 @@
     font-size: 1.5rem;
     cursor: pointer;
     box-shadow: var(--box-shadow);
-    transition: background-color var(--transition-speed), transform var(--transition-speed);
+    transition: background var(--transition-speed), transform var(--transition-speed);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -439,7 +466,7 @@
 }
 
 .live-chat-btn:hover {
-    background-color: var(--secondary-color);
+    background: var(--secondary-gradient);
     transform: scale(1.1);
 }
 

@@ -50,12 +50,22 @@ module.exports = (sequelize, DataTypes) => {
     },
   }, {
     tableName: 'Favorites',
-    timestamps: true, 
+    timestamps: true,
+    indexes: [
+      {
+        unique: true,
+        fields: ['userId', 'placeId'],
+        name: 'unique_user_place',
+      },
+    ],
   });
 
   Favorite.associate = (models) => {
-    Favorite.belongsTo(models.User, { foreignKey: 'userId',targetKey: 'UserID',
-      as: 'user' });
+    Favorite.belongsTo(models.User, { 
+      foreignKey: 'userId',
+      targetKey: 'UserID',
+      as: 'user' 
+    });
   };
 
   return Favorite;

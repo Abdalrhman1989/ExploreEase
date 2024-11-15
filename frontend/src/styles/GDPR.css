@@ -1,40 +1,43 @@
+@import './variables.css'; 
+
 .gdpr-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
-    font-family: 'Roboto', sans-serif;
-    color: #2c3e50;
-    background: #f9f9f9;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    font-family: var(--font-family);
+    color: var(--text-color);
+    background: var(--background-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
 }
 
 .gdpr-hero {
+    background: var(--primary-gradient); 
+    color: var(--accent-color);
+    padding: 100px 20px;
+    text-align: center;
+    border-radius: var(--border-radius);
+    margin-bottom: 40px;
+    position: relative;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    color: white;
-    padding: 100px 20px;
-    text-align: center;
-    border-radius: 10px;
-    margin-bottom: 40px;
-    position: relative;
 }
 
 .gdpr-hero-content {
-    background-color: rgba(0, 0, 0, 0.5); /* Add dark overlay */
+    background-color: rgba(0, 0, 0, 0.5); 
     padding: 20px;
-    border-radius: 10px;
+    border-radius: var(--border-radius);
     display: inline-block;
 }
 
 .gdpr-hero h1 {
-    font-size: 48px;
+    font-size: var(--font-size-xlarge);
     font-weight: bold;
 }
 
 .gdpr-hero p {
-    font-size: 24px;
+    font-size: var(--font-size-large);
 }
 
 .gdpr-overview, .gdpr-rights, .gdpr-compliance, .gdpr-contact {
@@ -42,15 +45,16 @@
 }
 
 .gdpr-overview h2, .gdpr-rights h2, .gdpr-compliance h2, .gdpr-contact h2 {
-    font-size: 28px;
+    font-size: var(--font-size-large);
     font-weight: bold;
-    color: #2980b9;
+    color: var(--secondary-color);
     margin-bottom: 20px;
 }
 
 .gdpr-overview p, .gdpr-rights p, .gdpr-compliance p, .gdpr-contact p {
-    font-size: 18px;
+    font-size: var(--font-size-medium);
     line-height: 1.6;
+    color: var(--secondary-text-color);
 }
 
 .gdpr-rights ul, .gdpr-compliance ul, .gdpr-contact ul {
@@ -59,18 +63,18 @@
 }
 
 .gdpr-rights li, .gdpr-compliance li, .gdpr-contact li {
-    font-size: 18px;
-    color: #34495e;
+    font-size: var(--font-size-medium);
+    color: var(--text-color);
     margin-bottom: 10px;
 }
 
 /* Responsive Styles */
 @media (max-width: 768px) {
     .gdpr-hero h1 {
-        font-size: 36px;
+        font-size: 36px; 
     }
 
     .gdpr-hero p {
-        font-size: 20px;
+        font-size: 20px; 
     }
 }

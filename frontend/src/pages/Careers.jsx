@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import '../styles/Careers.css'; 
+import '../styles/Careers.css';
+import axios from 'axios';
 
 const Careers = () => {
   const [jobs, setJobs] = useState([]);
@@ -9,12 +10,13 @@ const Careers = () => {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
-    resume: null,
+    cv: '',
     coverLetter: '',
   });
+  const [formStatus, setFormStatus] = useState('');
 
-  
   useEffect(() => {
+    // Fetch job data (can be replaced with an API call)
     const jobData = [
       {
         id: 1,
@@ -37,7 +39,7 @@ const Careers = () => {
         department: 'Sales',
         description: 'Lead our sales team to new heights...',
       },
-      
+      // Add more jobs as needed
     ];
     setJobs(jobData);
   }, []);
@@ -57,9 +59,10 @@ const Careers = () => {
     setFormData({
       fullName: '',
       email: '',
-      resume: null,
+      cv: '',
       coverLetter: '',
     });
+    setFormStatus('');
   };
 
   // Filter jobs based on department
@@ -67,19 +70,47 @@ const Careers = () => {
     filter === 'All' ? jobs : jobs.filter((job) => job.department === filter);
 
   const handleInputChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === 'resume') {
-      setFormData({ ...formData, resume: files[0] });
-    } else {
-      setFormData({ ...formData, [name]: value });
-    }
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
-    console.log('Application Data:', formData);
-    alert('Application submitted successfully!');
-    closeApplyModal();
+    setFormStatus('Submitting...');
+
+    // Validate form data
+    if (!formData.fullName || !formData.email || !formData.cv || !formData.coverLetter) {
+      setFormStatus('Please fill in all fields.');
+      return;
+    }
+
+    // Prepare the data to send
+    const applicationData = {
+      fullName: formData.fullName,
+      email: formData.email,
+      cv: formData.cv,
+      coverLetter: formData.coverLetter,
+      jobId: selectedJob.id,
+      jobTitle: selectedJob.title,
+    };
+
+    try {
+      const response = await axios.post('http://localhost:3001/api/apply', applicationData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.data.success) {
+        setFormStatus('Application submitted successfully!');
+        closeApplyModal();
+      } else {
+        setFormStatus(response.data.message || 'Failed to submit application.');
+      }
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      setFormStatus('An error occurred. Please try again later.');
+    }
   };
 
   return (
@@ -120,7 +151,7 @@ const Careers = () => {
             <option value="Engineering">Engineering</option>
             <option value="Marketing">Marketing</option>
             <option value="Sales">Sales</option>
-           
+            {/* Add more departments as needed */}
           </select>
         </div>
 
@@ -152,7 +183,7 @@ const Careers = () => {
           <li>Remote Work Opportunities</li>
           <li>Professional Development Programs</li>
           <li>Team Building Activities</li>
-          
+          {/* Add more benefits as needed */}
         </ul>
       </section>
 
@@ -174,7 +205,7 @@ const Careers = () => {
             </p>
             <h4>John Smith, Marketing Specialist</h4>
           </div>
-
+          {/* Add more testimonials as needed */}
         </div>
       </section>
 
@@ -208,14 +239,14 @@ const Careers = () => {
                 />
               </label>
               <label>
-                Resume:
-                <input
-                  type="file"
-                  name="resume"
-                  accept=".pdf,.doc,.docx"
+                CV:
+                <textarea
+                  name="cv"
+                  value={formData.cv}
                   onChange={handleInputChange}
                   required
-                />
+                  placeholder="Write your CV here..."
+                ></textarea>
               </label>
               <label>
                 Cover Letter:
@@ -224,10 +255,12 @@ const Careers = () => {
                   value={formData.coverLetter}
                   onChange={handleInputChange}
                   required
+                  placeholder="Write your cover letter here..."
                 ></textarea>
               </label>
               <button type="submit">Submit Application</button>
             </form>
+            {formStatus && <p className="form-status">{formStatus}</p>}
           </div>
         </div>
       )}

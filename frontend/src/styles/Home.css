@@ -1,7 +1,6 @@
 /* Import Variables */
 @import './variables.css';
 
-
 html {
   font-size: 16px;
 }
@@ -777,6 +776,7 @@ body {
 
   .why-cards {
     flex-direction: column;
+    align-items: center; /* Added to center cards */
   }
 }
 
@@ -845,10 +845,17 @@ body {
   .destination-cards,
   .why-cards {
     grid-template-columns: 1fr;
+    /* Ensure centering for why-cards */
+    align-items: center;
   }
 
   .destination-card img {
     height: 160px;
+  }
+
+  .why-cards {
+    flex-direction: column;
+    align-items: center; /* Added to center cards */
   }
 }
 
@@ -917,9 +924,16 @@ body {
   .destination-cards,
   .why-cards {
     grid-template-columns: 1fr;
+    /* Ensure centering for why-cards */
+    align-items: center;
   }
 
   .destination-card img {
     height: 160px;
+  }
+
+  .why-cards {
+    flex-direction: column;
+    align-items: center; /* Added to center cards */
   }
 }

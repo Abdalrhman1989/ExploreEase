@@ -1,5 +1,3 @@
-// src/pages/CarRentals.jsx
-
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import {
   GoogleMap,
@@ -24,7 +22,7 @@ import {
   IconButton,
   Paper,
   Typography,
-  Button, // Import MUI Button
+  Button,
 } from '@mui/material';
 import {
   FavoriteBorder,
@@ -63,7 +61,11 @@ const CarRentals = () => {
 
   // Access environment variables directly
   const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
-  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+
+  if (!BACKEND_URL) {
+    console.error('REACT_APP_BACKEND_URL is not defined in the environment variables.');
+  }
 
   // Load Google Maps Script
   const { isLoaded, loadError } = useLoadScript({
@@ -72,8 +74,8 @@ const CarRentals = () => {
   });
 
   const mapRef = useRef(null);
-  const mapSectionRef = useRef(null); // Reference to the map section
-  const searchBarRef = useRef(null); // Reference to the search bar
+  const mapSectionRef = useRef(null);
+  const searchBarRef = useRef(null);
 
   const onMapLoad = (map) => {
     mapRef.current = map;
@@ -320,14 +322,16 @@ const CarRentals = () => {
         },
         (error) => {
           console.error('Error getting user location:', error);
-          // Handle error or set default location
-          setMapCenter({ lat: 55.4038, lng: 10.4024 }); // Default to Odense
+          // Handle error: set an error state or prompt user
+          setError('Unable to retrieve your location. Please allow location access or search manually.');
+          setIsLoading(false);
         }
       );
     } else {
       console.error('Geolocation not supported');
-      setMapCenter({ lat: 55.4038, lng: 10.4024 }); // Default to Odense
+      setError('Geolocation is not supported by your browser.');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -408,6 +412,15 @@ const CarRentals = () => {
           </Button>
         </Paper>
       </Container>
+
+      {/* Error Message Section */}
+      {error && (
+        <Container className="car-rentals-component-error-section">
+          <Typography variant="h6" color="error">
+            {error}
+          </Typography>
+        </Container>
+      )}
 
       {/* Map Section */}
       <div className="car-rentals-component-map-section" ref={mapSectionRef}>
@@ -540,12 +553,27 @@ const CarRentals = () => {
               </InfoWindow>
             )}
           </GoogleMap>
-        ) : (
-          // If the map is not loaded, show the rest of the page without the map
+        ) : isLoaded && !mapCenter ? (
+          // If the map is loaded but mapCenter is not set, prompt user
           <Box display="flex" justifyContent="center" alignItems="center" minHeight="600px">
             <Typography variant="h6" color="textSecondary">
-              Loading Map...
+              {error
+                ? 'Unable to display the map. ' + error
+                : 'Loading your location...'}
             </Typography>
+          </Box>
+        ) : (
+          // If the map is not loaded, show a loading spinner or error
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight="600px">
+            {loadError ? (
+              <Typography variant="h6" color="error">
+                Error loading Google Maps.
+              </Typography>
+            ) : (
+              <Typography variant="h6" color="textSecondary">
+                Loading Map...
+              </Typography>
+            )}
           </Box>
         )}
       </div>
@@ -557,7 +585,7 @@ const CarRentals = () => {
             <h2>Car Rental Companies</h2>
             {isLoading && (
               <div className="car-rentals-component-spinner">
-                <div className="spinner"></div>
+                <CircularProgress />
                 <p>Loading car rental companies...</p>
               </div>
             )}
@@ -570,13 +598,23 @@ const CarRentals = () => {
                       className="car-rentals-component-image-button"
                       onClick={() => fetchPlaceDetails(company.place_id)}
                     >
-                      {company.photos && company.photos.length > 0 && (
+                      {company.photos && company.photos.length > 0 ? (
                         <img
                           src={getPhotoUrl(company.photos[0].photo_reference)}
                           alt={company.name}
                           className="car-rentals-component-placeholder"
                           loading="lazy"
                         />
+                      ) : (
+                        <Box
+                          display="flex"
+                          justifyContent="center"
+                          alignItems="center"
+                          height="200px"
+                          bgcolor="#f0f0f0"
+                        >
+                          <FaCar size={50} color="#ccc" />
+                        </Box>
                       )}
                     </button>
                     <div className="car-rentals-component-info">
@@ -639,11 +677,23 @@ const CarRentals = () => {
                         className="car-rentals-component-favorite-image-button"
                         onClick={() => fetchPlaceDetails(fav.placeId)}
                       >
-                        {fav.photoReference && (
+                        {fav.photoReference ? (
                           <img
                             src={getPhotoUrl(fav.photoReference)}
                             alt={fav.name}
+                            className="car-rentals-component-favorite-placeholder"
+                            loading="lazy"
                           />
+                        ) : (
+                          <Box
+                            display="flex"
+                            justifyContent="center"
+                            alignItems="center"
+                            height="200px"
+                            bgcolor="#f0f0f0"
+                          >
+                            <FaCar size={50} color="#ccc" />
+                          </Box>
                         )}
                       </button>
                       <div className="car-rentals-component-favorite-info">

@@ -1,34 +1,57 @@
+@import './variables.css'; 
+
 /* Base Styles */
 .about-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
-    font-family: 'Roboto', sans-serif;
-    color: #2c3e50;
-    background: #f9f9f9;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    font-family: var(--font-family);
+    color: var(--text-color);
+    background: var(--background-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
 }
 
 /* Hero Section */
 .about-hero {
-    background: linear-gradient(135deg, #3498db 0%, #2ecc71 100%);
-    color: white;
+    background-image: url('../assets/hotel.jpg'); /* Adjust path if necessary */
+    background-size: cover;
+    background-position: center;
+    color: var(--accent-color);
     padding: 100px 20px;
     text-align: center;
-    border-radius: 10px;
+    border-radius: var(--border-radius);
     margin-bottom: 40px;
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.about-hero::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4); /* Semi-transparent overlay */
+    border-radius: var(--border-radius);
+}
+
+.about-hero-content {
+    position: relative;
+    z-index: 1;
 }
 
 .about-hero-content h1 {
-    font-size: 48px;
-    font-weight: bold;
+    font-size: var(--font-size-xlarge);
+    font-weight: 700;
     margin-bottom: 20px;
 }
 
 .about-hero-content p {
-    font-size: 24px;
+    font-size: var(--font-size-large);
 }
 
 /* Mission and Vision Section */
@@ -43,22 +66,28 @@
     flex: 1;
     display: flex;
     align-items: center;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+    transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+}
+
+.mission:hover, .vision:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--hover-shadow);
 }
 
 .image-container {
     flex: 1;
     overflow: hidden;
-    border-radius: 10px 0 0 10px;
 }
 
 .image-container img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.3s ease;
+    transition: transform var(--transition-speed) ease;
 }
 
 .text-container {
@@ -67,13 +96,13 @@
 }
 
 .mission h2, .vision h2 {
-    font-size: 28px;
+    font-size: var(--font-size-large);
     margin-bottom: 10px;
-    color: #2980b9;
+    color: var(--primary-color);
 }
 
 .mission p, .vision p {
-    font-size: 18px;
+    font-size: var(--font-size-medium);
     line-height: 1.6;
 }
 
@@ -84,16 +113,16 @@
 
 /* Core Values Section */
 .about-values {
-    background: #2980b9;
-    color: white;
+    background: var(--primary-color);
+    color: var(--accent-color);
     padding: 40px 20px;
-    border-radius: 10px;
+    border-radius: var(--border-radius);
     margin-bottom: 40px;
     text-align: center;
 }
 
 .about-values h2 {
-    font-size: 32px;
+    font-size: var(--font-size-large);
     margin-bottom: 20px;
 }
 
@@ -103,13 +132,14 @@
 }
 
 .values-list li {
-    font-size: 18px;
+    font-size: var(--font-size-medium);
     line-height: 2;
     margin-bottom: 10px;
 }
 
 .values-list span {
     font-weight: bold;
+    color: var(--secondary-color);
 }
 
 /* Meet Our Team Section */
@@ -118,31 +148,32 @@
 }
 
 .about-team h2 {
-    font-size: 32px;
+    font-size: var(--font-size-large);
     margin-bottom: 20px;
     text-align: center;
-    color: #2980b9;
+    color: var(--primary-color);
 }
 
 .team-members {
     display: flex;
     justify-content: space-around;
     gap: 20px;
+    flex-wrap: wrap;
 }
 
 .team-member {
-    flex: 1;
+    flex: 1 1 250px;
     text-align: center;
-    background: white;
+    background: var(--card-background);
     padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
 }
 
 .team-member:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--hover-shadow);
 }
 
 .team-member img {
@@ -154,35 +185,37 @@
 }
 
 .team-member h3 {
-    font-size: 20px;
+    font-size: var(--font-size-medium);
     margin-bottom: 5px;
-    color: #2c3e50;
+    color: var(--text-color);
 }
 
 .team-member p {
-    font-size: 16px;
-    color: #7f8c8d;
+    font-size: var(--font-size-small);
+    color: var(--secondary-text-color);
 }
 
 /* Our Journey Section */
 .about-history {
     display: flex;
     align-items: center;
-    background: #ecf0f1;
+    background: var(--background-color);
     padding: 40px 20px;
-    border-radius: 10px;
+    border-radius: var(--border-radius);
     margin-bottom: 40px;
+    flex-wrap: wrap;
 }
 
 .about-history .image-container {
     flex: 1;
-    border-radius: 10px 0 0 10px;
+    border-radius: var(--border-radius);
     overflow: hidden;
+    margin-right: 20px;
 }
 
 .about-history .image-container img {
     width: 100%;
-    height: 100%;
+    height: auto;
     object-fit: cover;
 }
 
@@ -193,55 +226,135 @@
 }
 
 .about-history h2 {
-    font-size: 32px;
+    font-size: var(--font-size-large);
     margin-bottom: 20px;
     text-transform: uppercase;
+    color: var(--primary-color);
 }
 
 .about-history p {
-    font-size: 18px;
+    font-size: var(--font-size-medium);
     line-height: 1.6;
 }
 
-/* Testimonials Section */
-.about-testimonials {
-    text-align: center;
+/* Awards Section */
+.about-awards {
+    background: var(--background-color);
     padding: 40px 20px;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border-radius: var(--border-radius);
+    margin-bottom: 40px;
+    text-align: center;
 }
 
-.about-testimonials h2 {
-    font-size: 32px;
+.about-awards h2 {
+    font-size: var(--font-size-large);
     margin-bottom: 20px;
-    color: #2980b9;
+    color: var(--primary-color);
 }
 
-.testimonials {
+.awards-list {
     display: flex;
-    flex-wrap: wrap;
     justify-content: center;
-    gap: 40px;
+    gap: 20px;
+    flex-wrap: wrap;
 }
 
-.testimonial {
-    background: #3498db;
-    color: white;
+.award-item {
+    background: var(--card-background);
     padding: 20px;
-    border-radius: 10px;
-    max-width: 500px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    flex: 1 1 45%;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    flex: 1 1 200px;
+    transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
 }
 
-.testimonial h4 {
-    margin-top: 15px;
-    font-size: 18px;
+.award-item:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--hover-shadow);
+}
+
+.award-item img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    margin-bottom: 15px;
+}
+
+.award-item h3 {
+    font-size: var(--font-size-medium);
+    margin-bottom: 10px;
+    color: var(--primary-color);
+}
+
+.award-item p {
+    font-size: var(--font-size-small);
+    color: var(--secondary-text-color);
+}
+
+/* FAQs Section */
+.about-faqs {
+    background: var(--background-color);
+    padding: 40px 20px;
+    border-radius: var(--border-radius);
+    margin-bottom: 40px;
+}
+
+.about-faqs h2 {
+    font-size: var(--font-size-large);
+    margin-bottom: 20px;
+    text-align: center;
+    color: var(--primary-color);
+}
+
+.faq-list {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.faq-item {
+    margin-bottom: 15px;
+}
+
+.faq-question {
+    font-size: var(--font-size-medium);
+    font-weight: bold;
+    color: var(--secondary-color);
+    cursor: pointer;
+    position: relative;
+    padding-right: 20px;
+}
+
+.faq-question::after {
+    content: '+';
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-size: var(--font-size-medium);
+    transition: transform var(--transition-speed) ease;
+}
+
+.faq-item.active .faq-question::after {
+    transform: rotate(45deg);
+}
+
+.faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height var(--transition-speed) ease;
+}
+
+.faq-item.active .faq-answer {
+    max-height: 200px; /* Adjust based on content */
+}
+
+.faq-answer p {
+    font-size: var(--font-size-small);
+    line-height: 1.6;
+    margin-top: 10px;
 }
 
 /* Responsive Styles */
-@media (max-width: 768px) {
+@media (max-width: 992px) {
     .about-mission-vision {
         flex-direction: column;
     }
@@ -258,7 +371,60 @@
         flex-direction: column;
     }
 
-    .testimonial {
-        margin-bottom: 20px;
+    .awards-list {
+        flex-direction: column;
+    }
+
+    .award-item {
+        flex: 1 1 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .about-hero {
+        padding: 60px 20px;
+    }
+
+    .about-hero-content h1 {
+        font-size: var(--font-size-large);
+    }
+
+    .about-hero-content p {
+        font-size: var(--font-size-medium);
+    }
+
+    .about-mission-vision {
+        padding: 20px;
+        gap: 20px;
+    }
+
+    .mission h2, .vision h2 {
+        font-size: var(--font-size-medium);
+    }
+
+    .team-member img {
+        width: 100px;
+        height: 100px;
+    }
+
+    .team-member h3 {
+        font-size: var(--font-size-small);
+    }
+
+    .team-member p {
+        font-size: var(--font-size-small);
+    }
+
+    .award-item img {
+        width: 80px;
+        height: 80px;
+    }
+
+    .award-item h3 {
+        font-size: var(--font-size-small);
+    }
+
+    .award-item p {
+        font-size: var(--font-size-xsmall);
     }
 }

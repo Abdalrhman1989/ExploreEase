@@ -38,6 +38,10 @@ import ManageRestaurants from './pages/ManageRestaurants.jsx';
 import ManageHotels from './pages/ManageHotels.jsx';
 import PaymentPage from './pages/PaymentPage.jsx'; // Import PaymentPage
 
+// New Pages
+import Blog from './pages/Blog';
+import Careers from './pages/Careers';
+
 // Components
 import Navbar from './components/NavBar.jsx';
 import Footer from './components/Footer';
@@ -79,6 +83,10 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/faq" element={<FAQ />} />
         <Route path="/support" element={<Support />} />
+
+        {/* New Public Routes */}
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/careers" element={<Careers />} />
 
         {/* Protected User Profile Route */}
         <Route

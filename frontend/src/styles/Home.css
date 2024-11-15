@@ -576,7 +576,6 @@ body {
   text-align: center;
   background-size: cover;
   background-position: center;
-  border-radius: var(--border-radius);
   box-shadow: var(--box-shadow);
 }
 

@@ -1,17 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import '../styles/About.css';
-import missionImage from '../assets/flight.jpg'; // Image for mission section
-import visionImage from '../assets/flight1.jpg'; // Image for vision section
-import teamImage from '../assets/flight2.jpg'; // Image for team section
+import hotelImage from '../assets/hotel.jpg';
+import flightImage from '../assets/flight.jpg';
+import carRentalImage from '../assets/carrenter.jpg';
+import trainImage from '../assets/train1.jpg';
+import busImage from '../assets/bus1.jpg';
+import restaurantImage from '../assets/Restaurant1.jpg';
+
+
 
 const About = () => {
+  const [activeFaq, setActiveFaq] = useState(null);
+
+  const toggleFaq = (index) => {
+    setActiveFaq(activeFaq === index ? null : index);
+  };
+
   return (
     <div className="about-container">
       {/* Hero Section */}
       <section className="about-hero">
         <div className="about-hero-content">
-          <h1>About TravelPlanner</h1>
-          <p>Your ultimate travel companion for unforgettable journeys.</p>
+          <h1>About ExploreEase</h1>
+          <p>Your gateway to seamless and unforgettable travel experiences.</p>
         </div>
       </section>
 
@@ -19,7 +30,7 @@ const About = () => {
       <section className="about-mission-vision">
         <div className="mission">
           <div className="image-container">
-            <img src={missionImage} alt="Our Mission" />
+            <img src={hotelImage} alt="Our Mission" />
           </div>
           <div className="text-container">
             <h2>Our Mission</h2>
@@ -28,7 +39,7 @@ const About = () => {
         </div>
         <div className="vision">
           <div className="image-container">
-            <img src={visionImage} alt="Our Vision" />
+            <img src={flightImage} alt="Our Vision" />
           </div>
           <div className="text-container">
             <h2>Our Vision</h2>
@@ -73,25 +84,63 @@ const About = () => {
       {/* Our Journey Section */}
       <section className="about-history">
         <div className="image-container">
-          <img src={teamImage} alt="Our Journey" />
+          <img src={carRentalImage} alt="Our Journey" />
         </div>
         <div className="text-container">
           <h2>Our Journey</h2>
-          <p>Founded in 2024, TravelPlanner began with a simple idea: to make travel planning easy and accessible. Since then, we've grown into a global platform, helping thousands of travelers explore the world.</p>
+          <p>Founded in 2024, ExploreEase began with a simple idea: to make travel planning easy and accessible. Since then, we've grown into a global platform, helping thousands of travelers explore the world.</p>
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="about-testimonials">
-        <h2>What Our Users Say</h2>
-        <div className="testimonials">
-          <div className="testimonial">
-            <p>"TravelPlanner made my vacation stress-free. I found everything I needed in one place!"</p>
-            <h4>- Emily R.</h4>
+      {/* Awards Section */}
+      <section className="about-awards">
+        <h2>Our Achievements</h2>
+        <div className="awards-list">
+          <div className="award-item">
+            <img src="https://via.placeholder.com/100" alt="Award 1" />
+            <h3>Best Travel App 2023</h3>
+            <p>Awarded by TravelTech Magazine</p>
           </div>
-          <div className="testimonial">
-            <p>"The best travel app I've ever used. It saved me so much time and hassle!"</p>
-            <h4>- Michael K.</h4>
+          <div className="award-item">
+            <img src="https://via.placeholder.com/100" alt="Award 2" />
+            <h3>Customer Choice Award</h3>
+            <p>Voted by our users</p>
+          </div>
+          <div className="award-item">
+            <img src="https://via.placeholder.com/100" alt="Award 3" />
+            <h3>Innovation in Travel</h3>
+            <p>Recognized by Tech Innovators</p>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQs Section */}
+      <section className="about-faqs">
+        <h2>Frequently Asked Questions</h2>
+        <div className="faq-list">
+          <div className={`faq-item ${activeFaq === 1 ? 'active' : ''}`}>
+            <div className="faq-question" onClick={() => toggleFaq(1)}>
+              What services does ExploreEase offer?
+            </div>
+            <div className="faq-answer">
+              <p>We offer a comprehensive travel planning platform that includes booking flights, hotels, car rentals, and providing personalized travel itineraries.</p>
+            </div>
+          </div>
+          <div className={`faq-item ${activeFaq === 2 ? 'active' : ''}`}>
+            <div className="faq-question" onClick={() => toggleFaq(2)}>
+              How can I contact customer support?
+            </div>
+            <div className="faq-answer">
+              <p>You can reach our customer support team via the Contact Us section on our website, or by emailing support@exploreease.com.</p>
+            </div>
+          </div>
+          <div className={`faq-item ${activeFaq === 3 ? 'active' : ''}`}>
+            <div className="faq-question" onClick={() => toggleFaq(3)}>
+              Is ExploreEase available on mobile devices?
+            </div>
+            <div className="faq-answer">
+              <p>Yes, ExploreEase is available on both iOS and Android devices. You can download our app from the App Store or Google Play Store.</p>
+            </div>
           </div>
         </div>
       </section>

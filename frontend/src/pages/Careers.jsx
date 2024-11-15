@@ -1,15 +1,19 @@
-// src/pages/Careers.jsx
-
 import React, { useState, useEffect } from 'react';
-import '../styles/Careers.css'; // Ensure this path is correct based on your project structure
+import '../styles/Careers.css'; 
 
 const Careers = () => {
   const [jobs, setJobs] = useState([]);
   const [filter, setFilter] = useState('All');
   const [selectedJob, setSelectedJob] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    resume: null,
+    coverLetter: '',
+  });
 
-  // Sample job data (Replace with API calls if available)
+  
   useEffect(() => {
     const jobData = [
       {
@@ -33,7 +37,7 @@ const Careers = () => {
         department: 'Sales',
         description: 'Lead our sales team to new heights...',
       },
-      // Add more jobs as needed
+      
     ];
     setJobs(jobData);
   }, []);
@@ -50,15 +54,30 @@ const Careers = () => {
   const closeApplyModal = () => {
     setSelectedJob(null);
     setIsModalOpen(false);
+    setFormData({
+      fullName: '',
+      email: '',
+      resume: null,
+      coverLetter: '',
+    });
   };
 
   // Filter jobs based on department
   const filteredJobs =
     filter === 'All' ? jobs : jobs.filter((job) => job.department === filter);
 
+  const handleInputChange = (e) => {
+    const { name, value, files } = e.target;
+    if (name === 'resume') {
+      setFormData({ ...formData, resume: files[0] });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
+  };
+
   const handleFormSubmit = (e) => {
     e.preventDefault();
-    // Handle form submission logic here (e.g., send data to backend)
+    console.log('Application Data:', formData);
     alert('Application submitted successfully!');
     closeApplyModal();
   };
@@ -67,8 +86,13 @@ const Careers = () => {
     <div className="careers">
       {/* Hero Section */}
       <section className="careers-hero">
-        <h1>Join Our Team</h1>
-        <p>Explore exciting career opportunities with us.</p>
+        <div className="hero-overlay">
+          <h1>Join Our Team</h1>
+          <p>Explore exciting career opportunities with us.</p>
+          <a href="#current-openings" className="hero-button">
+            View Openings
+          </a>
+        </div>
       </section>
 
       {/* Company Culture Section */}
@@ -78,14 +102,14 @@ const Careers = () => {
           At TravelPlanner, we foster a collaborative and inclusive environment where innovation thrives. Our team is passionate about creating memorable travel experiences for our users.
         </p>
         <div className="culture-images">
-          <img src="/images/culture1.jpg" alt="Team Collaboration" />
-          <img src="/images/culture2.jpg" alt="Office Environment" />
-          <img src="/images/culture3.jpg" alt="Team Outing" />
+          <img src="https://images.unsplash.com/photo-1515378791036-0648a3ef77b2" alt="Team Collaboration" />
+          <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085" alt="Office Environment" />
+          <img src="https://images.unsplash.com/photo-1519985176271-adb1088fa94c" alt="Team Outing" />
         </div>
       </section>
 
       {/* Current Openings Section */}
-      <section className="current-openings">
+      <section className="current-openings" id="current-openings">
         <h2>Current Openings</h2>
 
         {/* Filter Jobs */}
@@ -96,7 +120,7 @@ const Careers = () => {
             <option value="Engineering">Engineering</option>
             <option value="Marketing">Marketing</option>
             <option value="Sales">Sales</option>
-            {/* Add more departments as needed */}
+           
           </select>
         </div>
 
@@ -128,7 +152,7 @@ const Careers = () => {
           <li>Remote Work Opportunities</li>
           <li>Professional Development Programs</li>
           <li>Team Building Activities</li>
-          {/* Add more benefits as needed */}
+          
         </ul>
       </section>
 
@@ -137,18 +161,20 @@ const Careers = () => {
         <h2>What Our Employees Say</h2>
         <div className="testimonials">
           <div className="testimonial">
+            <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Jane Doe" className="testimonial-avatar" />
             <p>
               "Working at TravelPlanner has been an incredible experience. The team is supportive and the projects are challenging and rewarding."
             </p>
             <h4>Jane Doe, Frontend Developer</h4>
           </div>
           <div className="testimonial">
+            <img src="https://randomuser.me/api/portraits/men/46.jpg" alt="John Smith" className="testimonial-avatar" />
             <p>
               "I love the flexibility and the emphasis on work-life balance. It's a great place to grow your career."
             </p>
             <h4>John Smith, Marketing Specialist</h4>
           </div>
-          {/* Add more testimonials as needed */}
+
         </div>
       </section>
 
@@ -160,22 +186,45 @@ const Careers = () => {
               &times;
             </button>
             <h2>Apply for {selectedJob.title}</h2>
-            <form onSubmit={handleFormSubmit}>
+            <form onSubmit={handleFormSubmit} className="application-form">
               <label>
                 Full Name:
-                <input type="text" name="fullName" required />
+                <input
+                  type="text"
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleInputChange}
+                  required
+                />
               </label>
               <label>
                 Email Address:
-                <input type="email" name="email" required />
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  required
+                />
               </label>
               <label>
                 Resume:
-                <input type="file" name="resume" accept=".pdf,.doc,.docx" required />
+                <input
+                  type="file"
+                  name="resume"
+                  accept=".pdf,.doc,.docx"
+                  onChange={handleInputChange}
+                  required
+                />
               </label>
               <label>
                 Cover Letter:
-                <textarea name="coverLetter" required></textarea>
+                <textarea
+                  name="coverLetter"
+                  value={formData.coverLetter}
+                  onChange={handleInputChange}
+                  required
+                ></textarea>
               </label>
               <button type="submit">Submit Application</button>
             </form>

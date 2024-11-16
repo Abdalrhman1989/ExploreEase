@@ -1,4 +1,6 @@
-import React, { useState, useRef, useEffect, useContext } from 'react';
+// frontend/src/pages/Attractions.jsx
+
+import React, { useState, useRef, useEffect, useContext, useCallback } from 'react';
 import {
   GoogleMap,
   useLoadScript,
@@ -8,7 +10,9 @@ import {
 } from '@react-google-maps/api';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import '../styles/Attractions.css';
+import '../styles/ApprovedAttractions.css'; // Import ApprovedAttractions.css if needed
 
 const libraries = ['places'];
 
@@ -24,6 +28,7 @@ const options = {
 
 const Attractions = () => {
   const { user, isAuthenticated, loading: authLoading } = useContext(AuthContext);
+  const navigate = useNavigate(); // Initialize useNavigate
   const [mapCenter, setMapCenter] = useState({ lat: 55.4038, lng: 10.4024 });
   const [mapZoom, setMapZoom] = useState(12);
   const [googleMarkers, setGoogleMarkers] = useState([]);
@@ -61,7 +66,7 @@ const Attractions = () => {
     { name: 'Government', type: 'city_hall', icon: '🏢' },
   ];
 
-  const fetchFavorites = async () => {
+  const fetchFavorites = useCallback(async () => {
     if (!isAuthenticated || !user) return;
 
     try {
@@ -71,12 +76,13 @@ const Attractions = () => {
           Authorization: `Bearer ${idToken}`,
         },
       });
+      console.log('Fetched Favorites:', response.data.favorites); // Debugging Line
       setFavorites(response.data.favorites);
     } catch (err) {
       console.error('Error fetching favorites:', err.response ? err.response.data : err.message);
       setError('Failed to fetch favorites.');
     }
-  };
+  }, [isAuthenticated, user]);
 
   const addFavoriteToDB = async (favoriteData) => {
     if (!isAuthenticated || !user) {
@@ -95,6 +101,7 @@ const Attractions = () => {
           },
         }
       );
+      console.log('Added Favorite:', response.data.favorite); // Debugging Line
       setFavorites((prevFavorites) => [...prevFavorites, response.data.favorite]);
       alert('Favorite added successfully!');
     } catch (err) {
@@ -120,7 +127,8 @@ const Attractions = () => {
           Authorization: `Bearer ${idToken}`,
         },
       });
-      setFavorites((prevFavorites) => prevFavorites.filter((fav) => fav.id !== favoriteId));
+      console.log(`Removed Favorite ID: ${favoriteId}`); // Debugging Line
+      setFavorites((prevFavorites) => prevFavorites.filter((fav) => fav.AttractionID !== favoriteId));
       alert('Favorite removed successfully!');
     } catch (err) {
       console.error('Error removing favorite:', err.response ? err.response.data : err.message);
@@ -246,8 +254,10 @@ const Attractions = () => {
           name: attraction.name,
           formatted_address: attraction.location,
           rating: attraction.rating,
-          price_level: attraction.priceLevel,
-          photos: attraction.images.map((img) => ({
+          entryFee: attraction.entryFee,
+          description: attraction.description,
+          amenities: attraction.amenities,
+          images: attraction.images.map((img) => ({
             photo_reference: img,
           })),
           latitude: attraction.latitude,
@@ -264,7 +274,7 @@ const Attractions = () => {
       service.getDetails(
         {
           placeId: placeId,
-          fields: ['name', 'rating', 'price_level', 'formatted_address', 'photos', 'reviews', 'website', 'url', 'geometry'],
+          fields: ['name', 'rating', 'price_level', 'formatted_address', 'photos', 'reviews', 'website', 'url', 'geometry', 'opening_hours', 'description', 'amenities'],
         },
         (place, status) => {
           if (status === window.google.maps.places.PlacesServiceStatus.OK && place && place.geometry && place.geometry.location) {
@@ -306,6 +316,7 @@ const Attractions = () => {
       const response = await axios.get('http://localhost:3001/api/attractions/approved', {
         params: { city },
       });
+      console.log('Fetched Created Attractions:', response.data.attractions); // Debugging Line
       setCreatedAttractions(response.data.attractions);
     } catch (err) {
       console.error('Error fetching created attractions:', err.response ? err.response.data : err.message);
@@ -348,6 +359,7 @@ const Attractions = () => {
           },
           () => {
             // Handle location access denial if needed
+            console.warn('Geolocation permission denied.');
           }
         );
       }
@@ -381,10 +393,8 @@ const Attractions = () => {
     return <div className="attractions-component-loading">Loading Maps...</div>;
 
   const handleViewDetails = (attraction) => {
-    fetchPlaceDetails(attraction.AttractionID || attraction.place_id);
-    if (mapSectionRef.current) {
-      mapSectionRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
+    const id = attraction.AttractionID || attraction.place_id;
+    navigate(`/attractions/${id}`); // Navigate to the details page
   };
 
   return (
@@ -500,26 +510,67 @@ const Attractions = () => {
             >
               <div className="attractions-component-info-window">
                 <h3>{selected.name}</h3>
-                {selected.rating && <p>Rating: {selected.rating} ⭐</p>}
+
+                {/* Conditional Rendering for Rating */}
+                {selected.rating !== undefined && <p>Rating: {selected.rating} ⭐</p>}
+
+                {/* Conditional Rendering for Entry Fee */}
+                {selected.entryFee !== undefined && (
+                  <p>Entry Fee: ${selected.entryFee}</p>
+                )}
+
+                {/* Conditional Rendering for Price Level */}
                 {selected.price_level !== undefined && (
                   <p>Price Level: {'$'.repeat(selected.price_level)}</p>
                 )}
-                {selected.formatted_address && <p>{selected.formatted_address}</p>}
+
+                {/* Address/Location */}
+                <p>{selected.formatted_address || selected.location || 'No location available'}</p>
+
+                {/* Conditional Rendering for Opening Hours */}
+                {selected.opening_hours && (
+                  <p>Opening Hours: {selected.opening_hours.weekday_text.join(', ')}</p>
+                )}
+
+                {/* Conditional Rendering for Description */}
+                {selected.description && (
+                  <p>Description: {selected.description}</p>
+                )}
+
+                {/* Conditional Rendering for Amenities */}
+                {selected.amenities && selected.amenities.length > 0 && (
+                  <div>
+                    <strong>Amenities:</strong>
+                    <ul>
+                      {selected.amenities.map((amenity, index) => (
+                        <li key={index}>{amenity}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Conditional Rendering for Photos */}
                 {selected.photos && selected.photos.length > 0 ? (
-                  <img
-                    src={getPhotoUrl(selected.photos[0].photo_reference)}
-                    alt={selected.name}
-                    className="attractions-component-info-window-image"
-                    loading="lazy"
-                  />
+                  <div className="attractions-component-info-window-images">
+                    <img
+                      src={getPhotoUrl(selected.photos[0].photo_reference)}
+                      alt={`${selected.name} - 1`}
+                      className="attractions-component-info-window-image"
+                      loading="lazy"
+                    />
+                  </div>
                 ) : selected.images && selected.images.length > 0 ? (
-                  <img
-                    src={selected.images[0]}
-                    alt={selected.name}
-                    className="attractions-component-info-window-image"
-                    loading="lazy"
-                  />
+                  <div className="attractions-component-info-window-images">
+                    <img
+                      src={selected.images[0]}
+                      alt={`${selected.name} - 1`}
+                      className="attractions-component-info-window-image"
+                      loading="lazy"
+                    />
+                  </div>
                 ) : null}
+
+                {/* Conditional Rendering for Reviews */}
                 {selected.reviews && selected.reviews.length > 0 && (
                   <div className="attractions-component-reviews">
                     <h4>User Reviews</h4>
@@ -532,6 +583,8 @@ const Attractions = () => {
                     ))}
                   </div>
                 )}
+
+                {/* Conditional Rendering for Links */}
                 {selected.website && (
                   <a href={selected.website} target="_blank" rel="noopener noreferrer" className="attractions-component-google-maps-link">
                     Visit Website
@@ -542,21 +595,23 @@ const Attractions = () => {
                     View on Google Maps
                   </a>
                 )}
+
+                {/* Add to Favorites Button */}
                 <div className="attractions-component-info-buttons">
                   <button
                     onClick={() => {
                       const favoriteData = {
                         type: 'attraction',
-                        placeId: selected.place_id || selected.id,
+                        placeId: selected.place_id || selected.AttractionID,
                         name: selected.name,
                         address: selected.formatted_address || selected.location || '',
                         rating: selected.rating || null,
-                        priceLevel: selected.price_level || selected.priceLevel || null,
-                        photoReference: selected.photos && selected.photos.length > 0
-                          ? selected.photos[0].photo_reference
+                        entryFee: selected.entryFee || selected.price_level || null, // Adjust based on type
+                        ...(selected.photos && selected.photos.length > 0
+                          ? { photoReference: selected.photos[0].photo_reference }
                           : selected.images && selected.images.length > 0
-                          ? selected.images[0]
-                          : null
+                          ? { photoReference: selected.images[0] }
+                          : {})
                       };
                       addFavoriteToDB(favoriteData);
                     }}
@@ -581,7 +636,7 @@ const Attractions = () => {
             googleMarkers.map((attraction) => (
               <div key={attraction.place_id} className="attractions-component-item">
                 <button
-                  onClick={() => handleViewDetails(attraction)}
+                  onClick={() => handleViewDetails(attraction)} // Navigate to details
                   className="attractions-component-image-button"
                   aria-label={`View details for ${attraction.name}`}
                 >
@@ -591,18 +646,27 @@ const Attractions = () => {
                       alt={attraction.name}
                       className="attractions-component-placeholder"
                       loading="lazy"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://via.placeholder.com/400?text=No+Image';
+                      }}
                     />
-                  ) : null}
+                  ) : (
+                    <div className="attractions-component-placeholder no-image">
+                      <p>No image available.</p>
+                    </div>
+                  )}
                 </button>
                 <div className="attractions-component-info">
                   <h3>{attraction.name}</h3>
-                  {attraction.rating && <p>Rating: {attraction.rating} ⭐</p>}
-                  {attraction.price_level !== undefined && (
-                    <p>Price Level: {'$'.repeat(attraction.price_level)}</p>
+                  {attraction.rating !== undefined && <p>Rating: {attraction.rating} ⭐</p>}
+                  {attraction.entryFee !== undefined && (
+                    <p>Entry Fee: ${attraction.entryFee}</p>
                   )}
+                  <p>{attraction.formatted_address || attraction.vicinity || 'No address available'}</p>
                   <div className="attractions-component-actions">
                     <button
-                      onClick={() => handleViewDetails(attraction)}
+                      onClick={() => handleViewDetails(attraction)} // Navigate to details
                       className="attractions-component-favorite-button"
                     >
                       View Details
@@ -615,10 +679,10 @@ const Attractions = () => {
                           name: attraction.name,
                           address: attraction.vicinity || attraction.formatted_address || '',
                           rating: attraction.rating || null,
-                          priceLevel: attraction.price_level || null,
+                          entryFee: attraction.entryFee || null, // Adjust as needed
                           photoReference: attraction.photos && attraction.photos.length > 0
                             ? attraction.photos[0].photo_reference
-                            : null
+                            : null,
                         };
                         addFavoriteToDB(favoriteData);
                       }}
@@ -638,12 +702,12 @@ const Attractions = () => {
 
       {/* Created Attractions Section */}
       {createdAttractions.length > 0 && (
-        <div className="attractions-component-approved-attractions-section">
+        <div className="approved-attractions-container"> {/* Updated Class Name */}
           <h2>Our Partner Attractions in {selectedCity}</h2>
-          <div className="attractions-component-approved-grid">
+          <div className="approved-attractions-grid"> {/* Updated Class Name */}
             {createdAttractions.map((attraction) => (
-              <div key={attraction.AttractionID} className="attractions-component-approved-item">
-                <div className="attractions-component-approved-image">
+              <div key={attraction.AttractionID} className="approved-attractions-card"> {/* Updated Class Name */}
+                <div className="approved-attractions-image">
                   {attraction.images && attraction.images.length > 0 ? (
                     <img
                       src={attraction.images[0]}
@@ -651,21 +715,25 @@ const Attractions = () => {
                       loading="lazy"
                       onError={(e) => {
                         e.target.onerror = null;
-                        e.target.src = null;
+                        e.target.src = 'https://via.placeholder.com/400?text=No+Image';
                       }}
                     />
-                  ) : null}
-                </div>
-                <div className="attractions-component-approved-details">
-                  <h3>{attraction.name}</h3>
-                  {attraction.rating && <p>Rating: {attraction.rating} ⭐</p>}
-                  {attraction.priceLevel !== undefined && (
-                    <p>Price Level: {'$'.repeat(attraction.priceLevel)}</p>
+                  ) : (
+                    <div className="approved-attractions-image no-image">
+                      <p>No image available.</p>
+                    </div>
                   )}
-                  <div className="attractions-component-approved-actions">
+                </div>
+                <div className="approved-attractions-details"> {/* Updated Class Name */}
+                  <h3>{attraction.name}</h3>
+                  {attraction.entryFee !== undefined && (
+                    <p>Entry Fee: ${attraction.entryFee}</p>
+                  )}
+                  <p>{attraction.location || 'No location available'}</p>
+                  <div className="approved-attractions-actions"> {/* Updated Class Name */}
                     <button
                       onClick={() => handleViewDetails(attraction)}
-                      className="attractions-component-favorite-button"
+                      className="approved-attractions-view-details-button"
                     >
                       View Details
                     </button>
@@ -676,15 +744,15 @@ const Attractions = () => {
                           placeId: attraction.AttractionID,
                           name: attraction.name,
                           address: `${attraction.location}`,
-                          rating: attraction.rating || null,
-                          priceLevel: attraction.priceLevel || null,
+                          rating: attraction.rating || null, // If applicable
+                          entryFee: attraction.entryFee || null, // Use entryFee
                           photoReference: attraction.images && attraction.images.length > 0
                             ? attraction.images[0]
-                            : null
+                            : null,
                         };
                         addFavoriteToDB(favoriteData);
                       }}
-                      className="attractions-component-favorite-button"
+                      className="approved-attractions-add-favorite-button"
                     >
                       Add to Favorites
                     </button>
@@ -702,7 +770,7 @@ const Attractions = () => {
         {favorites.filter(fav => fav.type === 'attraction').length > 0 ? (
           <div className="attractions-component-favorites-grid">
             {favorites.filter(fav => fav.type === 'attraction').map((fav) => (
-              <div key={fav.id} className="attractions-component-favorite-item">
+              <div key={fav.AttractionID} className="attractions-component-favorite-item">
                 <button
                   onClick={() => handleViewDetails(fav)}
                   className="attractions-component-favorite-image-button"
@@ -714,27 +782,31 @@ const Attractions = () => {
                       alt={fav.name}
                       className="attractions-component-placeholder"
                       loading="lazy"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://via.placeholder.com/400?text=No+Image';
+                      }}
                     />
-                  ) : null}
+                  ) : (
+                    <div className="attractions-component-placeholder no-image">
+                      <p>No image available.</p>
+                    </div>
+                  )}
                 </button>
                 <div className="attractions-component-favorite-info">
                   <h3>{fav.name}</h3>
-                  {fav.rating && <p>Rating: {fav.rating} ⭐</p>}
-                  {fav.priceLevel !== undefined && (
-                    <p>Price Level: {'$'.repeat(fav.priceLevel)}</p>
+                  {fav.entryFee !== undefined && (
+                    <p>Entry Fee: ${fav.entryFee}</p>
                   )}
                   <div className="attractions-component-favorite-actions">
                     <button
-                      onClick={() => {
-                        const mapsUrl = `https://www.google.com/maps/place/?q=place_id:${fav.placeId}`;
-                        window.open(mapsUrl, '_blank');
-                      }}
+                      onClick={() => handleViewDetails(fav)}
                       className="attractions-component-favorite-button"
                     >
-                      View in Google Maps
+                      View Details
                     </button>
                     <button
-                      onClick={() => removeFavoriteFromDB(fav.id)}
+                      onClick={() => removeFavoriteFromDB(fav.AttractionID)}
                       className="attractions-component-favorite-button"
                     >
                       Delete

@@ -20,7 +20,7 @@ const favoriteValidationRules = [
   body('placeId').notEmpty().withMessage('placeId is required'),
   body('name').notEmpty().withMessage('Name is required'),
   body('priceLevel').optional({ nullable: true }).isInt({ min: 1, max: 5 }).withMessage('Price Level must be between 1 and 5'),
-  body('photoReference').optional().isString().withMessage('photoReference must be a string'),
+  body('photoReference').optional({ nullable: true }).isString().withMessage('photoReference must be a string'),
 
 ];
 

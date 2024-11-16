@@ -103,17 +103,17 @@
     "web-streams-polyfill": "^4.0.0"
   },
   "jest": {
-  "transform": {
-    "^.+\\.(js|jsx)$": "babel-jest"
-  },
-  "moduleNameMapper": {
-    "^firebase/auth$": "<rootDir>/src/__mocks__/firebase/auth.js",
-    "^react-router-dom$": "<rootDir>/src/__mocks__/react-router-dom.js",
-    "^.+\\.module\\.(css|sass|scss)$": "identity-obj-proxy",
-    "^.+\\.(css|sass|scss)$": "identity-obj-proxy"
-  },
-  "transformIgnorePatterns": [
-    "/node_modules/(?!(firebase|axios)/)"
-  ]
-}
+    "transform": {
+      "^.+\\.(js|jsx)$": "babel-jest"
+    },
+    "moduleNameMapper": {
+      "^firebase/auth$": "<rootDir>/src/__mocks__/firebase/auth.js",
+      "^react-router-dom$": "<rootDir>/src/__mocks__/react-router-dom.js",
+      "^.+\\.module\\.(css|sass|scss)$": "identity-obj-proxy",
+      "^.+\\.(css|sass|scss)$": "identity-obj-proxy"
+    },
+    "transformIgnorePatterns": [
+      "/node_modules/(?!(firebase|axios)/)"
+    ]
+  }
 }

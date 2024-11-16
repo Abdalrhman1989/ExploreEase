@@ -5,7 +5,7 @@ import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import '../styles/Stays.css'; // Utilizing existing styles from Stays.css
+import '../styles/ApprovedAttractions.css'; // Correct CSS import
 
 const ApprovedAttractions = () => {
   const { user, isAuthenticated, loading: authLoading } = useContext(AuthContext);
@@ -107,36 +107,36 @@ const ApprovedAttractions = () => {
   };
 
   return (
-    <div className="stays-component-approved-attractions-section">
+    <div className="approved-attractions-container">
       <h2>Approved User-Created Attractions</h2>
       
       {/* Loading Indicator */}
       {isLoading && (
-        <div className="stays-component-spinner">
-          <div className="spinner"></div>
+        <div className="approved-attractions-loading-spinner">
+          <div className="approved-attractions-spinner"></div>
           <p>Loading approved attractions...</p>
         </div>
       )}
       
       {/* Error Message */}
-      {error && <div className="stays-component-error-message">{error}</div>}
+      {error && <div className="approved-attractions-error-message">{error}</div>}
       
       {/* Attractions Grid */}
-      <div className="stays-component-grid">
+      <div className="approved-attractions-grid">
         {approvedAttractions.length > 0 ? (
           approvedAttractions.map((attraction) => (
-            <div key={attraction.id} className="stays-component-item">
+            <div key={attraction.AttractionID} className="approved-attractions-card">
               {/* Attraction Image */}
               <button
-                onClick={() => navigate(`/attractions/${attraction.id}`)}
-                className="stays-component-image-button"
+                onClick={() => navigate(`/attractions/${attraction.AttractionID}`)}
+                className="approved-attractions-image-button"
                 aria-label={`View details for ${attraction.name}`}
               >
                 {attraction.photoReference ? (
                   <img
                     src={getPhotoUrl(attraction.photoReference)}
                     alt={attraction.name}
-                    className="stays-component-placeholder"
+                    className="approved-attractions-image"
                     loading="lazy"
                     onError={(e) => {
                       e.target.onerror = null;
@@ -144,14 +144,14 @@ const ApprovedAttractions = () => {
                     }}
                   />
                 ) : (
-                  <div className="stays-component-placeholder no-image">
+                  <div className="approved-attractions-image no-image">
                     <p>No image available.</p>
                   </div>
                 )}
               </button>
               
               {/* Attraction Information */}
-              <div className="stays-component-info">
+              <div className="approved-attractions-details">
                 <h3>{attraction.name}</h3>
                 {attraction.rating && <p>Rating: {attraction.rating} ⭐</p>}
                 {attraction.priceLevel !== undefined && (
@@ -160,10 +160,10 @@ const ApprovedAttractions = () => {
                 <p>{attraction.address || 'No address available'}</p>
                 
                 {/* Action Buttons */}
-                <div className="stays-component-actions">
+                <div className="approved-attractions-actions">
                   <button
-                    onClick={() => navigate(`/attractions/${attraction.id}`)}
-                    className="stays-component-view-details-button"
+                    onClick={() => navigate(`/attractions/${attraction.AttractionID}`)}
+                    className="approved-attractions-view-details-button"
                     aria-label={`View details for ${attraction.name}`}
                   >
                     View Details
@@ -171,17 +171,19 @@ const ApprovedAttractions = () => {
                   <button
                     onClick={() => {
                       const favoriteData = {
-                        type: 'attraction', // Adjust based on your backend schema
-                        placeId: attraction.id, // Ensure 'id' corresponds to 'placeId'
+                        type: 'attraction',
+                        placeId: attraction.AttractionID,
                         name: attraction.name,
                         address: attraction.address || '',
                         rating: attraction.rating || null,
                         priceLevel: attraction.priceLevel || null,
-                        photoReference: attraction.photoReference || null,
+                        ...(attraction.photoReference
+                          ? { photoReference: attraction.photoReference }
+                          : {})
                       };
                       addFavoriteToDB(favoriteData);
                     }}
-                    className="stays-component-add-favorite-button"
+                    className="approved-attractions-add-favorite-button"
                     aria-label={`Add ${attraction.name} to Favorites`}
                   >
                     Add to Favorites
@@ -191,7 +193,7 @@ const ApprovedAttractions = () => {
             </div>
           ))
         ) : (
-          !isLoading && <p className="stays-component-no-attractions-message">No approved attractions to display.</p>
+          !isLoading && <p className="approved-attractions-no-attractions-message">No approved attractions to display.</p>
         )}
       </div>
     </div>

@@ -43,8 +43,10 @@ const categories = [
 
 const Buses = () => {
   const { user, isAuthenticated, loading: authLoading } = useContext(AuthContext); 
-  const [mapCenter, setMapCenter] = useState({ lat: 40.7128, lng: -74.006 }); 
-  const [mapZoom, setMapZoom] = useState(12);
+  // Initialize mapCenter to { lat: 0, lng: 0 } for world view
+  const [mapCenter, setMapCenter] = useState({ lat: 0, lng: 0 }); 
+  // Initialize mapZoom to 2 for a global overview
+  const [mapZoom, setMapZoom] = useState(2);
   const [markers, setMarkers] = useState([]);
   const [selected, setSelected] = useState(null);
   const [favorites, setFavorites] = useState([]);
@@ -405,8 +407,9 @@ const Buses = () => {
         } else {
           console.error('Geocoding failed:', status);
           setJourneyError('Location not found. Please try a different search.');
-          setMapCenter({ lat: 40.7128, lng: -74.006 }); 
-          setMapZoom(12);
+          // Set map to world view instead of New York
+          setMapCenter({ lat: 0, lng: 0 }); 
+          setMapZoom(2);
           setMarkers([]);
           setIsLoading(false);
           setJourneyLoading(false);
@@ -666,8 +669,9 @@ const Buses = () => {
         });
       } else {
         setError('Location not found. Please try a different search.');
-        setMapCenter({ lat: 40.7128, lng: -74.006 }); 
-        setMapZoom(12);
+        // Set map to world view instead of New York
+        setMapCenter({ lat: 0, lng: 0 }); 
+        setMapZoom(2);
         setMarkers([]);
         setIsLoading(false);
       }
@@ -832,14 +836,14 @@ const Buses = () => {
         },
         (error) => {
           console.error('Error fetching user location:', error);
-          toast.info('Using default location (New York City).');
-          // Defaults are already set
+          toast.info('Using default world view.');
+          // Keep mapCenter as { lat: 0, lng: 0 } and zoom: 2
         }
       );
     } else {
       console.error('Geolocation not supported by this browser.');
-      toast.info('Geolocation not supported. Using default location.');
-      // Defaults are already set
+      toast.info('Geolocation not supported. Using default world view.');
+      // Keep mapCenter as { lat: 0, lng: 0 } and zoom: 2
     }
   }, []);
 
@@ -1274,7 +1278,7 @@ const Buses = () => {
                   onClick={() => handleViewJourneyOnMap(journey)}
                   className="buses-component-view-directions-button"
                 >
-                  View on Map
+                  Map
                 </button>
                 {journey.ticketProviderUrl && (
                   <button

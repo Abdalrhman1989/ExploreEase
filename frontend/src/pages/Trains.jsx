@@ -92,6 +92,7 @@ const Trains = () => {
   });
 
   const mapRef = useRef(null);
+  const mapSectionRef = useRef(null); // Ref for scrolling to the map
 
   const onMapLoad = (map) => {
     mapRef.current = map;
@@ -106,6 +107,14 @@ const Trains = () => {
     } catch (_) {
       return false;
     }
+  };
+
+  // Helper function to convert UNIX timestamp if in milliseconds
+  const convertToSeconds = (unix) => {
+    if (unix > 1e12) { // Likely in milliseconds
+      return Math.floor(unix / 1000);
+    }
+    return unix;
   };
 
   // Helper function to format time as ISO 8601
@@ -151,6 +160,113 @@ const Trains = () => {
     }
   };
 
+  // Function to generate Ticket Provider URL
+  const generateTicketProviderUrl = (origin, destination, departureUnix) => {
+    const baseUrl = 'https://www.dsb.dk/en'; // Danish State Railways as an example
+    const departureDateISO = moment.unix(departureUnix).utc().toISOString();
+    const params = new URLSearchParams({
+      origin: origin,
+      destination: destination,
+      departure: departureDateISO,
+    });
+    return `${baseUrl}?${params.toString()}`;
+  };
+
+  // Function to save a trip via backend
+  const saveTripToDB = async (tripData) => {
+    if (!isAuthenticated || !user) {
+      toast.error('Please log in to save trips.');
+      return;
+    }
+
+    const requiredFields = ['type', 'origin', 'destination', 'departureTime', 'arrivalTime', 'duration'];
+    const missingFields = requiredFields.filter((field) => !tripData[field]);
+
+    if (missingFields.length > 0) {
+      toast.error(`Missing required fields: ${missingFields.join(', ')}`);
+      return;
+    }
+
+    if (tripData.ticket_provider_url && !isValidUrl(tripData.ticket_provider_url)) {
+      toast.error('Invalid Ticket Provider URL.');
+      return;
+    }
+
+    console.log('Attempting to save trip with data:', tripData); // Detailed logging
+
+    try {
+      // Convert departureTime and arrivalTime to ISO strings using moment and remove any leading '+'
+      const departureISO = moment(tripData.departureTime).toISOString().replace(/^\+/, '');
+      const arrivalISO = moment(tripData.arrivalTime).toISOString().replace(/^\+/, '');
+
+      if (!moment(departureISO).isValid() || !moment(arrivalISO).isValid()) {
+        throw new Error('Invalid departure or arrival date.');
+      }
+
+      const tripDataToSend = {
+        ...tripData,
+        departureTime: departureISO,
+        arrivalTime: arrivalISO,
+      };
+
+      console.log('Trip Data to Send:', tripDataToSend); // Detailed logging
+
+      const idToken = await user.getIdToken();
+      const response = await axios.post(`${BACKEND_URL}/api/trips`, tripDataToSend, {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      console.log('Save Trip API Response:', response.data); // Detailed logging
+
+      if (response.data && (response.status === 201 || response.status === 200)) {
+        setSavedTrips((prevTrips) => [...prevTrips, response.data]);
+        setFilteredSavedTrips((prevTrips) => [...prevTrips, response.data]);
+        toast.success('Trip saved successfully!');
+      } else {
+        console.error('Unexpected response structure:', response);
+        toast.error('Failed to save trip. Unexpected response from server.');
+      }
+    } catch (err) {
+      console.error('Error saving trip:', err.response ? err.response.data : err.message);
+      if (err.response && err.response.data && err.response.data.errors) {
+        const messages = err.response.data.errors.map((error) => error.msg).join('\n');
+        console.error('Validation Errors:', messages);
+        toast.error(`Error: ${messages}`);
+      } else if (err.response && err.response.data && err.response.data.message) {
+        toast.error(`Error: ${err.response.data.message}`);
+      } else {
+        toast.error('Failed to save trip.');
+      }
+    }
+  };
+
+  // Function to remove a saved trip via backend
+  const removeTripFromDB = async (tripId) => {
+    if (!isAuthenticated || !user) {
+      toast.error('Please log in to remove trips.');
+      return;
+    }
+
+    try {
+      const idToken = await user.getIdToken();
+      await axios.delete(`${BACKEND_URL}/api/trips/${tripId}`, {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+      console.log(`Trip with ID ${tripId} removed.`);
+      setSavedTrips((prevTrips) => prevTrips.filter((trip) => trip.id !== tripId));
+      setFilteredSavedTrips((prevTrips) => prevTrips.filter((trip) => trip.id !== tripId));
+      toast.success('Trip removed successfully!');
+    } catch (err) {
+      console.error('Error removing trip:', err.response ? err.response.data : err.message);
+      toast.error('Failed to remove trip.');
+    }
+  };
+
   // Function to fetch favorites from backend
   const fetchFavorites = async () => {
     if (!isAuthenticated || !user) return;
@@ -186,7 +302,6 @@ const Trains = () => {
       const response = await axios.post(`${BACKEND_URL}/api/favorites`, favoriteData, {
         headers: {
           Authorization: `Bearer ${idToken}`,
-          'Content-Type': 'application/json',
         },
       });
       console.log('Add Favorite API Response:', response.data);
@@ -259,101 +374,6 @@ const Trains = () => {
     }
   };
 
-  // Function to save a trip via backend
-  const saveTripToDB = async (tripData) => {
-    if (!isAuthenticated || !user) {
-      toast.error('Please log in to save trips.');
-      return;
-    }
-
-    const requiredFields = ['type', 'origin', 'destination', 'departureTime', 'arrivalTime', 'duration'];
-    const missingFields = requiredFields.filter((field) => !tripData[field]);
-
-    if (missingFields.length > 0) {
-      toast.error(`Missing required fields: ${missingFields.join(', ')}`);
-      return;
-    }
-
-    if (tripData.ticket_provider_url && !isValidUrl(tripData.ticket_provider_url)) {
-      toast.error('Invalid Ticket Provider URL.');
-      return;
-    }
-
-    console.log('Attempting to save trip with data:', tripData); // Detailed logging
-
-    try {
-      // Convert departureTime and arrivalTime to ISO strings if they aren't already
-      const departureDate = new Date(tripData.departureTime);
-      const arrivalDate = new Date(tripData.arrivalTime);
-
-      if (isNaN(departureDate.getTime()) || isNaN(arrivalDate.getTime())) {
-        throw new Error('Invalid departure or arrival date.');
-      }
-
-      const tripDataToSend = {
-        ...tripData,
-        departureTime: departureDate.toISOString(),
-        arrivalTime: arrivalDate.toISOString(),
-      };
-
-      console.log('Trip Data to Send:', tripDataToSend); // Detailed logging
-
-      const idToken = await user.getIdToken();
-      const response = await axios.post(`${BACKEND_URL}/api/trips`, tripDataToSend, {
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      console.log('Save Trip API Response:', response.data); // Detailed logging
-
-      if (response.data && (response.status === 201 || response.status === 200)) {
-        setSavedTrips((prevTrips) => [...prevTrips, response.data]);
-        setFilteredSavedTrips((prevTrips) => [...prevTrips, response.data]);
-        toast.success('Trip saved successfully!');
-      } else {
-        console.error('Unexpected response structure:', response);
-        toast.error('Failed to save trip. Unexpected response from server.');
-      }
-    } catch (err) {
-      console.error('Error saving trip:', err.response ? err.response.data : err.message);
-      if (err.response && err.response.data && err.response.data.errors) {
-        const messages = err.response.data.errors.map((error) => error.msg).join('\n');
-        console.error('Validation Errors:', messages);
-        toast.error(`Error: ${messages}`);
-      } else if (err.response && err.response.data && err.response.data.message) {
-        toast.error(`Error: ${err.response.data.message}`);
-      } else {
-        toast.error('Failed to save trip.');
-      }
-    }
-  };
-
-  // Function to remove a saved trip via backend
-  const removeTripFromDB = async (tripId) => {
-    if (!isAuthenticated || !user) {
-      toast.error('Please log in to remove trips.');
-      return;
-    }
-
-    try {
-      const idToken = await user.getIdToken();
-      await axios.delete(`${BACKEND_URL}/api/trips/${tripId}`, {
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-        },
-      });
-      console.log(`Trip with ID ${tripId} removed.`);
-      setSavedTrips((prevTrips) => prevTrips.filter((trip) => trip.id !== tripId));
-      setFilteredSavedTrips((prevTrips) => prevTrips.filter((trip) => trip.id !== tripId));
-      toast.success('Trip removed successfully!');
-    } catch (err) {
-      console.error('Error removing trip:', err.response ? err.response.data : err.message);
-      toast.error('Failed to remove trip.');
-    }
-  };
-
   // Handler for journey search form submission with timezone handling
   const handleJourneySearch = async (values) => {
     const { origin, destination, date, time } = values;
@@ -399,8 +419,8 @@ const Trains = () => {
           // Create a moment object in the origin's timezone
           const departureInOriginTZ = moment.tz(departureDateTime, timeZoneId);
 
-          // Convert departure time to ISO string
-          const departureISO = departureInOriginTZ.toISOString();
+          // Convert departure time to ISO string without leading '+'
+          const departureISO = departureInOriginTZ.toISOString().replace(/^\+/, '');
 
           // Update the map center to the origin
           setMapCenter({ lat, lng });
@@ -441,31 +461,34 @@ const Trains = () => {
                       step.transit.line.short_name || step.transit.line.name || 'Unknown Stop'
                   );
 
-                  const schedule = transitSteps.map((step, idx) => ({
-                    segment: step.transit.line.name || `Segment ${idx + 1}`,
-                    departure: step.transit.departure_time
-                      ? formatTime(step.transit.departure_time.value, timeZoneId)
-                      : 'N/A',
-                    arrival: step.transit.arrival_time
-                      ? formatTime(step.transit.arrival_time.value, timeZoneId)
-                      : 'N/A',
-                  })).filter(seg => seg.departure !== 'N/A' && seg.arrival !== 'N/A'); // Exclude invalid segments
+                  const schedule = transitSteps
+                    .map((step, idx) => ({
+                      segment: step.transit.line.name || `Segment ${idx + 1}`,
+                      departure: step.transit.departure_time
+                        ? formatTime(step.transit.departure_time.value, timeZoneId)
+                        : 'N/A',
+                      arrival: step.transit.arrival_time
+                        ? formatTime(step.transit.arrival_time.value, timeZoneId)
+                        : 'N/A',
+                    }))
+                    .filter((seg) => seg.departure !== 'N/A' && seg.arrival !== 'N/A'); // Exclude invalid segments
 
                   // Correct Timestamp Conversion
-                  const departureUnix = Number(leg.departure_time.value);
-                  const arrivalUnix = Number(leg.arrival_time.value);
+                  let departureUnix = Number(leg.departure_time.value);
+                  let arrivalUnix = Number(leg.arrival_time.value);
 
-                  if (isNaN(departureUnix) || isNaN(arrivalUnix)) {
-                    console.error('Invalid departure or arrival timestamp:', departureUnix, arrivalUnix);
-                    toast.error('Invalid departure or arrival timestamp received.');
-                    return null; // Exclude this journey
-                  }
+                  console.log('Departure Unix:', departureUnix);
+                  console.log('Arrival Unix:', arrivalUnix);
 
-                  const departure = new Date(departureUnix * 1000);
-                  const arrival = new Date(arrivalUnix * 1000);
+                  // Convert to seconds if in milliseconds
+                  departureUnix = convertToSeconds(departureUnix);
+                  arrivalUnix = convertToSeconds(arrivalUnix);
+
+                  const departure = moment.unix(departureUnix).utc();
+                  const arrival = moment.unix(arrivalUnix).utc();
 
                   // Validate Date Objects
-                  if (isNaN(departure.getTime()) || isNaN(arrival.getTime())) {
+                  if (!departure.isValid() || !arrival.isValid()) {
                     console.error('Invalid departure or arrival date:', departure, arrival);
                     toast.error('Invalid departure or arrival date.');
                     return null; // Exclude this journey
@@ -476,20 +499,18 @@ const Trains = () => {
                     (arrival - departure) / 60000
                   ); // Difference in minutes
 
-                  console.log('leg.departure_time.value:', leg.departure_time.value);
-                  console.log('departure.toISOString():', departure.toISOString());
-                  console.log('leg.arrival_time.value:', leg.arrival_time.value);
-                  console.log('arrival.toISOString():', arrival.toISOString());
+                  console.log('Departure ISO:', departure.toISOString());
+                  console.log('Arrival ISO:', arrival.toISOString());
 
                   // Generate ticketProviderUrl
                   const ticketProviderUrl = generateTicketProviderUrl(
                     leg.start_address,
                     leg.end_address,
-                    leg.departure_time.value
+                    departureUnix
                   );
 
                   return {
-                    departureTime: departure.toISOString(),
+                    departureTime: departure.toISOString(), // Correctly formatted ISO string
                     arrivalTime: arrival.toISOString(),
                     origin: leg.start_address,
                     destination: leg.end_address,
@@ -500,7 +521,7 @@ const Trains = () => {
                     type: 'train',
                     duration: durationInMinutes,
                   };
-                }).filter(journey => journey !== null); // Exclude invalid journeys
+                }).filter((journey) => journey !== null); // Exclude invalid journeys
 
                 // Set fetched journeys
                 setJourneys(fetchedJourneys);
@@ -535,18 +556,123 @@ const Trains = () => {
     }
   };
 
-  // Helper function to generate Ticket Provider URL
-  const generateTicketProviderUrl = (origin, destination, departureUnix) => {
-    const baseUrl = 'https://www.dsb.dk/en'; // Danish State Railways as an example
-    const departureDateISO = new Date(departureUnix * 1000).toISOString();
-    const params = new URLSearchParams({
-      origin: origin,
-      destination: destination,
-      departure: departureDateISO,
-    });
-    return `${baseUrl}?${params.toString()}`;
+  // Handler for viewing a journey on Google Maps externally
+  const handleViewJourneyOnMap = (journey) => {
+    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(
+      journey.origin
+    )}&destination=${encodeURIComponent(
+      journey.destination
+    )}&travelmode=transit`;
+    window.open(mapsUrl, '_blank', 'noopener,noreferrer');
   };
 
+  // Function to fetch detailed place information
+  const fetchPlaceDetails = (placeId) => {
+    console.log('Fetching details for Place ID:', placeId);
+    if (!window.google || !mapRef.current) {
+      console.error('Google Maps is not loaded properly or mapRef is undefined.');
+      return;
+    }
+
+    const service = new window.google.maps.places.PlacesService(mapRef.current);
+    service.getDetails(
+      {
+        placeId: placeId,
+        fields: [
+          'name',
+          'rating',
+          'formatted_address',
+          'photos',
+          'reviews',
+          'website',
+          'url',
+          'geometry',
+          'types',
+        ],
+      },
+      (place, status) => {
+        console.log('Place Details:', place);
+        console.log('Place Details Status:', status);
+        if (
+          status === window.google.maps.places.PlacesServiceStatus.OK &&
+          place &&
+          place.geometry &&
+          place.geometry.location
+        ) {
+          setSelected(place);
+          setMapCenter({
+            lat: place.geometry.location.lat(),
+            lng: place.geometry.location.lng(),
+          });
+          setMapZoom(15);
+        } else {
+          setError('Failed to fetch place details.');
+          toast.error('Failed to fetch place details.');
+        }
+      }
+    );
+  };
+
+  // Marker Handling
+  const addAdvancedMarker = (position, place) => {
+    if (!window.google || !mapRef.current) return;
+
+    const marker = new window.google.maps.Marker({
+      map: mapRef.current,
+      position,
+      title: place.name,
+      icon: {
+        url: 'https://maps.google.com/mapfiles/ms/icons/train.png', // Custom train icon
+        scaledSize: new window.google.maps.Size(40, 40), // Adjust size as needed
+      },
+    });
+
+    marker.addListener('click', () => {
+      fetchPlaceDetails(place.place_id);
+      setMapCenter({
+        lat: place.geometry.location.lat(),
+        lng: place.geometry.location.lng(),
+      });
+      setMapZoom(15);
+    });
+
+    // Add marker to mapRef for cleanup
+    if (!mapRef.current.markers) {
+      mapRef.current.markers = [];
+    }
+    mapRef.current.markers.push(marker);
+  };
+
+  useEffect(() => {
+    if (isLoaded && markers.length > 0) {
+      markers.forEach((marker) => {
+        if (marker.geometry && marker.geometry.location) {
+          addAdvancedMarker(
+            {
+              lat: marker.geometry.location.lat(),
+              lng: marker.geometry.location.lng(),
+            },
+            marker
+          );
+        } else {
+          console.warn(
+            `Marker with ID ${marker.place_id} is missing geometry/location.`
+          );
+        }
+      });
+    }
+
+    // Cleanup markers on unmount or markers change
+    return () => {
+      if (mapRef.current && mapRef.current.markers) {
+        mapRef.current.markers.forEach((marker) => marker.setMap(null));
+        mapRef.current.markers = [];
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded, markers]);
+
+  // Handler for category selection
   const [selectedCategory, setSelectedCategory] = useState(null);
 
   const handleCategoryClick = (category) => {
@@ -574,7 +700,7 @@ const Trains = () => {
 
     const service = new window.google.maps.places.PlacesService(mapRef.current);
     const request = {
-      location: mapCenter,
+      location: new window.google.maps.LatLng(mapCenter.lat, mapCenter.lng),
       radius: '10000', // 10 km radius
       type: [type],
     };
@@ -593,6 +719,7 @@ const Trains = () => {
     });
   };
 
+  // Function to search trains by query
   const searchTrainsByQuery = (query) => {
     if (!window.google) {
       setError('Google Maps is not loaded properly.');
@@ -641,59 +768,13 @@ const Trains = () => {
     });
   };
 
+  // Function to get photo URL
   const getPhotoUrl = (photoReference) => {
     if (photoReference) {
       return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photoReference}&key=${GOOGLE_MAPS_API_KEY}`;
     }
     // Return a dynamic placeholder image from Unsplash
     return `https://source.unsplash.com/collection/190727/400x300?train`;
-  };
-
-  // Fetch detailed place information
-  const fetchPlaceDetails = (placeId) => {
-    console.log('Fetching details for Place ID:', placeId);
-    if (!window.google || !mapRef.current) {
-      console.error('Google Maps is not loaded properly or mapRef is undefined.');
-      return;
-    }
-
-    const service = new window.google.maps.places.PlacesService(mapRef.current);
-    service.getDetails(
-      {
-        placeId: placeId,
-        fields: [
-          'name',
-          'rating',
-          'formatted_address',
-          'photos',
-          'reviews',
-          'website',
-          'url',
-          'geometry',
-          'types',
-        ],
-      },
-      (place, status) => {
-        console.log('Place Details:', place);
-        console.log('Place Details Status:', status);
-        if (
-          status === window.google.maps.places.PlacesServiceStatus.OK &&
-          place &&
-          place.geometry &&
-          place.geometry.location
-        ) {
-          setSelected(place);
-          setMapCenter({
-            lat: place.geometry.location.lat(),
-            lng: place.geometry.location.lng(),
-          });
-          setMapZoom(15);
-        } else {
-          setError('Failed to fetch place details.');
-          toast.error('Failed to fetch place details.');
-        }
-      }
-    );
   };
 
   // Fetch favorites when authenticated
@@ -717,16 +798,15 @@ const Trains = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, user]);
 
-  // Handler for viewing a journey on Google Maps externally
-  const handleViewJourneyOnMap = (journey) => {
-    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(
-      journey.origin
-    )}&destination=${encodeURIComponent(
-      journey.destination
-    )}&travelmode=transit`;
-    window.open(mapsUrl, '_blank', 'noopener,noreferrer');
+  // Handler function to handle "View Details" and scroll to map
+  const handleViewDetails = (placeId) => {
+    fetchPlaceDetails(placeId);
+    if (mapSectionRef.current) {
+      mapSectionRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
+  // Handle Error and Loading States
   if (loadError)
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
@@ -922,7 +1002,7 @@ const Trains = () => {
       </Container>
 
       {/* Map Section */}
-      <div className="trains-component-map-section">
+      <div className="trains-component-map-section" ref={mapSectionRef}>
         <GoogleMap
           mapContainerStyle={mapContainerStyle}
           zoom={mapZoom}
@@ -1057,7 +1137,7 @@ const Trains = () => {
                   <Card className="trains-component-item">
                     <button
                       className="trains-component-image-button"
-                      onClick={() => fetchPlaceDetails(train.place_id)}
+                      onClick={() => handleViewDetails(train.place_id)}
                       aria-label={`View details for ${train.name}`}
                     >
                       <img
@@ -1078,7 +1158,7 @@ const Trains = () => {
                     <div className="trains-component-actions">
                       <button
                         className="trains-component-view-details-button"
-                        onClick={() => fetchPlaceDetails(train.place_id)}
+                        onClick={() => handleViewDetails(train.place_id)}
                         aria-label={`View details for ${train.name}`}
                       >
                         View Details
@@ -1223,7 +1303,7 @@ const Trains = () => {
                   endOfDay.setHours(23, 59, 59, 999);
                   setFilteredSavedTrips(
                     savedTrips.filter((trip) => {
-                      const tripDeparture = new Date(trip.departureTime);
+                      const tripDeparture = moment.unix(trip.departureTime).toDate();
                       return tripDeparture >= startOfDay && tripDeparture <= endOfDay;
                     })
                   );
@@ -1258,10 +1338,10 @@ const Trains = () => {
                         <strong>To:</strong> {trip.destination}
                       </p>
                       <p>
-                        <strong>Departure:</strong> {moment(trip.departureTime).format('YYYY-MM-DD HH:mm')}
+                        <strong>Departure:</strong> {moment.unix(trip.departureTime).format('YYYY-MM-DD HH:mm')}
                       </p>
                       <p>
-                        <strong>Arrival:</strong> {moment(trip.arrivalTime).format('YYYY-MM-DD HH:mm')}
+                        <strong>Arrival:</strong> {moment.unix(trip.arrivalTime).format('YYYY-MM-DD HH:mm')}
                       </p>
                       <p>
                         <strong>Duration:</strong> {formatDuration(trip.duration)}
@@ -1354,7 +1434,7 @@ const Trains = () => {
                   <Card className="trains-component-favorite-item">
                     <button
                       className="trains-component-favorite-image-button"
-                      onClick={() => fetchPlaceDetails(fav.placeId)}
+                      onClick={() => handleViewDetails(fav.placeId)}
                       aria-label={`View details for favorite station ${fav.name}`}
                     >
                       {fav.photoReference ? (

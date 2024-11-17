@@ -36,7 +36,9 @@ import HotelBook from './pages/HotelBook.jsx';
 import ManageAttractions from './pages/ManageAttractions.jsx';
 import ManageRestaurants from './pages/ManageRestaurants.jsx';
 import ManageHotels from './pages/ManageHotels.jsx';
-import PaymentPage from './pages/PaymentPage.jsx'; // Import PaymentPage
+import PaymentPage from './pages/PaymentPage.jsx'; 
+import RestaurantDetails from './pages/RestaurantDetails'; 
+
 
 // New Pages
 import Blog from './pages/Blog';
@@ -79,6 +81,7 @@ function App() {
         <Route path="/trains" element={<Trains />} />
         <Route path="/buses" element={<Buses />} />
         <Route path="/restaurants" element={<Restaurants />} />
+        <Route path="/restaurants/:id" element={<RestaurantDetails />} /> 
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/faq" element={<FAQ />} />

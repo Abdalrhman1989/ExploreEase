@@ -1,5 +1,3 @@
-// src/pages/Buses.jsx
-
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import {
   GoogleMap,
@@ -9,21 +7,20 @@ import {
   TransitLayer,
   DirectionsRenderer,
 } from '@react-google-maps/api';
-import { AuthContext } from '../context/AuthContext'; // Import AuthContext
+import { AuthContext } from '../context/AuthContext'; 
 import axios from 'axios';
 import moment from 'moment-timezone';
-import '../styles/Buses.css'; // Ensure you have appropriate CSS styles
+import '../styles/Buses.css'; 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { FaBus, FaBusAlt } from 'react-icons/fa'; // Combined import
+import { FaBus, FaBusAlt } from 'react-icons/fa'; 
 import { Formik, Form, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import busBanner from '../assets/bus1.jpg'; // Import the banner image
+import busBanner from '../assets/bus1.jpg'; 
 
-const libraries = ['places']; // Ensure 'places' is included
-
+const libraries = ['places']; 
 const mapContainerStyle = {
   width: '100%',
   height: '600px',
@@ -41,12 +38,12 @@ const categories = [
     type: 'bus_station',
     icon: <FaBusAlt size={40} color="inherit" />,
   },
-  // You can add more categories here in the future
+  
 ];
 
 const Buses = () => {
-  const { user, isAuthenticated, loading: authLoading } = useContext(AuthContext); // Access AuthContext
-  const [mapCenter, setMapCenter] = useState({ lat: 40.7128, lng: -74.006 }); // Default to New York City
+  const { user, isAuthenticated, loading: authLoading } = useContext(AuthContext); 
+  const [mapCenter, setMapCenter] = useState({ lat: 40.7128, lng: -74.006 }); 
   const [mapZoom, setMapZoom] = useState(12);
   const [markers, setMarkers] = useState([]);
   const [selected, setSelected] = useState(null);
@@ -68,7 +65,7 @@ const Buses = () => {
   // API Keys from Environment Variables
   const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
   const GOOGLE_TIMEZONE_API_KEY = process.env.REACT_APP_GOOGLE_TIMEZONE_API_KEY;
-  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001'; // Default to localhost if not set
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001'; 
 
   // Load Google Maps Script
   const { isLoaded, loadError } = useLoadScript({
@@ -98,7 +95,7 @@ const Buses = () => {
     return (
       typeof timestamp === 'number' &&
       timestamp > 0 &&
-      timestamp < 32503680000 // Equivalent to year 3000
+      timestamp < 32503680000
     );
   };
 
@@ -159,12 +156,9 @@ const Buses = () => {
         ...tripData,
         departureTime: new Date(tripData.departureTime * 1000).toISOString(),
         arrivalTime: new Date(tripData.arrivalTime * 1000).toISOString(),
-        // If the backend expects duration in a different format, adjust here
-        // For example, to send duration in minutes:
-        // duration: Math.floor(tripData.duration / 60),
       };
 
-      console.log('Trip Data to Send:', tripDataToSend); // Debugging line
+      console.log('Trip Data to Send:', tripDataToSend); 
 
       const idToken = await user.getIdToken();
       const response = await axios.post(`${BACKEND_URL}/api/trips`, tripDataToSend, {
@@ -333,14 +327,14 @@ const Buses = () => {
                   }));
 
                   // Calculate duration in seconds
-                  let departure = leg.departure_time.value; // UNIX timestamp in seconds
-                  let arrival = leg.arrival_time.value; // UNIX timestamp in seconds
+                  let departure = leg.departure_time.value; 
+                  let arrival = leg.arrival_time.value; 
 
                   console.log('Departure Timestamp:', departure, typeof departure);
                   console.log('Arrival Timestamp:', arrival, typeof arrival);
 
                   // Check if timestamps are in milliseconds and convert to seconds if necessary
-                  if (departure > 1e12) { // Roughly dates beyond year 33658, indicating milliseconds
+                  if (departure > 1e12) { 
                     departure = Math.floor(departure / 1000);
                     console.warn('Converted departure from milliseconds to seconds:', departure);
                   }
@@ -355,7 +349,7 @@ const Buses = () => {
                   // Ensure duration is positive
                   if (durationInSeconds <= 0) {
                     console.error('Calculated duration is not positive:', durationInSeconds);
-                    return null; // Exclude this journey
+                    return null; 
                   }
 
                   // Generate ticketProviderUrl using FlixBus as an example
@@ -366,21 +360,21 @@ const Buses = () => {
                   );
 
                   return {
-                    departureTime: departure, // UNIX timestamp in seconds
-                    arrivalTime: arrival, // UNIX timestamp in seconds
+                    departureTime: departure, 
+                    arrivalTime: arrival, 
                     origin: leg.start_address,
                     destination: leg.end_address,
                     transitStops: transitStops.length > 0 ? transitStops : ['No transit stops'],
                     schedule: schedule.length > 0 ? schedule : [{ segment: 'N/A', departure: 'N/A', arrival: 'N/A' }],
                     ticketProviderUrl: ticketProviderUrl,
                     type: 'bus',
-                    duration: durationInSeconds, // Positive integer (seconds)
+                    duration: durationInSeconds, 
                     destinationLocation: {
                       lat: leg.end_location.lat(),
                       lng: leg.end_location.lng(),
                     },
                   };
-                }).filter(journey => journey !== null); // Remove any null journeys
+                }).filter(journey => journey !== null); 
 
                 // Filter journeys to include only those departing after the specified time
                 const filteredJourneys = fetchedJourneys.filter((journey) => {
@@ -411,7 +405,7 @@ const Buses = () => {
         } else {
           console.error('Geocoding failed:', status);
           setJourneyError('Location not found. Please try a different search.');
-          setMapCenter({ lat: 40.7128, lng: -74.006 }); // Reset to New York City
+          setMapCenter({ lat: 40.7128, lng: -74.006 }); 
           setMapZoom(12);
           setMarkers([]);
           setIsLoading(false);
@@ -430,7 +424,7 @@ const Buses = () => {
   // Function to generate Ticket Provider URL (using FlixBus as an example)
   const generateTicketProviderUrl = (origin, destination, departureUnix) => {
     const departureDate = moment.unix(departureUnix).format('YYYY-MM-DD');
-    const baseUrl = 'https://www.flixbus.com/search-results'; // Real provider URL
+    const baseUrl = 'https://www.flixbus.com/search-results'; 
     const params = new URLSearchParams({
       origin: origin,
       destination: destination,
@@ -489,7 +483,7 @@ const Buses = () => {
       console.error('Error adding favorite:', err.response ? err.response.data : err.message);
       
       if (err.response && err.response.data && err.response.data.errors) {
-        console.log('Validation Errors:', err.response.data.errors); // Log validation errors
+        console.log('Validation Errors:', err.response.data.errors); 
         err.response.data.errors.forEach((error) => {
           toast.error(`Error: ${error.msg}`);
         });
@@ -539,7 +533,7 @@ const Buses = () => {
           Authorization: `Bearer ${idToken}`,
         },
         params: {
-          limit: 1000, // Adjust as needed
+          limit: 1000, 
         },
       });
 
@@ -672,7 +666,7 @@ const Buses = () => {
         });
       } else {
         setError('Location not found. Please try a different search.');
-        setMapCenter({ lat: 40.7128, lng: -74.006 }); // Reset to New York City
+        setMapCenter({ lat: 40.7128, lng: -74.006 }); 
         setMapZoom(12);
         setMarkers([]);
         setIsLoading(false);
@@ -684,7 +678,7 @@ const Buses = () => {
     if (photoReference) {
       return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photoReference}&key=${GOOGLE_MAPS_API_KEY}`;
     }
-    return null; // No image available
+    return null; 
   };
 
   // Fetch detailed place information
@@ -744,8 +738,8 @@ const Buses = () => {
       position,
       title: place.name,
       icon: {
-        url: 'https://maps.google.com/mapfiles/ms/icons/bus.png', // Bus icon
-        scaledSize: new window.google.maps.Size(40, 40), // Adjust size as needed
+        url: 'https://maps.google.com/mapfiles/ms/icons/bus.png', 
+        scaledSize: new window.google.maps.Size(40, 40), 
       },
     });
 
@@ -799,7 +793,7 @@ const Buses = () => {
     if (isAuthenticated) {
       fetchFavorites();
     } else {
-      setFavorites([]); // Clear favorites if not authenticated
+      setFavorites([]); 
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, user]);
@@ -809,7 +803,7 @@ const Buses = () => {
     if (isAuthenticated) {
       fetchSavedTrips();
     } else {
-      setSavedTrips([]); // Clear saved trips if not authenticated
+      setSavedTrips([]); 
       setFilteredSavedTrips([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -918,7 +912,7 @@ const Buses = () => {
                   aria-label="Origin"
                   value={values.origin}
                   onChange={handleChange}
-                  className="buses-component-input" // Consistent class name
+                  className="buses-component-input" 
                 />
                 <ErrorMessage name="origin">
                   {(msg) => <div className="error">{msg}</div>}
@@ -935,7 +929,7 @@ const Buses = () => {
                   aria-label="Destination"
                   value={values.destination}
                   onChange={handleChange}
-                  className="buses-component-input" // Consistent class name
+                  className="buses-component-input" 
                 />
                 <ErrorMessage name="destination">
                   {(msg) => <div className="error">{msg}</div>}
@@ -952,7 +946,7 @@ const Buses = () => {
                   }
                   dateFormat="yyyy-MM-dd"
                   placeholderText="Select departure date"
-                  className="buses-component-input" // Consistent class name
+                  className="buses-component-input" 
                   aria-label="Date of journey"
                 />
                 <ErrorMessage name="date">
@@ -969,7 +963,7 @@ const Buses = () => {
                   aria-label="Time of journey"
                   value={values.time}
                   onChange={handleChange}
-                  className="buses-component-input" // Consistent class name
+                  className="buses-component-input" 
                 />
                 <ErrorMessage name="time">
                   {(msg) => <div className="error">{msg}</div>}
@@ -1033,7 +1027,7 @@ const Buses = () => {
               }
             }}
             aria-label="Search for a city or station"
-            className="search-input" // Add class for specific styling if needed
+            className="search-input" 
           />
           <button
             onClick={() => {
@@ -1141,7 +1135,7 @@ const Buses = () => {
                   <button
                     onClick={() => {
                       const favoriteData = {
-                        type: 'bus_station', // Ensure only bus_station is added
+                        type: 'bus_station', 
                         placeId: selected.place_id,
                         name: selected.name,
                         address:
@@ -1198,7 +1192,6 @@ const Buses = () => {
               <div className="buses-component-info">
                 <h3>{bus.name}</h3>
                 {bus.rating && <p>Rating: {bus.rating} ⭐</p>}
-                {/* Other dynamic content */}
               </div>
               <div className="buses-component-actions">
                 <button
@@ -1210,7 +1203,7 @@ const Buses = () => {
                 <button
                   onClick={() => {
                     const favoriteData = {
-                      type: 'bus_station', // Ensure only bus_station is added
+                      type: 'bus_station', 
                       placeId: bus.place_id,
                       name: bus.name,
                       address:
@@ -1325,7 +1318,7 @@ const Buses = () => {
                 endOfDay.setHours(23, 59, 59, 999);
                 setFilteredSavedTrips(
                   savedTrips.filter((trip) => {
-                    const tripDeparture = new Date(trip.departureTime * 1000); // Convert UNIX timestamp to Date
+                    const tripDeparture = new Date(trip.departureTime * 1000); 
                     return (
                       tripDeparture >= startOfDay && tripDeparture <= endOfDay
                     );
@@ -1356,10 +1349,10 @@ const Buses = () => {
                 <div key={trip.id} className="buses-component-trip-item">
                   <h3>Trip to {trip.destination}</h3>
                   <p>
-                    <strong>Departure:</strong> {formatTime(trip.departureTime, 'UTC')} {/* Adjust timezone as needed */}
+                    <strong>Departure:</strong> {formatTime(trip.departureTime, 'UTC')} 
                   </p>
                   <p>
-                    <strong>Arrival:</strong> {formatTime(trip.arrivalTime, 'UTC')} {/* Adjust timezone as needed */}
+                    <strong>Arrival:</strong> {formatTime(trip.arrivalTime, 'UTC')} 
                   </p>
                   <p>
                     <strong>Duration:</strong> {formatDuration(trip.duration)}
@@ -1479,7 +1472,7 @@ const Buses = () => {
                       }}
                       className="buses-component-google-maps-button"
                     >
-                      View on Google Maps
+                    Google Maps
                     </button>
                     <button
                       onClick={() => removeFavoriteFromDB(fav.id)}

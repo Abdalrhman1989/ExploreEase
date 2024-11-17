@@ -1,17 +1,15 @@
-/* src/styles/Buses.css */
-
 /* Root Variables for Consistent Styling */
 :root {
   /* Color Palette */
-  --primary-color: #1e3c72; /* Deep Blue */
-  --secondary-color: #2a5298; /* Medium Blue */
-  --accent-color: #ffffff; /* White */
-  --background-color: #f4f6f8; /* Light Gray */
-  --card-background: #ffffff; /* White */
-  --text-color: #333333; /* Dark Gray */
-  --secondary-text-color: #555555; /* Medium Gray */
-  --error-color: #dc3545; /* Red for errors */
-  --success-color: #28a745; /* Green for success messages */
+  --primary-color: #1e3c72; 
+  --secondary-color: #2a5298; 
+  --accent-color: #ffffff; 
+  --background-color: #f4f6f8; 
+  --card-background: #ffffff; 
+  --text-color: #333333; 
+  --secondary-text-color: #555555; 
+  --error-color: #dc3545; 
+  --success-color: #28a745; 
 
   /* Gradients */
   --primary-gradient: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
@@ -45,7 +43,7 @@
   font-family: var(--font-family);
   color: var(--text-color);
   background-color: var(--background-color);
-  overflow-x: hidden; /* Prevent horizontal scrollbar */
+  overflow-x: hidden; 
 }
 
 /* Banner Section */
@@ -58,7 +56,6 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
-  border-radius: var(--border-radius);
 }
 
 .buses-component-banner::after {
@@ -68,8 +65,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Overlay color */
-  border-radius: var(--border-radius);
+  background-color: rgba(0, 0, 0, 0.5); 
 }
 
 .buses-component-banner-content {
@@ -95,25 +91,25 @@
 
 .buses-component-explore-button,
 .cta-button {
-  background: var(--primary-gradient); /* Primary Blue Gradient */
+  background: var(--primary-gradient); 
   border: none;
-  color: var(--accent-color); /* White Text */
-  padding: 10px 25px; /* Enhanced padding */
+  color: var(--accent-color); 
+  padding: 10px 25px; 
   font-size: 1rem;
   cursor: pointer;
   transition: background var(--transition-speed), transform var(--transition-speed);
   border-radius: 25px;
   display: inline-flex;
-  align-items: center; /* Vertically center icon and text */
-  justify-content: center; /* Horizontally center icon and text */
-  gap: 5px; /* Space between icon and text */
-  max-width: 220px; /* Prevent excessive sizing */
+  align-items: center; 
+  justify-content: center; 
+  gap: 5px; 
+  max-width: 220px; 
 }
 
 .buses-component-explore-button:hover,
 .cta-button:hover {
-  background: var(--secondary-gradient); /* Darker Blue on Hover */
-  transform: scale(1.05); /* Slightly enlarge on hover */
+  background: var(--secondary-gradient); 
+  transform: scale(1.05); 
 }
 
 /* Journey Search Form */
@@ -161,7 +157,7 @@
 .buses-component-journey-form input:focus {
   border-color: var(--primary-color);
   outline: none;
-  box-shadow: 0 0 5px rgba(30, 60, 114, 0.5); /* Match primary color */
+  box-shadow: 0 0 5px rgba(30, 60, 114, 0.5); 
 }
 
 .buses-component-search-journey-button {
@@ -205,7 +201,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 30px;
-  justify-content: center; /* Center the grid items */
+  justify-content: center; 
 }
 
 .buses-component-category-item {
@@ -469,11 +465,8 @@
   gap: 10px;
 }
 
-/* ------------------------------------------
-   Fix for Uniform Button Alignment in Cards
--------------------------------------------*/
 
-/* Ensure the card items use flex layout with column direction and full height */
+
 .buses-component-trip-item,
 .buses-component-journey-item {
   display: flex;
@@ -481,24 +474,21 @@
   height: 100%;
 }
 
-/* Modify the actions containers to align buttons uniformly */
 .buses-component-actions,
 .buses-component-favorite-actions {
-  margin-top: auto; /* Pushes the actions section to the bottom */
+  margin-top: auto; 
   display: flex;
-  justify-content: space-between; /* Distributes buttons evenly */
-  gap: 10px; /* Space between buttons */
+  justify-content: space-between; 
+  gap: 10px; 
 }
 
-/* Ensure all buttons within actions containers have the same flex properties */
 .buses-component-actions button,
 .buses-component-favorite-actions button {
-  flex: 1; /* Makes all buttons take equal space */
-  min-width: 0; /* Prevents buttons from overflowing */
-  height: 40px; /* Set a fixed height for uniformity */
+  flex: 1; 
+  min-width: 0; 
+  height: 40px;
 }
 
-/* Optional: If you have specific button classes, ensure they inherit these properties */
 .buses-component-view-details-button,
 .buses-component-favorite-button-small,
 .buses-component-view-directions-button,
@@ -507,8 +497,8 @@
 .buses-component-delete-trip-button,
 .buses-component-google-maps-button,
 .buses-component-delete-favorite-button {
-  flex: 1; /* Equal width */
-  height: 40px; /* Uniform height */
+  flex: 1; 
+  height: 40px; 
 }
 
 /* Uniform Button Styles */
@@ -520,7 +510,7 @@
 .buses-component-delete-trip-button,
 .buses-component-google-maps-button,
 .buses-component-delete-favorite-button {
-  flex: 1 1 45%; /* Flex-grow, flex-shrink, flex-basis */
+  flex: 1 1 45%; 
   padding: 10px;
   background: var(--primary-gradient);
   color: var(--accent-color);

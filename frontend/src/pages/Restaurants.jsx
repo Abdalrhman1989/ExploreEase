@@ -1,4 +1,3 @@
-// src/pages/Restaurants.jsx
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import {
   GoogleMap,
@@ -9,13 +8,19 @@ import {
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
 import '../styles/Restaurants.css';
-import { FaCalendarAlt, FaInfoCircle, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import {
+  FaCalendarAlt,
+  FaInfoCircle,
+  FaChevronDown,
+  FaChevronUp,
+} from 'react-icons/fa';
 import { MdClose } from 'react-icons/md';
 import { Link } from 'react-router-dom';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { format } from 'date-fns';
-import { toast } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Import the local banner image
 import RestaurantBanner from '../assets/Restaurant1.jpg';
@@ -51,8 +56,7 @@ const Restaurants = () => {
   const { user, isAuthenticated, loading: authLoading } = useContext(AuthContext);
 
   // State variables
-  // Removed bannerImage state as we're using a local image
-  const [mapCenter, setMapCenter] = useState({ lat: 40.7128, lng: -74.0060 }); // Default to New York City
+  const [mapCenter, setMapCenter] = useState({ lat: 40.7128, lng: -74.006 }); // Default to New York City
   const [mapZoom, setMapZoom] = useState(12);
   const [markers, setMarkers] = useState([]);
   const [selected, setSelected] = useState(null);
@@ -63,11 +67,15 @@ const Restaurants = () => {
   const [approvedRestaurants, setApprovedRestaurants] = useState([]);
   const [approvedLoading, setApprovedLoading] = useState(true);
   const [approvedError, setApprovedError] = useState(null);
+  const [locationLoading, setLocationLoading] = useState(true); // New state for location loading
+
+  const [currentCity, setCurrentCity] = useState(''); // New state for current city
 
   const mapRef = useRef(null);
 
-  // Ref for the search section
+  // Refs for scrolling
   const searchSectionRef = useRef(null);
+  const mapSectionRef = useRef(null); // New ref for the map section
 
   // Environment variables
   const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
@@ -83,7 +91,49 @@ const Restaurants = () => {
     mapRef.current = map;
   };
 
-  // Removed fetchBannerImage function since we're using a local image
+  // Function to get city name from coordinates using reverse geocoding
+  const getCityFromCoordinates = async (lat, lng) => {
+    return new Promise((resolve, reject) => {
+      const geocoder = new window.google.maps.Geocoder();
+      const latlng = { lat, lng };
+      geocoder.geocode({ location: latlng }, (results, status) => {
+        if (status === 'OK' && results[0]) {
+          const addressComponents = results[0].address_components;
+          for (let component of addressComponents) {
+            if (component.types.includes('locality')) {
+              resolve(component.long_name);
+              return;
+            }
+          }
+          // Fallback to administrative_area_level_1 or country
+          for (let component of addressComponents) {
+            if (component.types.includes('administrative_area_level_1')) {
+              resolve(component.long_name);
+              return;
+            }
+          }
+          resolve('');
+        } else {
+          reject('Geocoder failed due to: ' + status);
+        }
+      });
+    });
+  };
+
+  // useEffect to determine current city whenever mapCenter changes
+  useEffect(() => {
+    if (isLoaded && window.google) {
+      getCityFromCoordinates(mapCenter.lat, mapCenter.lng)
+        .then((city) => {
+          setCurrentCity(city);
+        })
+        .catch((err) => {
+          console.error('Error getting city:', err);
+          setCurrentCity('');
+        });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapCenter, isLoaded]);
 
   // Fetch favorites from backend
   const fetchFavorites = async () => {
@@ -96,17 +146,25 @@ const Restaurants = () => {
           Authorization: `Bearer ${idToken}`,
         },
       });
-      setFavorites(response.data.favorites);
+      // Filter favorites to include only restaurants
+      const restaurantFavorites = response.data.favorites.filter(
+        (fav) => fav.type === 'restaurant'
+      );
+      setFavorites(restaurantFavorites);
     } catch (err) {
-      console.error('Error fetching favorites:', err.response ? err.response.data : err.message);
+      console.error(
+        'Error fetching favorites:',
+        err.response ? err.response.data : err.message
+      );
       setError('Failed to fetch favorites.');
+      toast.error('Failed to fetch favorites.');
     }
   };
 
   // Add a favorite via backend
   const addFavoriteToDB = async (favoriteData) => {
     if (!isAuthenticated || !user) {
-      alert('Please log in to add favorites.');
+      toast.error('Please log in to add favorites.');
       return;
     }
 
@@ -125,7 +183,10 @@ const Restaurants = () => {
       setFavorites((prevFavorites) => [...prevFavorites, response.data.favorite]);
       toast.success('Favorite added successfully!');
     } catch (err) {
-      console.error('Error adding favorite:', err.response ? err.response.data : err.message);
+      console.error(
+        'Error adding favorite:',
+        err.response ? err.response.data : err.message
+      );
       if (err.response && err.response.data && err.response.data.message) {
         toast.error(`Error: ${err.response.data.message}`);
       } else {
@@ -137,7 +198,7 @@ const Restaurants = () => {
   // Remove a favorite via backend
   const removeFavoriteFromDB = async (favoriteId) => {
     if (!isAuthenticated || !user) {
-      alert('Please log in to remove favorites.');
+      toast.error('Please log in to remove favorites.');
       return;
     }
 
@@ -152,7 +213,10 @@ const Restaurants = () => {
       setFavorites((prevFavorites) => prevFavorites.filter((fav) => fav.id !== favoriteId));
       toast.success('Favorite removed successfully!');
     } catch (err) {
-      console.error('Error removing favorite:', err.response ? err.response.data : err.message);
+      console.error(
+        'Error removing favorite:',
+        err.response ? err.response.data : err.message
+      );
       toast.error('Failed to remove favorite.');
     }
   };
@@ -232,7 +296,7 @@ const Restaurants = () => {
         });
       } else {
         setError('Location not found. Please try a different search.');
-        setMapCenter({ lat: 40.7128, lng: -74.0060 }); // Reset to NYC
+        setMapCenter({ lat: 40.7128, lng: -74.006 }); // Reset to NYC
         setMapZoom(12);
         setMarkers([]);
         setIsLoading(false);
@@ -276,8 +340,19 @@ const Restaurants = () => {
           place.geometry.location
         ) {
           setSelected(place);
+          // Scroll to the map section
+          if (mapSectionRef.current) {
+            mapSectionRef.current.scrollIntoView({ behavior: 'smooth' });
+          }
+          // Adjust map center and zoom
+          setMapCenter({
+            lat: place.geometry.location.lat(),
+            lng: place.geometry.location.lng(),
+          });
+          setMapZoom(15);
         } else {
           setError('Failed to fetch place details.');
+          toast.error('Failed to fetch place details.');
         }
       }
     );
@@ -325,13 +400,20 @@ const Restaurants = () => {
     return 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
   };
 
-  // Fetch approved restaurants from backend
-  const fetchApprovedRestaurants = async () => {
+  // Fetch approved restaurants from backend based on current city
+  const fetchApprovedRestaurants = async (city) => {
+    if (!city) {
+      setApprovedRestaurants([]);
+      setApprovedLoading(false);
+      return;
+    }
+
     setApprovedLoading(true);
     setApprovedError(null);
     try {
       const response = await axios.get(`${BACKEND_URL}/api/restaurants/approved`, {
         params: {
+          city: city, // Pass the current city as a query parameter
           page: 1,
           limit: 100,
         },
@@ -386,16 +468,43 @@ const Restaurants = () => {
     }
   };
 
+  // Fetch user's location
   useEffect(() => {
-    fetchApprovedRestaurants();
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setMapCenter({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+          setLocationLoading(false);
+        },
+        (error) => {
+          console.error('Error fetching geolocation:', error);
+          toast.error('Unable to retrieve your location. Showing default location.');
+          setLocationLoading(false);
+        }
+      );
+    } else {
+      console.error('Geolocation not supported by this browser.');
+      toast.error('Geolocation is not supported by your browser.');
+      setLocationLoading(false);
+    }
+  }, []);
+
+  // Fetch approved restaurants and favorites when authentication or city changes
+  useEffect(() => {
     if (isAuthenticated) {
       fetchFavorites();
     } else {
       setFavorites([]);
     }
+    // Fetch approved restaurants based on the current city
+    fetchApprovedRestaurants(currentCity);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, currentCity]);
 
+  // Add markers to the map when markers state changes
   useEffect(() => {
     if (isLoaded && markers.length > 0) {
       const newMarkers = markers
@@ -427,7 +536,7 @@ const Restaurants = () => {
 
   if (loadError)
     return <div className="restaurants-error">Error loading maps</div>;
-  if (!isLoaded || authLoading)
+  if (!isLoaded || authLoading || locationLoading)
     return <div className="restaurants-loading">Loading Maps...</div>;
 
   return (
@@ -515,7 +624,10 @@ const Restaurants = () => {
       </div>
 
       {/* Map Section */}
-      <div className="restaurants-component-map-section">
+      <div
+        className="restaurants-component-map-section"
+        ref={mapSectionRef} // Attach the ref here
+      >
         <GoogleMap
           mapContainerStyle={mapContainerStyle}
           zoom={mapZoom}
@@ -708,7 +820,7 @@ const Restaurants = () => {
 
       {/* Our User Restaurants Section */}
       <div className="restaurants-component-approved-restaurants-section">
-        <h2>Our User Restaurants</h2>
+        <h2>Our User Restaurants in {currentCity || 'Your Area'}</h2>
         {approvedLoading ? (
           <div className="restaurants-component-spinner">
             <div className="spinner"></div>
@@ -720,7 +832,7 @@ const Restaurants = () => {
           </div>
         ) : approvedRestaurants.length === 0 ? (
           <p className="restaurants-component-no-restaurants">
-            No partner restaurants available at the moment.
+            No partner restaurants available in {currentCity || 'this area'}.
           </p>
         ) : (
           <div className="restaurants-component-approved-grid">
@@ -808,6 +920,7 @@ const Restaurants = () => {
                     <Link
                       to={`/restaurants/${restaurant.RestaurantID}`}
                       className="restaurants-component-approved-view-details-button"
+                      onClick={() => fetchPlaceDetails(restaurant.placeId)} // Ensure this triggers the scroll and InfoWindow
                     >
                       <FaInfoCircle /> View Details
                     </Link>
@@ -933,6 +1046,20 @@ const Restaurants = () => {
           </p>
         )}
       </div>
+
+      {/* Toast Notifications */}
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </div>
   );
 };

@@ -917,13 +917,28 @@ const Attractions = () => {
                         <p>Entry Fee: ${fav.entryFee}</p>
                       )}
                       <div className="attractions-component-favorite-actions">
+                        {/* "View in Google Maps" Button */}
                         <button
-                          onClick={() => handleViewDetails(fav, 'map')} // Show InfoWindow on map
+                          onClick={() => {
+                            let mapsUrl = '';
+                            if (fav.placeId && !fav.placeId.startsWith('user-')) {
+                              mapsUrl = `https://www.google.com/maps/place/?q=place_id:${fav.placeId}`;
+                            } else if (fav.latitude && fav.longitude) {
+                              mapsUrl = `https://www.google.com/maps/@${fav.latitude},${fav.longitude},15z`;
+                            }
+                            if (mapsUrl) {
+                              window.open(mapsUrl, '_blank');
+                            } else {
+                              alert('Unable to determine location for this attraction.');
+                            }
+                          }}
                           className="attractions-component-favorite-button"
-                          aria-label={`View details for ${fav.name}`}
+                          aria-label={`View ${fav.name} in Google Maps`}
                         >
-                          View Details
+                          View in Google Maps
                         </button>
+
+                        {/* Delete Button */}
                         <button
                           onClick={() => removeFavoriteFromDB(fav.id || fav.AttractionID)}
                           className="attractions-component-favorite-button"

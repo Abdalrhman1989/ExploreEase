@@ -1,3 +1,5 @@
+// Attractions.jsx
+
 import React, { useState, useRef, useEffect, useContext, useCallback } from 'react';
 import {
   GoogleMap,
@@ -181,6 +183,12 @@ const Attractions = () => {
     }
   };
 
+  // Determine if Attraction is User-Created
+  const isUserCreatedAttraction = (attraction) => {
+    // Assuming user-created attractions have an 'id' but no 'place_id'
+    return attraction.id && !attraction.place_id;
+  };
+
   // Handle Category Click
   const handleCategoryClick = (category) => {
     setSelectedCategory(category.name);
@@ -320,71 +328,84 @@ const Attractions = () => {
   const fetchPlaceDetails = (placeId) => {
     if (!window.google || !mapRef.current) return;
 
-    if (!isNaN(placeId)) {
-      // Handle user-created attraction
-      const attraction = createdAttractions.find(attr => attr.AttractionID === parseInt(placeId));
-      if (attraction) {
-        const selectedAttraction = {
-          id: attraction.AttractionID,
-          name: attraction.name,
-          formatted_address: attraction.location,
-          rating: attraction.rating,
-          entryFee: attraction.entryFee,
-          description: attraction.description,
-          amenities: attraction.amenities,
-          images: attraction.images, // Assume images are URLs
-          latitude: attraction.latitude,
-          longitude: attraction.longitude,
-        };
-        console.log('Selected Attraction:', selectedAttraction);
-        setSelected(selectedAttraction);
-        setMapCenter({
-          lat: attraction.latitude,
-          lng: attraction.longitude,
-        });
-        setMapZoom(15);
-      }
-    } else {
-      // Handle Google Place
-      const service = new window.google.maps.places.PlacesService(mapRef.current);
-      service.getDetails(
-        {
-          placeId: placeId,
-          fields: ['name', 'rating', 'price_level', 'formatted_address', 'photos', 'reviews', 'website', 'url', 'geometry', 'opening_hours', 'description', 'amenities'],
-        },
-        (place, status) => {
-          if (status === window.google.maps.places.PlacesServiceStatus.OK && place && place.geometry && place.geometry.location) {
-            const selectedPlace = {
-              name: place.name,
-              formatted_address: place.formatted_address,
-              rating: place.rating,
-              price_level: place.price_level,
-              opening_hours: place.opening_hours,
-              description: place.description,
-              amenities: place.amenities,
-              photos: place.photos,
-              latitude: place.geometry.location.lat(),
-              longitude: place.geometry.location.lng(),
-            };
-            console.log('Selected Place:', selectedPlace);
-            setSelected(selectedPlace);
-            setMapCenter({
-              lat: place.geometry.location.lat(),
-              lng: place.geometry.location.lng(),
-            });
-            setMapZoom(15);
-          } else {
-            setError('Failed to fetch place details.');
-          }
+    // Corrected fields parameter by removing 'description'
+    const service = new window.google.maps.places.PlacesService(mapRef.current);
+    service.getDetails(
+      {
+        placeId: placeId,
+        fields: ['name', 'rating', 'price_level', 'formatted_address', 'photos', 'reviews', 'website', 'url', 'geometry', 'opening_hours', 'types'],
+      },
+      (place, status) => {
+        if (status === window.google.maps.places.PlacesServiceStatus.OK && place && place.geometry && place.geometry.location) {
+          const selectedPlace = {
+            name: place.name,
+            formatted_address: place.formatted_address,
+            rating: place.rating,
+            price_level: place.price_level,
+            opening_hours: place.opening_hours,
+            types: place.types,
+            amenities: place.types, // Assuming 'types' can act as amenities
+            photos: place.photos,
+            latitude: place.geometry.location.lat(),
+            longitude: place.geometry.location.lng(),
+          };
+          console.log('Selected Place:', selectedPlace);
+          setSelected(selectedPlace);
+          setMapCenter({
+            lat: place.geometry.location.lat(),
+            lng: place.geometry.location.lng(),
+          });
+          setMapZoom(15);
+        } else {
+          setError('Failed to fetch place details.');
         }
-      );
-    }
+      }
+    );
   };
 
   // Handle View Details Based on Source
   const handleViewDetails = (attraction, source = 'map') => {
     if (source === 'map') {
-      fetchPlaceDetails(attraction.id || attraction.placeId);
+      if (isUserCreatedAttraction(attraction)) {
+        // Directly set selected if it's a user-created attraction
+        const selectedAttraction = {
+          id: attraction.id || attraction.AttractionID,
+          name: attraction.name,
+          formatted_address: attraction.formatted_address || attraction.location || '',
+          rating: attraction.rating,
+          entryFee: attraction.entryFee || attraction.price_level || null,
+          description: attraction.description,
+          amenities: attraction.amenities,
+          images: attraction.images || attraction.photos || [],
+          latitude: attraction.latitude,
+          longitude: attraction.longitude,
+        };
+
+        // Validate coordinates
+        if (
+          typeof selectedAttraction.latitude === 'number' &&
+          typeof selectedAttraction.longitude === 'number' &&
+          isFinite(selectedAttraction.latitude) &&
+          isFinite(selectedAttraction.longitude)
+        ) {
+          console.log('Selected Attraction:', selectedAttraction);
+          setSelected(selectedAttraction);
+          setMapCenter({
+            lat: selectedAttraction.latitude,
+            lng: selectedAttraction.longitude,
+          });
+          setMapZoom(15);
+        } else {
+          setError('Invalid coordinates for the selected attraction.');
+          return;
+        }
+      } else if (attraction.place_id) {
+        // Fetch details for Google Place
+        fetchPlaceDetails(attraction.place_id);
+      } else {
+        setError('Invalid attraction data.');
+      }
+
       if (mapSectionRef.current) {
         mapSectionRef.current.scrollIntoView({ behavior: 'smooth' });
       }
@@ -410,36 +431,8 @@ const Attractions = () => {
     }
   }, [isAuthenticated, user, fetchFavorites]);
 
-  // Get User's Current Location on Load
-  useEffect(() => {
-    if (!selectedCity && isLoaded) {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          async (position) => {
-            const currentLocation = {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            };
-            setMapCenter(currentLocation);
-            setMapZoom(12);
-
-            const city = await getCityFromLocation(currentLocation);
-            if (city) {
-              setSelectedCity(city);
-              fetchCreatedAttractions(city);
-            }
-          },
-          () => {
-            // Handle location access denial if needed
-            console.warn('Geolocation permission denied.');
-          }
-        );
-      }
-    }
-  }, [isLoaded, fetchCreatedAttractions, selectedCity]);
-
   // Get Category Icon
-  const getCategoryIcon = (type) => {
+  const getCategoryIconSVG = (type) => {
     const category = categories.find((cat) => cat.type === type);
     if (category) {
       return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
@@ -578,7 +571,7 @@ const Attractions = () => {
                       clusterer={clusterer}
                       onClick={() => handleViewDetails(marker, 'map')}
                       icon={{
-                        url: getCategoryIcon(marker.types[0]),
+                        url: getCategoryIconSVG(marker.types[0]),
                         scaledSize: new window.google.maps.Size(30, 30),
                       }}
                       aria-label={`Marker for ${marker.name}`}
@@ -602,7 +595,7 @@ const Attractions = () => {
               ))}
 
               {/* InfoWindow */}
-              {selected && (
+              {selected && selected.latitude && selected.longitude && (
                 <InfoWindow
                   position={{
                     lat: selected.latitude,
@@ -712,16 +705,20 @@ const Attractions = () => {
                         onClick={() => {
                           const favoriteData = {
                             type: 'attraction',
-                            placeId: selected.place_id || selected.id,
+                            placeId: selected.place_id || `user-${selected.id}`, // Ensure unique identifier for user-created attractions
                             name: selected.name,
                             address: selected.formatted_address || selected.location || '',
                             rating: selected.rating || null,
                             entryFee: selected.entryFee || selected.price_level || null,
-                            ...(selected.photos && selected.photos.length > 0
-                              ? { photoReference: selected.photos[0].photo_reference }
+                            // Include photoReference based on available data
+                            photoReference: selected.photos && selected.photos.length > 0
+                              ? selected.photos[0].photo_reference
                               : selected.images && selected.images.length > 0
-                              ? { photoReference: selected.images[0] }
-                              : {})
+                              ? selected.images[0]
+                              : null,
+                            // Include latitude and longitude for map positioning
+                            latitude: selected.latitude,
+                            longitude: selected.longitude,
                           };
                           addFavoriteToDB(favoriteData);
                         }}
@@ -795,6 +792,9 @@ const Attractions = () => {
                               photoReference: attraction.photos && attraction.photos.length > 0
                                 ? attraction.photos[0].photo_reference
                                 : null,
+                              // Include latitude and longitude for map positioning
+                              latitude: attraction.geometry.location.lat(),
+                              longitude: attraction.geometry.location.lng(),
                             };
                             addFavoriteToDB(favoriteData);
                           }}
@@ -845,7 +845,7 @@ const Attractions = () => {
                       <p>{attraction.location || 'No location available'}</p>
                       <div className="approved-attractions-actions">
                         <button
-                          onClick={() => handleViewDetails(attraction, 'approved')} // Navigate to details page
+                          onClick={() => handleViewDetails(attraction, 'approved')} // Navigate to details page or handle as needed
                           className="approved-attractions-view-details-button"
                           aria-label={`View details for ${attraction.name}`}
                         >
@@ -855,7 +855,7 @@ const Attractions = () => {
                           onClick={() => {
                             const favoriteData = {
                               type: 'attraction',
-                              placeId: attraction.AttractionID,
+                              placeId: attraction.AttractionID, // Assuming placeId can be AttractionID
                               name: attraction.name,
                               address: `${attraction.location}`,
                               rating: attraction.rating || null,
@@ -863,6 +863,9 @@ const Attractions = () => {
                               photoReference: attraction.images && attraction.images.length > 0
                                 ? attraction.images[0]
                                 : null,
+                              // Include latitude and longitude for map positioning
+                              latitude: attraction.latitude,
+                              longitude: attraction.longitude,
                             };
                             addFavoriteToDB(favoriteData);
                           }}

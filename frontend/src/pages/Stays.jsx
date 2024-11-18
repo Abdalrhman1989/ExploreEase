@@ -34,7 +34,7 @@ const typeMapping = {
   apartment: 'apartment',
   resort: 'resort',
   hostel: 'hostel',
-  // Add more mappings as needed
+
 };
 
 // Categories specific to stays
@@ -43,12 +43,11 @@ const stayCategories = [
   { name: 'Apartments', type: 'apartment', icon: '🏢' },
   { name: 'Resorts', type: 'resort', icon: '🏖️' },
   { name: 'Hostels', type: 'hostel', icon: '🏘️' },
-  // Add more categories as needed
 ];
 
 const Stays = () => {
   const { user, isAuthenticated, loading: authLoading } = useContext(AuthContext);
-  const [mapCenter, setMapCenter] = useState({ lat: 48.8566, lng: 2.3522 }); // Default to Paris
+  const [mapCenter, setMapCenter] = useState({ lat: 48.8566, lng: 2.3522 }); 
   const [mapZoom, setMapZoom] = useState(12);
   const [places, setPlaces] = useState([]);
   const [selected, setSelected] = useState(null);
@@ -57,10 +56,9 @@ const Stays = () => {
   const [error, setError] = useState(null);
   const mapRef = useRef(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [bannerImage, setBannerImage] = useState(null); // State for banner image
+  const [bannerImage, setBannerImage] = useState(null); 
   const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
 
-  // Reference to the map section for scrolling
   const mapSectionRef = useRef(null);
 
   const { isLoaded, loadError } = useLoadScript({
@@ -72,22 +70,19 @@ const Stays = () => {
     mapRef.current = map;
   };
 
-  // Function to get category icon
   const getCategoryIcon = (type) => {
     const category = stayCategories.find((cat) => cat.type === type);
     if (category) {
-      // Replace emoji with actual icon URLs if desired
       return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
         `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30">
           <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="24">${category.icon}</text>
         </svg>`
       )}`;
     }
-    // Default marker icon
+    
     return 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
   };
 
-  // Fetch favorites from backend
   const fetchFavorites = useCallback(async () => {
     if (!isAuthenticated || !user) return;
 
@@ -106,7 +101,6 @@ const Stays = () => {
     }
   }, [isAuthenticated, user]);
 
-  // Add favorite to backend
   const addFavoriteToDB = useCallback(async (favoriteData) => {
     if (!isAuthenticated || !user) {
       toast.error('Please log in to add favorites.');
@@ -147,7 +141,7 @@ const Stays = () => {
     }
   }, [isAuthenticated, user]);
 
-  // Remove favorite from backend
+  
   const removeFavoriteFromDB = useCallback(async (favoriteId) => {
     if (!isAuthenticated || !user) {
       toast.error('Please log in to remove favorites.');
@@ -208,7 +202,6 @@ const Stays = () => {
     });
   };
 
-  // Search stays by query
   const searchStaysByQuery = (query) => {
     if (!window.google) {
       setError('Google Maps is not loaded properly.');
@@ -233,7 +226,7 @@ const Stays = () => {
         const request = {
           location: location,
           radius: '10000',
-          type: ['lodging'], // Use 'lodging' to get all types of accommodations
+          type: ['lodging'], 
           keyword: query,
         };
 
@@ -251,7 +244,7 @@ const Stays = () => {
       } else {
         console.error('Geocoding failed:', status);
         setError('Location not found. Please try a different search.');
-        setMapCenter({ lat: 48.8566, lng: 2.3522 }); // Reset to Paris
+        setMapCenter({ lat: 48.8566, lng: 2.3522 }); 
         setMapZoom(12);
         setPlaces([]);
         setIsLoading(false);
@@ -267,7 +260,6 @@ const Stays = () => {
     return null;
   };
 
-  // Fetch place details
   const fetchPlaceDetails = (placeId) => {
     if (!window.google || !mapRef.current) return;
 
@@ -294,7 +286,6 @@ const Stays = () => {
       (place, status) => {
         if (status === window.google.maps.places.PlacesServiceStatus.OK && place && place.geometry && place.geometry.location) {
           setSelected(place);
-          // Center map on the selected place
           setMapCenter({
             lat: place.geometry.location.lat(),
             lng: place.geometry.location.lng(),
@@ -308,7 +299,6 @@ const Stays = () => {
     );
   };
 
-  // Handle "View Details" click
   const handleViewDetails = (placeId) => {
     fetchPlaceDetails(placeId);
     if (mapSectionRef.current) {
@@ -318,7 +308,6 @@ const Stays = () => {
 
   useEffect(() => {
     if (isLoaded && places.length > 0) {
-      // Optional: Perform actions when places are loaded
     }
   }, [isLoaded, places]);
 
@@ -327,7 +316,7 @@ const Stays = () => {
     if (isAuthenticated) {
       fetchFavorites();
     } else {
-      setFavorites([]); // Clear favorites if not authenticated
+      setFavorites([]); 
     }
   }, [isAuthenticated, user, fetchFavorites]);
 
@@ -345,13 +334,11 @@ const Stays = () => {
       });
       const userHotels = response.data.hotels;
       if (userHotels && userHotels.length > 0) {
-        // Assuming user has at least one hotel, take the first one
         const userHotel = userHotels[0];
-        // Geocode the hotel's location to get coordinates
         geocodeAddress(userHotel.location);
       } else {
         console.warn('User has no hotels. Using default location.');
-        // Optionally, prompt user to add a hotel
+        
       }
     } catch (err) {
       console.error('Error fetching user hotels:', err.response ? err.response.data : err.message);
@@ -359,7 +346,6 @@ const Stays = () => {
     }
   }, [isAuthenticated, user]);
 
-  // Function to geocode an address to coordinates
   const geocodeAddress = (address) => {
     if (!window.google) {
       setError('Google Maps is not loaded properly.');
@@ -374,8 +360,7 @@ const Stays = () => {
           lat: location.lat(),
           lng: location.lng(),
         });
-        setMapZoom(14); // Zoom in closer to the user's city
-        // Optionally, fetch stays in this location
+        setMapZoom(14); 
         searchStaysByLocation(location);
       } else {
         console.error('Geocoding failed:', status);
@@ -384,7 +369,6 @@ const Stays = () => {
     });
   };
 
-  // Search stays by location
   const searchStaysByLocation = (location, type = 'lodging') => {
     if (!window.google) {
       setError('Google Maps is not loaded properly.');
@@ -412,12 +396,11 @@ const Stays = () => {
     });
   };
 
-  // Fetch banner image on component mount (if dynamic)
   useEffect(() => {
     if (isLoaded && window.google) {
       const service = new window.google.maps.places.PlacesService(document.createElement('div'));
       const request = {
-        placeId: 'ChIJD7fiBh9u5kcRYJSMaMOCCwQ', // Eiffel Tower Place ID (example)
+        placeId: 'ChIJD7fiBh9u5kcRYJSMaMOCCwQ', 
         fields: ['photos'],
       };
 
@@ -427,18 +410,17 @@ const Stays = () => {
           setBannerImage(photoUrl);
         } else {
           console.error('Failed to fetch banner image:', status);
-          setBannerImage(null); // Use static banner image
+          setBannerImage(null); 
         }
       });
     }
   }, [isLoaded]);
 
-  // Fetch user's hotel on component mount or when authenticated
+  
   useEffect(() => {
     if (isAuthenticated) {
       fetchUserHotel();
     } else {
-      // Fallback to geolocation or default location
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (position) => {
@@ -450,14 +432,12 @@ const Stays = () => {
           },
           (error) => {
             console.error('Error fetching user location:', error);
-            // Fallback to default location (Paris)
             setMapCenter({ lat: 48.8566, lng: 2.3522 });
             setMapZoom(12);
           }
         );
       } else {
         console.error('Geolocation not supported by this browser.');
-        // Fallback to default location (Paris)
         setMapCenter({ lat: 48.8566, lng: 2.3522 });
         setMapZoom(12);
       }
@@ -695,9 +675,9 @@ const Stays = () => {
                   <button
                     onClick={() => {
                       const primaryType = selected.types.find(type => typeMapping[type]) || 'hotel';
-                      const categoryType = typeMapping[primaryType] || 'hotel'; // Default to 'hotel' if not found
+                      const categoryType = typeMapping[primaryType] || 'hotel'; 
                       const favoriteData = {
-                        type: categoryType, // Use the correct type
+                        type: categoryType, 
                         placeId: selected.place_id,
                         name: selected.name,
                         address: selected.formatted_address || '',
@@ -778,7 +758,7 @@ const Stays = () => {
                         <button
                           onClick={() => {
                             const favoriteData = {
-                              type: mappedType, // Use the correct mapped type
+                              type: mappedType, 
                               placeId: stay.place_id,
                               name: stay.name,
                               address: stay.vicinity || stay.formatted_address || '',
@@ -814,7 +794,7 @@ const Stays = () => {
           <h2>Your Favorites</h2>
           <div className="stays-component-favorites-grid">
             {favorites
-              .filter(fav => fav.type === 'hotel') // Only show favorites of type 'hotel'
+              .filter(fav => fav.type === 'hotel') 
               .map((fav) => (
                 <div key={fav.id} className="stays-component-favorite-item">
                   <button

@@ -1,5 +1,3 @@
-// src/pages/Support.jsx
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/Support.css';
@@ -17,7 +15,7 @@ import {
 } from 'react-icons/fa';
 import axios from 'axios';
 
-// Importing Images (Ensure these paths are correct)
+
 import hotelImage from '../assets/hotel.jpg';
 import flightImage from '../assets/flight.jpg';
 import carRentalImage from '../assets/carrenter.jpg';
@@ -29,7 +27,6 @@ import Accordion from '../components/Accordion';
 import Modal from '../components/Modal';
 
 const Support = () => {
-  // Contact Form State without Extra Fields
   const [contactFormData, setContactFormData] = useState({
     name: '',
     email: '',
@@ -41,7 +38,6 @@ const Support = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Support Resources Data (Could be fetched from backend)
   const [resources] = useState([
     {
       id: 1,
@@ -71,7 +67,6 @@ const Support = () => {
       description: 'Watch our step-by-step guide to using our booking platform.',
       link: '/video-tutorials/navigating-booking-system',
     },
-    // Add more resources as needed
   ]);
 
   // Filtered Resources based on search
@@ -108,7 +103,7 @@ const Support = () => {
     e.preventDefault();
     setContactFormStatus('Submitting your message...');
     setValidationErrors({});
-    setIsSubmitting(true); // Start loading
+    setIsSubmitting(true); 
 
     try {
       const response = await axios.post('http://localhost:3001/api/contact', contactFormData);
@@ -119,18 +114,17 @@ const Support = () => {
           email: '',
           message: '',
         });
-        setIsModalOpen(true); // Open confirmation modal
-        localStorage.removeItem('contactFormData'); // Clear saved data
+        setIsModalOpen(true); 
+        localStorage.removeItem('contactFormData'); 
       } else {
         setContactFormStatus('Failed to send your message. Please try again later.');
       }
     } catch (error) {
       console.error('Error sending message:', error);
       if (error.response && error.response.data) {
-        const errors = error.response.data.errors; // Access 'errors' array
+        const errors = error.response.data.errors; 
         const errorObj = {};
 
-        // Check if errors is an array
         if (Array.isArray(errors)) {
           errors.forEach(err => {
             errorObj[err.path] = err.msg;
@@ -141,7 +135,6 @@ const Support = () => {
             errorObj[err.path] = err.msg;
           });
         } else {
-          // Generic error message if structure is unknown
           setContactFormStatus('An unexpected error occurred. Please try again.');
           return;
         }
@@ -152,13 +145,13 @@ const Support = () => {
         setContactFormStatus('An error occurred while sending your message. Please try again later.');
       }
     } finally {
-      setIsSubmitting(false); // End loading
+      setIsSubmitting(false); 
     }
   };
 
   // Handle Live Chat Button Click - Open WhatsApp Chat
   const handleLiveChat = () => {
-    const phoneNumber = '004542223110'; // WhatsApp number
+    const phoneNumber = '004542223110'; 
     const message = encodeURIComponent('Hello, I need assistance with your services.');
     const whatsappURL = `https://wa.me/${phoneNumber}?text=${message}`;
     window.open(whatsappURL, '_blank');
@@ -314,8 +307,6 @@ const Support = () => {
           </div>
         </Modal>
       )}
-
-      {/* Live Chat Button */}
       <button className="live-chat-btn" onClick={handleLiveChat} aria-label="Live Chat">
         <FaComments />
       </button>

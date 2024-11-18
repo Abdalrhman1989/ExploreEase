@@ -1,5 +1,3 @@
-// src/pages/UserProfile.jsx
-
 import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
@@ -50,16 +48,16 @@ import {
 } from '@mui/icons-material';
 import TripPlanner from '../components/TripPlanner';
 import BudgetPlanner from '../components/BudgetPlanner';
-import TravelStatistics from '../components/TravelStatistics'; // New Component
-import SavedItineraries from '../components/SavedItineraries'; // New Component
-import PaymentSubscriptions from '../components/PaymentSubscriptions'; // New Component
-import SupportHelp from '../components/SupportHelp'; // New Component
-import { gapi } from 'gapi-script'; // For Google Calendar Integration
-import '../styles/UserProfile.css'; // Ensure this is imported
+import TravelStatistics from '../components/TravelStatistics'; 
+import SavedItineraries from '../components/SavedItineraries'; 
+import PaymentSubscriptions from '../components/PaymentSubscriptions';
+import SupportHelp from '../components/SupportHelp'; 
+import { gapi } from 'gapi-script'; 
+import '../styles/UserProfile.css'; 
 
 // Initialize Google API client
 const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY; // If needed
+const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY; 
 
 const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
 const SCOPES = "https://www.googleapis.com/auth/calendar.events";
@@ -110,7 +108,7 @@ const UserProfile = () => {
 
   // States for Wishlist Dialog
   const [wishlistDialogOpen, setWishlistDialogOpen] = useState(false);
-  const [wishlistDialogMode, setWishlistDialogMode] = useState('add'); // 'add' or 'edit'
+  const [wishlistDialogMode, setWishlistDialogMode] = useState('add'); 
   const [wishlistPlaceData, setWishlistPlaceData] = useState({
     type: '',
     placeId: '',
@@ -137,7 +135,7 @@ const UserProfile = () => {
   // States for Snackbar Notifications
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMsg, setSnackbarMsg] = useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState('success'); // 'success' | 'error' | 'warning' | 'info'
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success'); 
 
   // States for Wishlist Sorting and Filtering
   const [sortField, setSortField] = useState('');
@@ -616,10 +614,10 @@ const UserProfile = () => {
           <Tab label="Wishlist" {...a11yProps(2)} />
           <Tab label="Trip Planner" {...a11yProps(3)} />
           <Tab label="Budget Planner" {...a11yProps(4)} />
-          <Tab label="Travel Statistics" {...a11yProps(5)} /> {/* New Tab */}
-          <Tab label="Saved Itineraries" {...a11yProps(6)} /> {/* New Tab */}
-          <Tab label="Payment & Subscriptions" {...a11yProps(7)} /> {/* New Tab */}
-          <Tab label="Support & Help" {...a11yProps(8)} /> {/* New Tab */}
+          <Tab label="Travel Statistics" {...a11yProps(5)} /> 
+          <Tab label="Saved Itineraries" {...a11yProps(6)} /> 
+          <Tab label="Payment & Subscriptions" {...a11yProps(7)} /> 
+          <Tab label="Support & Help" {...a11yProps(8)} /> 
         </Tabs>
       </Paper>
 
@@ -819,7 +817,7 @@ const UserProfile = () => {
               <Typography variant="h6">Trip History</Typography>
               <Button
                 variant="contained"
-                startIcon={<Edit />} // You can change the icon if needed
+                startIcon={<Edit />} 
                 onClick={handleSyncToGoogleCalendar}
                 sx={{
                   textTransform: 'none',
@@ -1102,7 +1100,7 @@ const UserProfile = () => {
               variant="standard"
               value={wishlistPlaceData.placeId}
               onChange={handleWishlistPlaceDataChange}
-              disabled={wishlistDialogMode === 'edit'} // Disable editing placeId on edit
+              disabled={wishlistDialogMode === 'edit'} 
             />
 
             <TextField

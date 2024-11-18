@@ -1,5 +1,3 @@
-// src/pages/Trains.jsx
-
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import {
   GoogleMap,
@@ -19,7 +17,6 @@ import { FaTrain } from 'react-icons/fa';
 import { Formik, Form, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 
-// Import MUI components
 import {
   Card,
   CardContent,
@@ -40,7 +37,7 @@ import {
   Search as SearchIcon,
 } from '@mui/icons-material';
 
-import '../styles/Trains.css'; // Ensure this path is correct
+import '../styles/Trains.css'; 
 
 const libraries = ['places'];
 
@@ -53,8 +50,6 @@ const options = {
   disableDefaultUI: true,
   zoomControl: true,
 };
-
-// Define categories specific to Trains
 const categories = [
   { name: 'Train Stations', type: 'train_station', icon: <FaTrain size={30} /> },
 ];
@@ -92,7 +87,7 @@ const Trains = () => {
   });
 
   const mapRef = useRef(null);
-  const mapSectionRef = useRef(null); // Ref for scrolling to the map
+  const mapSectionRef = useRef(null); 
 
   const onMapLoad = (map) => {
     mapRef.current = map;
@@ -111,7 +106,7 @@ const Trains = () => {
 
   // Helper function to convert UNIX timestamp if in milliseconds
   const convertToSeconds = (unix) => {
-    if (unix > 1e12) { // Likely in milliseconds
+    if (unix > 1e12) { 
       return Math.floor(unix / 1000);
     }
     return unix;
@@ -162,7 +157,7 @@ const Trains = () => {
 
   // Function to generate Ticket Provider URL
   const generateTicketProviderUrl = (origin, destination, departureUnix) => {
-    const baseUrl = 'https://www.dsb.dk/en'; // Danish State Railways as an example
+    const baseUrl = 'https://www.dsb.dk/en'; 
     const departureDateISO = moment.unix(departureUnix).utc().toISOString();
     const params = new URLSearchParams({
       origin: origin,
@@ -192,7 +187,7 @@ const Trains = () => {
       return;
     }
 
-    console.log('Attempting to save trip with data:', tripData); // Detailed logging
+    console.log('Attempting to save trip with data:', tripData); 
 
     try {
       // Convert departureTime and arrivalTime to ISO strings using moment and remove any leading '+'
@@ -209,7 +204,7 @@ const Trains = () => {
         arrivalTime: arrivalISO,
       };
 
-      console.log('Trip Data to Send:', tripDataToSend); // Detailed logging
+      console.log('Trip Data to Send:', tripDataToSend); 
 
       const idToken = await user.getIdToken();
       const response = await axios.post(`${BACKEND_URL}/api/trips`, tripDataToSend, {
@@ -219,7 +214,7 @@ const Trains = () => {
         },
       });
 
-      console.log('Save Trip API Response:', response.data); // Detailed logging
+      console.log('Save Trip API Response:', response.data); 
 
       if (response.data && (response.status === 201 || response.status === 200)) {
         setSavedTrips((prevTrips) => [...prevTrips, response.data]);
@@ -279,7 +274,6 @@ const Trains = () => {
         },
       });
       console.log('Favorites API Response:', response.data);
-      // Filter favorites to only include 'train_station'
       const trainFavorites = response.data.favorites.filter(
         (fav) => fav.type === 'train_station'
       );
@@ -378,12 +372,11 @@ const Trains = () => {
   const handleJourneySearch = async (values) => {
     const { origin, destination, date, time } = values;
 
-    console.log('Formik Values:', values); // Debugging
+    console.log('Formik Values:', values); 
 
-    // Combine date and time into a single Date object in local time
     const departureDateTime = new Date(`${date}T${time}:00`);
 
-    console.log('Constructed departureDateTime:', departureDateTime); // Debugging
+    console.log('Constructed departureDateTime:', departureDateTime); 
 
     // Validate departure time
     const now = new Date();
@@ -398,7 +391,6 @@ const Trains = () => {
     setJourneys([]);
 
     try {
-      // Geocode the origin to get latitude and longitude
       const geocoder = new window.google.maps.Geocoder();
       geocoder.geocode({ address: origin }, async (results, status) => {
         console.log('Geocode Results for Journey:', results);
@@ -407,8 +399,6 @@ const Trains = () => {
           const originLocation = results[0].geometry.location;
           let lat = originLocation.lat();
           let lng = originLocation.lng();
-
-          // Get the timezone of the origin location
           let timestamp = Math.floor(departureDateTime.getTime() / 1000);
           const timeZoneId = await getTimezone(lat, lng, timestamp);
           if (!timeZoneId) {
@@ -416,13 +406,10 @@ const Trains = () => {
             return;
           }
 
-          // Create a moment object in the origin's timezone
           const departureInOriginTZ = moment.tz(departureDateTime, timeZoneId);
 
-          // Convert departure time to ISO string without leading '+'
           const departureISO = departureInOriginTZ.toISOString().replace(/^\+/, '');
 
-          // Update the map center to the origin
           setMapCenter({ lat, lng });
           setMapZoom(12);
 
@@ -434,10 +421,10 @@ const Trains = () => {
               destination: destination,
               travelMode: window.google.maps.TravelMode.TRANSIT,
               transitOptions: {
-                departureTime: departureInOriginTZ.toDate(), // Correctly pass Date object
+                departureTime: departureInOriginTZ.toDate(), 
                 modes: ['TRAIN'],
               },
-              provideRouteAlternatives: true, // Enable multiple routes
+              provideRouteAlternatives: true, 
             },
             (result, status) => {
               console.log('Directions Service Result:', result);
@@ -471,7 +458,7 @@ const Trains = () => {
                         ? formatTime(step.transit.arrival_time.value, timeZoneId)
                         : 'N/A',
                     }))
-                    .filter((seg) => seg.departure !== 'N/A' && seg.arrival !== 'N/A'); // Exclude invalid segments
+                    .filter((seg) => seg.departure !== 'N/A' && seg.arrival !== 'N/A'); 
 
                   // Correct Timestamp Conversion
                   let departureUnix = Number(leg.departure_time.value);
@@ -491,13 +478,13 @@ const Trains = () => {
                   if (!departure.isValid() || !arrival.isValid()) {
                     console.error('Invalid departure or arrival date:', departure, arrival);
                     toast.error('Invalid departure or arrival date.');
-                    return null; // Exclude this journey
+                    return null; 
                   }
 
                   // Calculate duration in minutes
                   const durationInMinutes = Math.round(
                     (arrival - departure) / 60000
-                  ); // Difference in minutes
+                  ); 
 
                   console.log('Departure ISO:', departure.toISOString());
                   console.log('Arrival ISO:', arrival.toISOString());
@@ -510,7 +497,7 @@ const Trains = () => {
                   );
 
                   return {
-                    departureTime: departure.toISOString(), // Correctly formatted ISO string
+                    departureTime: departure.toISOString(), 
                     arrivalTime: arrival.toISOString(),
                     origin: leg.start_address,
                     destination: leg.end_address,
@@ -521,9 +508,9 @@ const Trains = () => {
                     type: 'train',
                     duration: durationInMinutes,
                   };
-                }).filter((journey) => journey !== null); // Exclude invalid journeys
+                }).filter((journey) => journey !== null); 
 
-                // Set fetched journeys
+                
                 setJourneys(fetchedJourneys);
               } else {
                 console.error('Directions request failed due to ' + status);
@@ -540,7 +527,7 @@ const Trains = () => {
         } else {
           console.error('Geocoding failed:', status);
           setJourneyError('Location not found. Please try a different search.');
-          setMapCenter({ lat: 55.4038, lng: 10.4024 }); // Reset to Odense
+          setMapCenter({ lat: 55.4038, lng: 10.4024 }); 
           setMapZoom(12);
           setMarkers([]);
           setIsLoading(false);
@@ -622,8 +609,8 @@ const Trains = () => {
       position,
       title: place.name,
       icon: {
-        url: 'https://maps.google.com/mapfiles/ms/icons/train.png', // Custom train icon
-        scaledSize: new window.google.maps.Size(40, 40), // Adjust size as needed
+        url: 'https://maps.google.com/mapfiles/ms/icons/train.png',
+        scaledSize: new window.google.maps.Size(40, 40), 
       },
     });
 
@@ -636,7 +623,6 @@ const Trains = () => {
       setMapZoom(15);
     });
 
-    // Add marker to mapRef for cleanup
     if (!mapRef.current.markers) {
       mapRef.current.markers = [];
     }
@@ -662,22 +648,20 @@ const Trains = () => {
       });
     }
 
-    // Cleanup markers on unmount or markers change
+    
     return () => {
       if (mapRef.current && mapRef.current.markers) {
         mapRef.current.markers.forEach((marker) => marker.setMap(null));
         mapRef.current.markers = [];
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [isLoaded, markers]);
 
-  // Handler for category selection
   const [selectedCategory, setSelectedCategory] = useState(null);
 
   const handleCategoryClick = (category) => {
     if (selectedCategory === category.name) {
-      // Deselect if already selected
       setSelectedCategory(null);
       setMarkers([]);
       setError(null);
@@ -701,7 +685,7 @@ const Trains = () => {
     const service = new window.google.maps.places.PlacesService(mapRef.current);
     const request = {
       location: new window.google.maps.LatLng(mapCenter.lat, mapCenter.lng),
-      radius: '10000', // 10 km radius
+      radius: '10000',
       type: [type],
     };
 
@@ -760,7 +744,7 @@ const Trains = () => {
         });
       } else {
         setError('Location not found. Please try a different search.');
-        setMapCenter({ lat: 55.4038, lng: 10.4024 }); // Reset to Odense
+        setMapCenter({ lat: 55.4038, lng: 10.4024 }); 
         setMapZoom(12);
         setMarkers([]);
         setIsLoading(false);
@@ -773,32 +757,26 @@ const Trains = () => {
     if (photoReference) {
       return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photoReference}&key=${GOOGLE_MAPS_API_KEY}`;
     }
-    // Return a dynamic placeholder image from Unsplash
     return `https://source.unsplash.com/collection/190727/400x300?train`;
   };
 
-  // Fetch favorites when authenticated
   useEffect(() => {
     if (isAuthenticated) {
       fetchFavorites();
     } else {
-      setFavorites([]); // Clear favorites if not authenticated
+      setFavorites([]); 
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, user]);
 
-  // Fetch saved trips when authenticated
   useEffect(() => {
     if (isAuthenticated) {
       fetchSavedTrips();
     } else {
-      setSavedTrips([]); // Clear saved trips if not authenticated
+      setSavedTrips([]); 
       setFilteredSavedTrips([]);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, user]);
 
-  // Handler function to handle "View Details" and scroll to map
   const handleViewDetails = (placeId) => {
     fetchPlaceDetails(placeId);
     if (mapSectionRef.current) {
@@ -806,7 +784,6 @@ const Trains = () => {
     }
   };
 
-  // Handle Error and Loading States
   if (loadError)
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">

@@ -1,3 +1,5 @@
+// src/pages/Restaurants.jsx
+
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import {
   GoogleMap,
@@ -315,6 +317,7 @@ const Restaurants = () => {
         placeId: placeId,
         fields: [
           'name',
+          'place_id', // Added 'place_id' to ensure it's included
           'rating',
           'price_level',
           'formatted_address',
@@ -706,7 +709,7 @@ const Restaurants = () => {
                     onClick={() => {
                       const favoriteData = {
                         type: 'restaurant',
-                        placeId: selected.place_id,
+                        placeId: selected.place_id, // Ensure place_id is included
                         name: selected.name,
                         address: selected.formatted_address || '',
                         rating: selected.rating || null,
@@ -782,7 +785,7 @@ const Restaurants = () => {
                       onClick={() => {
                         const favoriteData = {
                           type: 'restaurant',
-                          placeId: restaurant.place_id,
+                          placeId: restaurant.place_id, // Ensure placeId is correctly mapped
                           name: restaurant.name,
                           address: restaurant.vicinity || restaurant.formatted_address || '',
                           rating: restaurant.rating || null,

@@ -1,12 +1,8 @@
-// controllers/restaurantController.js
-
 const { validationResult } = require('express-validator');
 const { Restaurant } = require('../models');
 const { Op } = require('sequelize');
 
-/**
- * Create a new restaurant submission
- */
+// Create a new restaurant
 const createRestaurant = async (req, res) => {
   // Handle validation errors
   const errors = validationResult(req);
@@ -22,9 +18,9 @@ const createRestaurant = async (req, res) => {
       priceRange,
       rating,
       description,
-      amenities, // Array of strings
-      images, // Array of Base64 strings
-      availability, // Date-wise availability
+      amenities, 
+      images, 
+      availability, 
     } = req.body;
 
     // Validate and process images
@@ -67,8 +63,7 @@ const createRestaurant = async (req, res) => {
       amenities: amenities || [],
       images: processedImages,
       status: 'Pending',
-      availability: processedAvailability, // Set availability from request
-      // latitude and longitude are omitted since geocoding is removed
+      availability: processedAvailability, 
     });
 
     res.status(201).json({
@@ -82,23 +77,25 @@ const createRestaurant = async (req, res) => {
   }
 };
 
-/**
- * Get approved restaurants, optionally filtered by location or cuisine
- */
+// Get approved restaurants
 const getApprovedRestaurants = async (req, res) => {
   try {
-    const { location, cuisine } = req.query; // Get filters from query params
+    const { location, cuisine, page = 1, limit = 100 } = req.query;
     let whereClause = { status: 'Approved' };
 
     if (location) {
-      whereClause.location = { [Op.iLike]: `%${location}%` }; // Case-insensitive partial match
+      // Replace Op.iLike with Op.like for MySQL compatibility
+      whereClause.location = { [Op.like]: `%${location}%` };
     }
 
     if (cuisine) {
-      whereClause.cuisine = { [Op.iLike]: `%${cuisine}%` };
+      whereClause.cuisine = { [Op.like]: `%${cuisine}%` };
     }
 
-    const restaurants = await Restaurant.findAll({
+    // Implement pagination
+    const offset = (page - 1) * limit;
+
+    const restaurants = await Restaurant.findAndCountAll({
       where: whereClause,
       attributes: [
         'RestaurantID',
@@ -111,22 +108,30 @@ const getApprovedRestaurants = async (req, res) => {
         'amenities',
         'images',
         'availability',
-        // latitude and longitude are omitted
       ],
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      order: [['name', 'ASC']], // Optional: order by name
     });
-    res.status(200).json({ success: true, restaurants });
+
+    res.status(200).json({ 
+      success: true, 
+      restaurants: restaurants.rows,
+      total: restaurants.count,
+      page: parseInt(page),
+      totalPages: Math.ceil(restaurants.count / limit),
+    });
   } catch (error) {
     console.error('Error fetching approved restaurants:', error);
     res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
   }
 };
 
-/**
- * Get all restaurants (Admin Only)
- */
+// Get all restaurants (Admin Only)
 const getAllRestaurants = async (req, res) => {
   try {
     const restaurants = await Restaurant.findAll({
+      where: {}, // No filtering
       attributes: [
         'RestaurantID',
         'FirebaseUID',
@@ -152,9 +157,7 @@ const getAllRestaurants = async (req, res) => {
   }
 };
 
-/**
- * Get pending restaurants
- */
+// Get pending restaurants (Admin Only)
 const getPendingRestaurants = async (req, res) => {
   try {
     const restaurants = await Restaurant.findAll({ where: { status: 'Pending' } });
@@ -165,9 +168,7 @@ const getPendingRestaurants = async (req, res) => {
   }
 };
 
-/**
- * Approve a restaurant
- */
+// Approve a restaurant (Admin Only)
 const approveRestaurant = async (req, res) => {
   const restaurantId = req.params.id;
 
@@ -191,9 +192,7 @@ const approveRestaurant = async (req, res) => {
   }
 };
 
-/**
- * Reject a restaurant
- */
+// Reject a restaurant (Admin Only)
 const rejectRestaurant = async (req, res) => {
   const restaurantId = req.params.id;
 
@@ -217,9 +216,7 @@ const rejectRestaurant = async (req, res) => {
   }
 };
 
-/**
- * Get a single restaurant by ID (Approved only)
- */
+// Get a single restaurant by ID
 const getRestaurantById = async (req, res) => {
   const { id } = req.params;
   try {
@@ -238,9 +235,7 @@ const getRestaurantById = async (req, res) => {
   }
 };
 
-/**
- * Update restaurant availability (Admin Only)
- */
+// Update restaurant availability
 const updateRestaurantAvailability = async (req, res) => {
   const { id } = req.params;
   const { availability } = req.body;
@@ -266,9 +261,7 @@ const updateRestaurantAvailability = async (req, res) => {
   }
 };
 
-/**
- * Get authenticated user's restaurants (Approved and Pending and Rejected)
- */
+// Get user's restaurants
 const getUserRestaurants = async (req, res) => {
   try {
     const userUid = req.user.uid;
@@ -280,9 +273,7 @@ const getUserRestaurants = async (req, res) => {
   }
 };
 
-/**
- * Delete a restaurant
- */
+// Delete a restaurant
 const deleteRestaurant = async (req, res) => {
   const restaurantId = req.params.id;
 
@@ -291,8 +282,6 @@ const deleteRestaurant = async (req, res) => {
     if (!restaurant) {
       return res.status(404).json({ success: false, message: 'Restaurant not found' });
     }
-
-    // Only Admin or the owner can delete the restaurant
     if (req.user.role !== 'Admin' && restaurant.FirebaseUID !== req.user.uid) {
       return res.status(403).json({ success: false, message: 'Forbidden: You cannot delete this restaurant' });
     }
@@ -306,9 +295,7 @@ const deleteRestaurant = async (req, res) => {
   }
 };
 
-/**
- * Update a restaurant's details
- */
+// Update a restaurant's details
 const updateRestaurant = async (req, res) => {
   const restaurantId = req.params.id;
 
@@ -323,8 +310,6 @@ const updateRestaurant = async (req, res) => {
     if (!restaurant) {
       return res.status(404).json({ success: false, message: 'Restaurant not found' });
     }
-
-    // Only Admin or the owner can update the restaurant
     if (req.user.role !== 'Admin' && restaurant.FirebaseUID !== req.user.uid) {
       return res.status(403).json({ success: false, message: 'Forbidden: You cannot update this restaurant' });
     }
@@ -337,12 +322,12 @@ const updateRestaurant = async (req, res) => {
       rating,
       description,
       amenities,
-      images, // Expecting an array of Base64 strings
-      availability, // Date-wise availability (optional)
+      images, 
+      availability,
     } = req.body;
 
     // Validate and process images
-    let processedImages = restaurant.images; // Start with existing images
+    let processedImages = restaurant.images; 
     if (images && Array.isArray(images)) {
       processedImages = images.map((base64String) => {
         // Validate the Base64 string format
@@ -375,7 +360,7 @@ const updateRestaurant = async (req, res) => {
     restaurant.priceRange = priceRange || restaurant.priceRange;
     restaurant.rating = rating || restaurant.rating;
     restaurant.description = description || restaurant.description;
-    restaurant.amenities = amenities || restaurant.amenities; // Already an array
+    restaurant.amenities = amenities || restaurant.amenities; 
     restaurant.images = processedImages;
     restaurant.availability = processedAvailability;
 

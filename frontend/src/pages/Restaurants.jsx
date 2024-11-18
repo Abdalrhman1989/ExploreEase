@@ -21,8 +21,6 @@ import 'react-calendar/dist/Calendar.css';
 import { format } from 'date-fns';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
-// Import the local banner image
 import RestaurantBanner from '../assets/Restaurant1.jpg';
 
 const libraries = ['places'];
@@ -37,7 +35,7 @@ const options = {
   zoomControl: true,
 };
 
-// Categories specific to Restaurants
+// Categories
 const categories = [
   { name: 'Italian', type: 'italian_restaurant', icon: '🍝' },
   { name: 'Chinese', type: 'chinese_restaurant', icon: '🥡' },
@@ -49,15 +47,13 @@ const categories = [
   { name: 'Vegetarian', type: 'vegetarian_restaurant', icon: '🥗' },
   { name: 'Vegan', type: 'vegan_restaurant', icon: '🌱' },
   { name: 'Desserts', type: 'dessert_restaurant', icon: '🍰' },
-  // Add more categories as needed
 ];
 
 const Restaurants = () => {
   const { user, isAuthenticated, loading: authLoading } = useContext(AuthContext);
-
-  // State variables
-  const [mapCenter, setMapCenter] = useState({ lat: 40.7128, lng: -74.006 }); // Default to New York City
-  const [mapZoom, setMapZoom] = useState(12);
+  // Initialize map to center of the world
+  const [mapCenter, setMapCenter] = useState({ lat: 0, lng: 0 });
+  const [mapZoom, setMapZoom] = useState(2);
   const [markers, setMarkers] = useState([]);
   const [selected, setSelected] = useState(null);
   const [favorites, setFavorites] = useState([]);
@@ -67,17 +63,14 @@ const Restaurants = () => {
   const [approvedRestaurants, setApprovedRestaurants] = useState([]);
   const [approvedLoading, setApprovedLoading] = useState(true);
   const [approvedError, setApprovedError] = useState(null);
-  const [locationLoading, setLocationLoading] = useState(true); // New state for location loading
+  const [locationLoading, setLocationLoading] = useState(true);
 
-  const [currentCity, setCurrentCity] = useState(''); // New state for current city
+  const [currentCity, setCurrentCity] = useState('');
 
   const mapRef = useRef(null);
-
-  // Refs for scrolling
   const searchSectionRef = useRef(null);
-  const mapSectionRef = useRef(null); // New ref for the map section
+  const mapSectionRef = useRef(null);
 
-  // Environment variables
   const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
   const GOOGLE_PLACES_API_KEY = process.env.REACT_APP_GOOGLE_PLACES_API_KEY;
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -296,8 +289,8 @@ const Restaurants = () => {
         });
       } else {
         setError('Location not found. Please try a different search.');
-        setMapCenter({ lat: 40.7128, lng: -74.006 }); // Reset to NYC
-        setMapZoom(12);
+        setMapCenter({ lat: 0, lng: 0 }); // Reset to world view
+        setMapZoom(2);
         setMarkers([]);
         setIsLoading(false);
       }
@@ -413,7 +406,7 @@ const Restaurants = () => {
     try {
       const response = await axios.get(`${BACKEND_URL}/api/restaurants/approved`, {
         params: {
-          city: city, // Pass the current city as a query parameter
+          location: city, // Pass the current city as a query parameter
           page: 1,
           limit: 100,
         },
@@ -477,17 +470,18 @@ const Restaurants = () => {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
           });
+          setMapZoom(12);
           setLocationLoading(false);
         },
         (error) => {
           console.error('Error fetching geolocation:', error);
-          toast.error('Unable to retrieve your location. Showing default location.');
+          toast.error('Unable to retrieve your location. Showing world view.');
           setLocationLoading(false);
         }
       );
     } else {
       console.error('Geolocation not supported by this browser.');
-      toast.error('Geolocation is not supported by your browser.');
+      toast.error('Geolocation is not supported by your browser. Showing world view.');
       setLocationLoading(false);
     }
   }, []);

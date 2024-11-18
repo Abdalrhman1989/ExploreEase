@@ -34,7 +34,6 @@ const typeMapping = {
   apartment: 'apartment',
   resort: 'resort',
   hostel: 'hostel',
-
 };
 
 // Categories specific to stays
@@ -47,8 +46,8 @@ const stayCategories = [
 
 const Stays = () => {
   const { user, isAuthenticated, loading: authLoading } = useContext(AuthContext);
-  const [mapCenter, setMapCenter] = useState({ lat: 48.8566, lng: 2.3522 }); 
-  const [mapZoom, setMapZoom] = useState(12);
+  const [mapCenter, setMapCenter] = useState({ lat: 0, lng: 0 }); // World center
+  const [mapZoom, setMapZoom] = useState(2); // Zoom level for world view
   const [places, setPlaces] = useState([]);
   const [selected, setSelected] = useState(null);
   const [favorites, setFavorites] = useState([]);
@@ -140,7 +139,6 @@ const Stays = () => {
       }
     }
   }, [isAuthenticated, user]);
-
   
   const removeFavoriteFromDB = useCallback(async (favoriteId) => {
     if (!isAuthenticated || !user) {
@@ -243,9 +241,9 @@ const Stays = () => {
         });
       } else {
         console.error('Geocoding failed:', status);
-        setError('Location not found. Please try a different search.');
-        setMapCenter({ lat: 48.8566, lng: 2.3522 }); 
-        setMapZoom(12);
+        setError('Location not found. Showing world overview.');
+        setMapCenter({ lat: 0, lng: 0 }); // World center
+        setMapZoom(2); // World view
         setPlaces([]);
         setIsLoading(false);
       }
@@ -308,6 +306,7 @@ const Stays = () => {
 
   useEffect(() => {
     if (isLoaded && places.length > 0) {
+      // You can implement any additional logic here if needed
     }
   }, [isLoaded, places]);
 
@@ -337,12 +336,15 @@ const Stays = () => {
         const userHotel = userHotels[0];
         geocodeAddress(userHotel.location);
       } else {
-        console.warn('User has no hotels. Using default location.');
-        
+        console.warn('User has no hotels. Using world overview.');
+        setMapCenter({ lat: 0, lng: 0 });
+        setMapZoom(2);
       }
     } catch (err) {
       console.error('Error fetching user hotels:', err.response ? err.response.data : err.message);
       setError('Failed to fetch your hotel information.');
+      setMapCenter({ lat: 0, lng: 0 });
+      setMapZoom(2);
     }
   }, [isAuthenticated, user]);
 
@@ -360,11 +362,13 @@ const Stays = () => {
           lat: location.lat(),
           lng: location.lng(),
         });
-        setMapZoom(14); 
+        setMapZoom(14); // Zoom into the location
         searchStaysByLocation(location);
       } else {
         console.error('Geocoding failed:', status);
-        setError('Failed to locate your hotel. Using default location.');
+        setError('Failed to locate your hotel. Showing world overview.');
+        setMapCenter({ lat: 0, lng: 0 }); // World center
+        setMapZoom(2); // World view
       }
     });
   };
@@ -400,7 +404,7 @@ const Stays = () => {
     if (isLoaded && window.google) {
       const service = new window.google.maps.places.PlacesService(document.createElement('div'));
       const request = {
-        placeId: 'ChIJD7fiBh9u5kcRYJSMaMOCCwQ', 
+        placeId: 'ChIJD7fiBh9u5kcRYJSMaMOCCwQ', // Example Place ID
         fields: ['photos'],
       };
 
@@ -416,7 +420,7 @@ const Stays = () => {
     }
   }, [isLoaded]);
 
-  
+  // Fetch user's location or default to world overview
   useEffect(() => {
     if (isAuthenticated) {
       fetchUserHotel();
@@ -432,14 +436,14 @@ const Stays = () => {
           },
           (error) => {
             console.error('Error fetching user location:', error);
-            setMapCenter({ lat: 48.8566, lng: 2.3522 });
-            setMapZoom(12);
+            setMapCenter({ lat: 0, lng: 0 }); // World center
+            setMapZoom(2); // World view
           }
         );
       } else {
         console.error('Geolocation not supported by this browser.');
-        setMapCenter({ lat: 48.8566, lng: 2.3522 });
-        setMapZoom(12);
+        setMapCenter({ lat: 0, lng: 0 }); // World center
+        setMapZoom(2); // World view
       }
     }
   }, [isAuthenticated, user, fetchUserHotel]);

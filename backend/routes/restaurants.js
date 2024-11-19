@@ -1,5 +1,3 @@
-// backend/routes/restaurants.js
-
 const express = require('express');
 const { body } = require('express-validator');
 const restaurantController = require('../controllers/restaurantController');
@@ -8,18 +6,17 @@ const authorize = require('../middleware/authorize');
 
 const router = express.Router();
 
-// 1. Specific Routes First
 
-// Route to get approved restaurants with optional location or cuisine filter (Public Access)
+// get approved restaurants
 router.get('/approved', restaurantController.getApprovedRestaurants);
 
-// Route to get pending restaurants (Admin Only)
+// get pending restaurants (Admin Only)
 router.get('/pending', authenticate, authorize(['Admin']), restaurantController.getPendingRestaurants);
 
-// Route to get all restaurants (Admin Only to see all statuses)
+//get all restaurants (Admin Only 
 router.get('/', authenticate, authorize(['Admin']), restaurantController.getAllRestaurants);
 
-// Route to get authenticated user's restaurants (Protected: User, BusinessAdministrator, Admin)
+// get user's restaurants 
 router.get(
   '/user',
   authenticate,
@@ -27,18 +24,18 @@ router.get(
   restaurantController.getUserRestaurants
 );
 
-// 2. Dynamic Routes After Specific Routes
 
-// Route to approve a restaurant (Admin Only)
+
+// approve a restaurant (Admin Only)
 router.post('/:id/approve', authenticate, authorize(['Admin']), restaurantController.approveRestaurant);
 
-// Route to reject a restaurant (Admin Only)
+// reject a restaurant (Admin Only)
 router.post('/:id/reject', authenticate, authorize(['Admin']), restaurantController.rejectRestaurant);
 
-// Route to get a single restaurant by ID (Public Access for Approved only)
+// get a single restaurant by ID 
 router.get('/:id', restaurantController.getRestaurantById);
 
-// Route to create a new restaurant submission (Protected: User and BusinessAdministrator)
+// create a new restaurant
 router.post(
   '/',
   authenticate,
@@ -69,7 +66,7 @@ router.post(
   restaurantController.createRestaurant
 );
 
-// Route to update restaurant availability (Admin Only)
+// update restaurant availability (Admin Only)
 router.put(
   '/:id/availability',
   authenticate,
@@ -93,7 +90,7 @@ router.put(
   restaurantController.updateRestaurantAvailability
 );
 
-// Route to update a restaurant's details (Protected: Owner or Admin)
+// update a restaurant's details
 router.put(
   '/:id',
   authenticate,
@@ -127,7 +124,7 @@ router.put(
   restaurantController.updateRestaurant
 );
 
-// Route to delete a restaurant (Protected: Owner or Admin)
+// delete a restaurant 
 router.delete(
   '/:id',
   authenticate,

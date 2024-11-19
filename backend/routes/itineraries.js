@@ -3,8 +3,6 @@ const router = express.Router();
 const authenticate = require('../middleware/authenticate');
 const { body } = require('express-validator');
 const itineraryController = require('../controllers/itineraryController');
-
-// Apply authentication middleware to all itinerary routes
 router.use(authenticate);
 
 /**

@@ -1,9 +1,7 @@
-// backend/controllers/adminController.js
-
-const { User } = require('../models'); // Import the User model via models/index.js
-const admin = require('../firebaseAdmin'); // Import Firebase Admin SDK
-const bcrypt = require('bcrypt'); // Import bcrypt for hashing passwords
-const { Op } = require('sequelize'); // Import Op from Sequelize
+const { User } = require('../models'); 
+const admin = require('../firebaseAdmin'); 
+const bcrypt = require('bcrypt'); 
+const { Op } = require('sequelize'); 
 
 // Get all users
 const getAllUsers = async (req, res) => {
@@ -101,20 +99,18 @@ const createUser = async (req, res) => {
       return res.status(400).json({ message: 'UserName or Email already in use' });
     }
 
-    // 2. Prepare user creation data for Firebase
+    // user creation data for Firebase
     const userCreationData = {
       email: Email,
       password: Password,
       displayName: `${FirstName} ${LastName}`,
-      // Do not include photoURL if ProfilePicture is not provided
       ...(ProfilePicture && ProfilePicture.trim() !== '' ? { photoURL: ProfilePicture } : {})
     };
 
-    // 3. Create user in Firebase Authentication
+    // Create user in Firebase Authentication
     const firebaseUser = await admin.auth().createUser(userCreationData);
 
-    // 4. Hash the password before storing in MySQL (if storing passwords in MySQL)
-    // Note: If you're relying solely on Firebase for authentication, you might not need to store the password in MySQL.
+    // 4. Hash the password before storing in MySQL
     const hashedPassword = await bcrypt.hash(Password, 10);
 
     // 5. Create user in MySQL
@@ -127,15 +123,12 @@ const createUser = async (req, res) => {
       PhoneNumber: PhoneNumber || null,
       UserType,
       ProfilePicture: ProfilePicture || null,
-      // Include hashedPassword if necessary
-      // Password: hashedPassword,
     });
 
     res.status(201).json({ message: 'User created successfully', user: newUser });
   } catch (error) {
     console.error('Error creating user:', error);
-
-    // Handle specific Firebase errors
+    
     if (error.code === 'auth/email-already-exists') {
       return res.status(400).json({ message: 'Email already in use' });
     }
@@ -153,12 +146,11 @@ const getUsersCount = async (req, res) => {
   }
 }
 
-// Export the controller functions, including createUser
 module.exports = {
   getAllUsers,
   updateUser,
   deleteUser,
-  createUser, // Ensure createUser is exported
-  getUsersCount,      // Export the new functions
+  createUser, 
+  getUsersCount,      
 
 };

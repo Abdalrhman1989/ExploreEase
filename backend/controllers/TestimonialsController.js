@@ -1,10 +1,7 @@
-// backend/controllers/TestimonialsController.js
-
 const { Testimonial, User } = require('../models');
 
-/**
- * Get all approved testimonials (accessible by all users)
- */
+// Get all approved testimonials
+
 exports.getApprovedTestimonials = async (req, res) => {
   try {
     const testimonials = await Testimonial.findAll({
@@ -23,19 +20,17 @@ exports.getApprovedTestimonials = async (req, res) => {
   }
 };
 
-/**
- * Submit a new testimonial (accessible by authenticated users)
- */
+// Submit a new testimonial 
+
 exports.submitTestimonial = async (req, res) => {
   const { content } = req.body;
-  const firebaseUID = req.user.uid; // Extracted from authenticate middleware
+  const firebaseUID = req.user.uid;
 
   if (!content || content.trim() === '') {
     return res.status(400).json({ success: false, message: 'Testimonial content is required.' });
   }
 
   try {
-    // Find the user by FirebaseUID
     const user = await User.findOne({ where: { FirebaseUID: firebaseUID } });
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found.' });
@@ -46,7 +41,7 @@ exports.submitTestimonial = async (req, res) => {
       userName: `${user.FirstName} ${user.LastName}`,
       userEmail: user.Email,
       content,
-      status: 'pending', // New testimonials are pending approval
+      status: 'pending', 
     });
 
     res.status(201).json({
@@ -67,9 +62,8 @@ exports.submitTestimonial = async (req, res) => {
   }
 };
 
-/**
- * Get all pending testimonials (accessible by Admins only)
- */
+// Get all pending testimonials 
+
 exports.getPendingTestimonials = async (req, res) => {
   try {
     const pendingTestimonials = await Testimonial.findAll({
@@ -88,9 +82,7 @@ exports.getPendingTestimonials = async (req, res) => {
   }
 };
 
-/**
- * Approve a testimonial (accessible by Admins only)
- */
+// Approve a testimonial
 exports.approveTestimonial = async (req, res) => {
   const testimonialId = req.params.id;
 
@@ -110,9 +102,7 @@ exports.approveTestimonial = async (req, res) => {
   }
 };
 
-/**
- * Reject a testimonial (accessible by Admins only)
- */
+// Reject a testimonial
 exports.rejectTestimonial = async (req, res) => {
   const testimonialId = req.params.id;
 

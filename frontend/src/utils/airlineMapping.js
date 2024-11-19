@@ -1,5 +1,3 @@
-// frontend/src/utils/airlineMapping.js
-
 const airlineMapping = {
     // A
     AA: {

@@ -14,7 +14,7 @@
 
 /* Hero Section */
 .about-hero {
-    background-image: url('../assets/hotel.jpg'); /* Adjust path if necessary */
+    background-image: url('../assets/hotel.jpg'); 
     background-size: cover;
     background-position: center;
     color: var(--accent-color);
@@ -35,7 +35,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.4); /* Semi-transparent overlay */
+    background-color: rgba(0, 0, 0, 0.4); 
     border-radius: var(--border-radius);
 }
 
@@ -344,7 +344,7 @@
 }
 
 .faq-item.active .faq-answer {
-    max-height: 200px; /* Adjust based on content */
+    max-height: 200px; 
 }
 
 .faq-answer p {

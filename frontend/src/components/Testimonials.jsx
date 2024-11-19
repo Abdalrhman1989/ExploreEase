@@ -1,5 +1,3 @@
-/* src/components/Testimonials.jsx */
-
 import React, { useContext, useEffect, useState } from 'react';
 import Slider from 'react-slick';
 import '../styles/Testimonials.css';
@@ -114,7 +112,7 @@ const Testimonials = () => {
     } else if (lastName && lastName.length > 0) {
       return lastName.charAt(0).toUpperCase();
     }
-    return 'A'; // Default initial
+    return 'A'; 
   };
 
   // Construct image URL
@@ -138,8 +136,8 @@ const Testimonials = () => {
                 loading="lazy"
                 onError={(e) => {
                   console.error(`Error loading image for ${testimonial.user.UserName}`);
-                  e.target.onerror = null; // Prevent infinite loop
-                  e.target.src = '/default-avatar.png'; // Fallback image
+                  e.target.onerror = null; 
+                  e.target.src = '/default-avatar.png'; 
                 }}
               />
             ) : (

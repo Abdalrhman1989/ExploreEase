@@ -9,7 +9,6 @@ const SearchBar = ({ placeholder }) => {
 
   const handleSearch = () => {
     console.log(`Searching for stays in ${location} from ${checkInDate} to ${checkOutDate} for ${guests} guests.`);
-    // Implement search functionality for stays
   };
 
   return (

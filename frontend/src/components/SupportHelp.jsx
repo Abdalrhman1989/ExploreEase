@@ -1,5 +1,3 @@
-// src/components/SupportHelp.jsx
-
 import React, { useState, useEffect } from 'react';
 import {
   Box,
@@ -126,7 +124,7 @@ const SupportHelp = ({ idToken, API_BASE_URL }) => {
     e.preventDefault();
     setContactFormStatus('Submitting your message...');
     setValidationErrors({});
-    setIsSubmitting(true); // Start loading
+    setIsSubmitting(true); 
 
     try {
       const response = await axios.post(`${API_BASE_URL}/api/contact`, contactFormData, {
@@ -141,29 +139,26 @@ const SupportHelp = ({ idToken, API_BASE_URL }) => {
           email: '',
           message: '',
         });
-        setIsModalOpen(true); // Open confirmation modal
-        localStorage.removeItem('contactFormData'); // Clear saved data
+        setIsModalOpen(true); 
+        localStorage.removeItem('contactFormData'); 
       } else {
         setContactFormStatus('Failed to send your message. Please try again later.');
       }
     } catch (error) {
       console.error('Error sending message:', error);
       if (error.response && error.response.data) {
-        const errors = error.response.data.errors; // Access 'errors' array
+        const errors = error.response.data.errors; 
         const errorObj = {};
 
-        // Check if errors is an array
         if (Array.isArray(errors)) {
           errors.forEach((err) => {
             errorObj[err.path] = err.msg;
           });
         } else if (typeof errors === 'object') {
-          // If errors is an object, convert it to an array
           Object.values(errors).forEach((err) => {
             errorObj[err.path] = err.msg;
           });
         } else {
-          // Generic error message if structure is unknown
           setContactFormStatus('An unexpected error occurred. Please try again.');
           return;
         }
@@ -174,13 +169,12 @@ const SupportHelp = ({ idToken, API_BASE_URL }) => {
         setContactFormStatus('An error occurred while sending your message. Please try again later.');
       }
     } finally {
-      setIsSubmitting(false); // End loading
+      setIsSubmitting(false); 
     }
   };
 
-  // Handle Live Chat Button Click - Open WhatsApp Chat
   const handleLiveChat = () => {
-    const phoneNumber = '1234567890'; // Replace with your WhatsApp number
+    const phoneNumber = '1234567890'; 
     const message = encodeURIComponent('Hello, I need assistance with your services.');
     const whatsappURL = `https://wa.me/${phoneNumber}?text=${message}`;
     window.open(whatsappURL, '_blank');

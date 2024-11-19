@@ -1,5 +1,3 @@
-// src/components/SavedItineraries.jsx
-
 import React, { useEffect, useState } from 'react';
 import {
   Box,
@@ -206,7 +204,6 @@ const SavedItineraries = ({ idToken, API_BASE_URL }) => {
     fetchItineraries();
   }, [idToken, API_BASE_URL]);
 
-  // Filter and sort itineraries based on search query, filters, and sort options
   useEffect(() => {
     let filtered = itineraries;
 

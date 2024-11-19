@@ -1,5 +1,3 @@
-// src/components/TripPlanner.jsx
-
 import React, { useState, useEffect, useContext } from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
@@ -23,21 +21,20 @@ import { Delete } from '@mui/icons-material';
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
-import '../styles/TripPlanner.css'; // Import the custom styles
+import '../styles/TripPlanner.css'; 
 import { AuthContext } from '../context/AuthContext';
 
 // Initialize localizer
 const localizer = momentLocalizer(moment);
 
-// Initialize drag-and-drop functionality
 const DragAndDropCalendar = withDragAndDrop(Calendar);
 
-const TripPlanner = () => { // Removed idToken from props, use context instead
+const TripPlanner = () => { 
   const { idToken, isAuthenticated, loading: authLoading } = useContext(AuthContext);
   const [events, setEvents] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState(null);
-  const [tripType, setTripType] = useState('bus'); // Default type
+  const [tripType, setTripType] = useState('bus'); 
   const [tripOrigin, setTripOrigin] = useState('');
   const [tripDestination, setTripDestination] = useState('');
   const [tripStart, setTripStart] = useState(new Date());
@@ -51,9 +48,8 @@ const TripPlanner = () => { // Removed idToken from props, use context instead
 
   const API_BASE_URL = process.env.REACT_APP_BACKEND_URL;
 
-  // Fetch existing trips
   useEffect(() => {
-    if (!idToken) return; // Wait until idToken is available
+    if (!idToken) return; 
 
     const fetchTrips = async () => {
       setLoading(true);
@@ -92,7 +88,7 @@ const TripPlanner = () => { // Removed idToken from props, use context instead
   // Handle selecting a slot to create a new trip
   const handleSelectSlot = ({ start, end }) => {
     setSelectedTrip(null);
-    setTripType('bus'); // Reset to default
+    setTripType('bus'); 
     setTripOrigin('');
     setTripDestination('');
     setTripStart(start);
@@ -134,16 +130,15 @@ const TripPlanner = () => { // Removed idToken from props, use context instead
       destination: tripDestination,
       departureTime: tripStart.toISOString(),
       arrivalTime: tripEnd.toISOString(),
-      duration: Math.round((tripEnd - tripStart) / 60000), // Duration in minutes
-      transitStops: [], // Add logic if needed
-      transitLines: [], // Add logic if needed
-      schedule: {}, // Add logic if needed
-      ticketProviderUrl: selectedTrip ? selectedTrip.description : '', // Optional
+      duration: Math.round((tripEnd - tripStart) / 60000), 
+      transitStops: [], 
+      transitLines: [], 
+      schedule: {}, 
+      ticketProviderUrl: selectedTrip ? selectedTrip.description : '', 
     };
 
     try {
       if (isEditing && selectedTrip) {
-        // Update existing trip
         const response = await axios.put(
           `${API_BASE_URL}/api/trips/${selectedTrip.id}`,
           tripData,
@@ -170,7 +165,6 @@ const TripPlanner = () => { // Removed idToken from props, use context instead
           )
         );
       } else {
-        // Create new trip
         const response = await axios.post(`${API_BASE_URL}/api/trips`, tripData, {
           headers: {
             Authorization: `Bearer ${idToken}`,
@@ -248,9 +242,9 @@ const TripPlanner = () => { // Removed idToken from props, use context instead
       departureTime: start.toISOString(),
       arrivalTime: end.toISOString(),
       duration: Math.round((end - start) / 60000),
-      transitStops: [], // Add logic if needed
-      transitLines: [], // Add logic if needed
-      schedule: {}, // Add logic if needed
+      transitStops: [], 
+      transitLines: [], 
+      schedule: {}, 
       ticketProviderUrl: updatedTrip.description || '',
     };
 
@@ -307,9 +301,9 @@ const TripPlanner = () => { // Removed idToken from props, use context instead
       departureTime: start.toISOString(),
       arrivalTime: end.toISOString(),
       duration: Math.round((end - start) / 60000),
-      transitStops: [], // Add logic if needed
-      transitLines: [], // Add logic if needed
-      schedule: {}, // Add logic if needed
+      transitStops: [], 
+      transitLines: [],
+      schedule: {}, 
       ticketProviderUrl: updatedTrip.description || '',
     };
 
@@ -349,7 +343,6 @@ const TripPlanner = () => { // Removed idToken from props, use context instead
     }
   };
 
-  // Prevent rendering if authentication is still loading
   if (authLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -358,7 +351,6 @@ const TripPlanner = () => { // Removed idToken from props, use context instead
     );
   }
 
-  // Prevent rendering if user is not authenticated
   if (!isAuthenticated) {
     return (
       <Box sx={{ p: 4 }}>
@@ -381,7 +373,7 @@ const TripPlanner = () => { // Removed idToken from props, use context instead
             events={events}
             selectable
             resizable
-            defaultView={isMobile ? 'agenda' : 'month'} // Use 'agenda' view on mobile
+            defaultView={isMobile ? 'agenda' : 'month'} 
             defaultDate={new Date()}
             style={{ height: '100%', width: '100%' }}
             onSelectSlot={handleSelectSlot}
@@ -390,7 +382,6 @@ const TripPlanner = () => { // Removed idToken from props, use context instead
             onEventResize={handleEventResize}
             draggableAccessor={() => true}
             resizableAccessor={() => true}
-            // Additional Props for Enhanced Responsiveness
             views={isMobile ? ['agenda'] : ['month', 'week', 'day', 'agenda']}
             step={30}
             showMultiDayTimes
@@ -403,7 +394,7 @@ const TripPlanner = () => { // Removed idToken from props, use context instead
         onClose={handleDialogClose}
         fullWidth
         maxWidth="sm"
-        fullScreen={isMobile} // Full-screen on mobile
+        fullScreen={isMobile} 
       >
         <DialogTitle>{isEditing ? 'Edit Trip' : 'Add Trip'}</DialogTitle>
         <DialogContent>
@@ -519,7 +510,7 @@ const TripPlanner = () => { // Removed idToken from props, use context instead
               textTransform: 'none',
               transition: 'background-color var(--transition-duration), color var(--transition-duration)',
               '&:hover': {
-                backgroundColor: '#1976d2', // MUI primary darken color
+                backgroundColor: '#1976d2',
                 color: '#fff',
               },
             }}

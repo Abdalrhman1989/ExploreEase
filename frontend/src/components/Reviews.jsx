@@ -1,8 +1,6 @@
-// src/components/Reviews.jsx
-
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import '../styles/Reviews.css'; // Create corresponding CSS
+import '../styles/Reviews.css'; 
 
 const Reviews = () => {
   const [reviews, setReviews] = useState([]);
@@ -14,11 +12,12 @@ const Reviews = () => {
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  // Fetch reviews on component mount
+  const BASE_URL = process.env.REACT_APP_BACKEND_URL;
+
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/api/reviews');
+        const response = await axios.get(`${BASE_URL}/api/reviews`);
         setReviews(response.data.reviews);
         setLoading(false);
       } catch (err) {
@@ -29,7 +28,7 @@ const Reviews = () => {
     };
 
     fetchReviews();
-  }, []);
+  }, [BASE_URL]);
 
   // Handle input changes for new review
   const handleInputChange = (e) => {
@@ -47,11 +46,10 @@ const Reviews = () => {
     setSuccessMsg('');
 
     try {
-      // Assuming you have a way to get the current authenticated user
-      const token = localStorage.getItem('token'); // Or another method
+      const token = localStorage.getItem('token'); 
 
       const response = await axios.post(
-        'http://localhost:3001/api/reviews',
+        `${BASE_URL}/api/reviews`,
         { ...newReview },
         {
           headers: {
@@ -63,7 +61,6 @@ const Reviews = () => {
       if (response.data.success) {
         setSuccessMsg('Review submitted successfully!');
         setNewReview({ rating: 5, comment: '' });
-        // Optionally, refresh reviews
         setReviews([response.data.review, ...reviews]);
       } else {
         setError(response.data.message || 'Failed to submit review.');

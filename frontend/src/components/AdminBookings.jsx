@@ -1,5 +1,3 @@
-// frontend/src/components/AdminBookings.jsx
-
 import React, { useState, useEffect, useContext } from 'react';
 import '../styles/AdminBookings.css';
 import axios from 'axios';
@@ -24,20 +22,20 @@ import {
   DialogContent,
   DialogActions,
 } from '@mui/material';
-import { AuthContext } from '../context/AuthContext'; // Ensure AuthContext is properly set up
+import { AuthContext } from '../context/AuthContext'; 
 
 const AdminBookings = () => {
   const { isAuthenticated, user } = useContext(AuthContext);
 
   // State Variables for Hotel Bookings
-  const [hotelBookings, setHotelBookings] = useState([]); // Approved
-  const [pendingHotelBookings, setPendingHotelBookings] = useState([]); // Pending
-  const [rejectedHotelBookings, setRejectedHotelBookings] = useState([]); // Rejected
+  const [hotelBookings, setHotelBookings] = useState([]); 
+  const [pendingHotelBookings, setPendingHotelBookings] = useState([]); 
+  const [rejectedHotelBookings, setRejectedHotelBookings] = useState([]); 
 
   // State Variables for Flight Bookings
-  const [flightBookings, setFlightBookings] = useState([]); // Approved
-  const [pendingFlightBookings, setPendingFlightBookings] = useState([]); // Pending
-  const [rejectedFlightBookings, setRejectedFlightBookings] = useState([]); // Rejected
+  const [flightBookings, setFlightBookings] = useState([]); 
+  const [pendingFlightBookings, setPendingFlightBookings] = useState([]); 
+  const [rejectedFlightBookings, setRejectedFlightBookings] = useState([]); 
 
   const [loading, setLoading] = useState(true);
 
@@ -45,17 +43,16 @@ const AdminBookings = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [currentBooking, setCurrentBooking] = useState(null);
   const [newStatus, setNewStatus] = useState('');
-  const [bookingType, setBookingType] = useState(''); // 'hotel' or 'flight'
+  const [bookingType, setBookingType] = useState(''); 
 
   useEffect(() => {
     fetchAllBookings();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchAllBookings = async () => {
     try {
       const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
-      const token = localStorage.getItem('authToken'); // Ensure admin is logged in
+      const token = localStorage.getItem('authToken'); 
 
       // Fetch Hotel Bookings
       const hotelResponse = await axios.get(`${backendUrl}/api/bookings`, {
@@ -97,7 +94,7 @@ const AdminBookings = () => {
   const handleStatusChange = (booking, type, status) => {
     setCurrentBooking(booking);
     setBookingType(type);
-    setNewStatus(status); // Set the desired new status
+    setNewStatus(status); 
     setOpenDialog(true);
   };
 

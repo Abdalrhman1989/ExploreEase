@@ -1,8 +1,6 @@
-// frontend/src/components/AdminConfirmAttractionOffers.jsx
-
 import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
-import '../styles/AdminConfirmAttractionOffers.css'; // Create this CSS file for styling
+import '../styles/AdminConfirmAttractionOffers.css'; 
 import { AuthContext } from '../context/AuthContext';
 
 const AdminConfirmAttractionOffers = () => {
@@ -39,9 +37,7 @@ const AdminConfirmAttractionOffers = () => {
           Authorization: `Bearer ${idToken}`,
         },
       });
-      // Optionally, show a success message
       console.log(response.data.message);
-      // Refresh the list
       fetchAttractions();
     } catch (err) {
       console.error('Error updating attraction status:', err);
@@ -49,12 +45,10 @@ const AdminConfirmAttractionOffers = () => {
     }
   };
 
-  // Optional: Show loading state
   if (loading) {
     return <div>Loading...</div>;
   }
 
-  // Check if the user is not an Admin
   if (isAuthenticated && userRole !== 'Admin') {
     return <div>You do not have permission to view this page.</div>;
   }

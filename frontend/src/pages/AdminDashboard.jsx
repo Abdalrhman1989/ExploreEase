@@ -1,28 +1,21 @@
-// src/pages/AdminDashboard.jsx
-
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext'; // Ensure the path is correct
+import { AuthContext } from '../context/AuthContext'; 
 import AdminUsers from '../components/AdminUsers';
-// Removed AdminProviders import
 import AdminBookings from '../components/AdminBookings';
 import AdminConfirmBusinessOffers from '../components/AdminConfirmOffers';
-// Removed AdminConfirmUserRegistrations import
-import AdminPendingTestimonials from '../components/AdminPendingTestimonials'; // Import the new component
+import AdminPendingTestimonials from '../components/AdminPendingTestimonials'; 
 import '../styles/AdminDashboard.css';
 
 const AdminDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeContent, setActiveContent] = useState('dashboard'); // Default content
-  const navigate = useNavigate(); // Initialize useNavigate
-  const { user, logout } = useContext(AuthContext); // Destructure logout and user from AuthContext
-
-  // State variables for dynamic counts
+  const [activeContent, setActiveContent] = useState('dashboard'); 
+  const navigate = useNavigate(); 
+  const { user, logout } = useContext(AuthContext); 
   const [usersCount, setUsersCount] = useState(0);
-  // Removed providersCount as Providers are no longer part of the dashboard
   const [bookingsCount, setBookingsCount] = useState(0);
 
-  // Fetch dynamic counts
+
   useEffect(() => {
     const fetchCounts = async () => {
       try {
@@ -83,17 +76,16 @@ const AdminDashboard = () => {
   };
 
   const handleProfileNavigation = () => {
-    navigate('/profile'); // Navigate to the user profile page
+    navigate('/profile'); 
     closeSidebar();
   };
 
   const handleLogout = async () => {
     try {
-      await logout(); // Call the logout function from AuthContext
-      navigate('/login'); // Redirect to the login page after logout
+      await logout(); 
+      navigate('/login'); 
     } catch (error) {
       console.error('Error during logout:', error);
-      // Optionally, display an error message to the user
       alert('Failed to logout. Please try again.');
     }
   };
@@ -101,28 +93,25 @@ const AdminDashboard = () => {
   const renderContent = () => {
     switch (activeContent) {
       case 'dashboard':
-        return <DashboardHome /* You can pass any necessary props here */ />;
+        return <DashboardHome />;
       case 'users':
         return <AdminUsers />;
-      // Removed 'providers' case
       case 'bookings':
-        return <AdminBookings />; // Combined Bookings Component
+        return <AdminBookings />; 
       case 'confirm-offers':
         return <AdminConfirmBusinessOffers />;
-      // Removed 'confirm-registrations' case
       case 'pending-testimonials':
-        return <AdminPendingTestimonials />; // Add this case
+        return <AdminPendingTestimonials />; 
       default:
         return <DashboardHome />;
     }
   };
 
-  // Function to get the first letter of the user's name
   const getUserInitial = () => {
     if (user && user.displayName) {
       return user.displayName.charAt(0).toUpperCase();
     }
-    return 'U'; // Default initial if name is not available
+    return 'U'; 
   };
 
   return (
@@ -239,35 +228,31 @@ const AdminDashboard = () => {
                     : 'https://via.placeholder.com/30'
                 }
                 alt="Profile"
-                onClick={handleProfileNavigation} // Make the profile icon clickable
+                onClick={handleProfileNavigation} 
                 className="profile-avatar"
               />
               <span>{user ? user.displayName || 'Admin' : 'Admin'}</span>
               <i className="fas fa-chevron-down"></i>
               <ul className="dropdown-menu">
                 <li onClick={handleProfileNavigation}>Profile</li>
-                {/* You can add more dropdown items here if needed */}
               </ul>
             </div>
           </div>
         </nav>
 
-        {/* Dynamic Content based on menu selection */}
         {renderContent()}
       </div>
     </div>
   );
 };
 
-// DashboardHome Component Defined Inside AdminDashboard.jsx
+// DashboardHome Component
 const DashboardHome = () => {
   return (
     <div className="dashboard-home">
       {/* Welcome Message */}
       <h1>Welcome to the Admin Dashboard</h1>
       <p>Select an option from the sidebar to get started.</p>
-
-      {/* You can add more components or information here as needed */}
     </div>
   );
 };

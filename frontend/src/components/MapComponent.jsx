@@ -68,7 +68,8 @@ const MapComponent = ({
 
   const mapRef = useRef(); 
 
-  const GOOGLE_MAPS_API_KEY = 'AIzaSyAUsvB5yrnAISRSaSaoL-oCC3Su8LMFK3M';
+  // Use the environment variable for the Google Maps API key
+  const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
 
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: GOOGLE_MAPS_API_KEY,
@@ -173,14 +174,13 @@ const MapComponent = ({
   // Handle marker click
   const handleMarkerClick = (place) => {
     setSelectedPlace(place);
-    setTravelMode(null); // 
-    setDirections(null); // Clear existing directions
-    setDistanceInfo(null); // Clear existing distance info
+    setTravelMode(null); 
+    setDirections(null); 
+    setDistanceInfo(null); 
     mapRef.current.panTo(place.location);
     mapRef.current.setZoom(14);
   };
 
-  // Fetch distance and duration using Distance Matrix API
   const fetchDistanceInfo = useCallback(
     (destination) => {
       if (!userLocation || !isLoaded) return;
@@ -192,7 +192,7 @@ const MapComponent = ({
           origins: [userLocation],
           destinations: [destination],
           travelMode: window.google.maps.TravelMode[travelMode],
-          unitSystem: window.google.maps.UnitSystem.IMPERIAL, // or METRIC
+          unitSystem: window.google.maps.UnitSystem.IMPERIAL, 
           avoidTolls: false,
         },
         (response, status) => {
@@ -238,13 +238,13 @@ const MapComponent = ({
       {
         origin: userLocation,
         destination,
-        travelMode: window.google.maps.TravelMode[travelMode], // Dynamic travel mode
-        provideRouteAlternatives: false, // Change to false to simplify
+        travelMode: window.google.maps.TravelMode[travelMode], 
+        provideRouteAlternatives: false, 
       },
       (result, status) => {
         if (status === window.google.maps.DirectionsStatus.OK) {
           setDirections(result);
-          fetchDistanceInfo(destination); // Fetch distance info after directions
+          fetchDistanceInfo(destination); 
         } else {
           console.error(`Error fetching directions: ${status}`);
         }
@@ -256,7 +256,6 @@ const MapComponent = ({
   const onMapLoad = useCallback(
     (map) => {
       mapRef.current = map;
-      // After map is loaded, if selectedPlace exists and travelMode is set, fetch directions
       if (selectedPlace && travelMode) {
         handleDirections(selectedPlace.location);
       }
@@ -269,7 +268,6 @@ const MapComponent = ({
     if (selectedPlace && travelMode) {
       handleDirections(selectedPlace.location);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [travelMode]);
 
   if (loadError)
@@ -320,12 +318,11 @@ const MapComponent = ({
                 location: cityData.coordinates,
                 rating: cityData.rating || null,
                 userRatingsTotal: cityData.userRatingsTotal || null,
-                category: 'destination', // To identify as destination
+                category: 'destination', 
               });
-              // Do not automatically fetch directions; wait for travel mode selection
-              setTravelMode(null); // Reset travel mode
-              setDirections(null); // Clear existing directions
-              setDistanceInfo(null); // Clear distance info
+              setTravelMode(null); 
+              setDirections(null); 
+              setDistanceInfo(null); 
             }}
             icon={{
               url: MARKER_ICONS['destination'],
@@ -463,7 +460,6 @@ const MapComponent = ({
   );
 };
 
-// Define PropTypes for better type checking
 MapComponent.propTypes = {
   cityData: PropTypes.object.isRequired,
   userLocation: PropTypes.shape({

@@ -1,4 +1,3 @@
-// Import necessary libraries and mocks
 import React from 'react';
 import { render, screen, act, fireEvent } from '@testing-library/react';
 import ManageHotels from '../pages/ManageHotels';
@@ -12,7 +11,6 @@ jest.mock('axios', () => ({
   delete: jest.fn(),
 }));
 
-// Mock styles and external libraries
 jest.mock('react-toastify/dist/ReactToastify.css', () => {});
 jest.mock('../styles/ManageHotels.css', () => {});
 jest.mock('@react-google-maps/api', () => ({

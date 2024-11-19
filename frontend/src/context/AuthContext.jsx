@@ -1,14 +1,11 @@
-// src/context/AuthContext.jsx
-
 import React, { createContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 import axios from 'axios';
 
-// Create the AuthContext
+
 export const AuthContext = createContext();
 
-// Create the AuthProvider component
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null);
@@ -19,10 +16,10 @@ export const AuthProvider = ({ children }) => {
   // Logout function
   const logout = async () => {
     try {
-      await signOut(auth); // Firebase signOut
+      await signOut(auth); 
     } catch (error) {
       console.error('Error during logout:', error);
-      throw error; // Propagate the error to handle it in the UI
+      throw error; 
     }
   };
 
@@ -33,13 +30,12 @@ export const AuthProvider = ({ children }) => {
         setUser(currentUser);
 
         try {
-          // Get the ID token from Firebase with force refresh
           const token = await currentUser.getIdToken(true);
           setIdToken(token);
-          localStorage.setItem('authToken', token); // Store token in localStorage
+          localStorage.setItem('authToken', token); 
           console.log("ID Token:", token);
 
-          // Fetch user role from your backend
+          // Fetch user role
           const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/protected/dashboard`, {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -57,9 +53,9 @@ export const AuthProvider = ({ children }) => {
         setUserRole(null);
         setUser(null);
         setIdToken(null);
-        localStorage.removeItem('authToken'); // Clear token if user logs out
+        localStorage.removeItem('authToken'); 
       }
-      setLoading(false); // Set loading to false after auth state is determined
+      setLoading(false); 
     });
 
     return () => unsubscribe();

@@ -1,13 +1,11 @@
-const { sequelize, User, Itinerary } = require('./models'); // Adjust the path as needed
+const { sequelize, User, Itinerary } = require('../models');
 
 async function testItineraryCreation() {
   try {
-    // Authenticate
     await sequelize.authenticate();
     console.log('Connection has been established successfully.');
 
-    // Find a User (ensure at least one user exists)
-    const user = await User.findOne({ where: { UserID: 1 } }); // Adjust UserID as needed
+    const user = await User.findOne({ where: { UserID: 1 } }); 
 
     if (!user) {
       console.log('No user found with UserID 1.');

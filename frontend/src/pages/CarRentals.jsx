@@ -1,3 +1,5 @@
+// src/pages/CarRentals.jsx
+
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import {
   GoogleMap,
@@ -381,7 +383,7 @@ const CarRentals = () => {
           component="form"
           onSubmit={(e) => {
             e.preventDefault();
-            const query = e.currentTarget.search.value.trim();
+            const query = e.target.elements.search.value.trim(); // Updated line
             if (query) {
               setIsLoading(true);
               searchCarRentalsByQuery(query);

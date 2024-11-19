@@ -1,5 +1,3 @@
-// backend/routes/trips.js
-
 const express = require('express');
 const router = express.Router();
 const tripController = require('../controllers/tripController');
@@ -33,7 +31,7 @@ router.post(
     body('duration')
       .isInt({ min: 1 })
       .withMessage('Duration must be a positive integer'),
-    // Add more validations as needed
+
   ],
   tripController.createTrip
 );
@@ -85,7 +83,6 @@ router.put(
       .optional()
       .isInt({ min: 1 })
       .withMessage('Duration must be a positive integer'),
-    // Add more validations as needed
   ],
   tripController.updateTrip
 );

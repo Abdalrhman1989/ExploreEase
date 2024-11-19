@@ -1,7 +1,5 @@
-// services/stripeService.js
-
 const Stripe = require('stripe');
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY); // Ensure this key is set in your .env file
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY); 
 
 /**
  * Creates a Payment Intent with Stripe.

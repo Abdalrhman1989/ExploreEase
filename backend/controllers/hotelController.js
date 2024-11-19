@@ -1,14 +1,10 @@
-// backend/controllers/hotelController.js
-
 const { validationResult } = require('express-validator');
-const { Hotel } = require('../models'); // Ensure Hotel model is correctly defined
+const { Hotel } = require('../models'); 
 const { Op } = require('sequelize');
 
-/**
- * Create a new hotel submission
- */
+// Create a new hotel
 const createHotel = async (req, res) => {
-  // Handle validation errors
+  // validation errors
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ success: false, errors: errors.array() });
@@ -18,7 +14,7 @@ const createHotel = async (req, res) => {
     const {
       name,
       location,
-      city, // New field
+      city, 
       basePrice,
       description,
       roomTypes,
@@ -30,7 +26,7 @@ const createHotel = async (req, res) => {
       longitude, 
     } = req.body;
 
-    // Validate and process images
+    // Validate
     let processedImages = [];
     if (images && Array.isArray(images)) {
       processedImages = images.map((base64String) => {
@@ -83,17 +79,17 @@ const createHotel = async (req, res) => {
       FirebaseUID: req.user.uid,
       name,
       location,
-      city, // Assign city
+      city, 
       basePrice,
       description,
-      roomTypes: processedRoomTypes, // Directly assign the array
-      seasonalPricing: processedSeasonalPricing, // Directly assign the array
-      amenities: processedAmenities, // Directly assign the array
+      roomTypes: processedRoomTypes, 
+      seasonalPricing: processedSeasonalPricing, 
+      amenities: processedAmenities,
       images: processedImages,
       status: 'Pending',
-      availability: processedAvailability, // Set availability from request
-      latitude, // Include latitude
-      longitude, // Include longitude
+      availability: processedAvailability, 
+      latitude, 
+      longitude, 
     });
 
     res.status(201).json({
@@ -106,32 +102,22 @@ const createHotel = async (req, res) => {
     res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
   }
 };
-/**
- * Get approved hotels, optionally filtered by location
- */
-/**
- * Get approved hotels, optionally filtered by location
- */
+
+// Get approved hotels
+
 const getApprovedHotels = async (req, res) => {
   try {
-    const { lat, lng, radius = 10000 } = req.query; // Get lat, lng, radius from query params
-    let whereClause = { status: 'Approved' };
+    const { lat, lng, radius = 10000 } = req.query; 
 
     if (lat && lng) {
-      // Convert lat and lng to floats
       const latitude = parseFloat(lat);
       const longitude = parseFloat(lng);
-      const radiusInMeters = parseInt(radius, 10); // Ensure radius is integer
+      const radiusInMeters = parseInt(radius, 10);
 
       if (isNaN(latitude) || isNaN(longitude) || isNaN(radiusInMeters)) {
         return res.status(400).json({ success: false, message: 'Invalid latitude, longitude, or radius.' });
       }
 
-      // Assuming you have PostGIS enabled in your PostgreSQL database
-      // and your Hotel model has a 'location' field of type POINT
-      // Alternatively, calculate distance using the Haversine formula
-
-      // Using Sequelize's raw query to calculate distance
       const sequelize = require('../models').sequelize;
 
       const hotels = await Hotel.findAll({
@@ -169,9 +155,8 @@ const getApprovedHotels = async (req, res) => {
 };
 
 
-/**
- * Get pending hotels (Admin Only)
- */
+// Get pending hotels (Admin Only)
+
 const getPendingHotels = async (req, res) => {
   try {
     const hotels = await Hotel.findAll({ where: { status: 'Pending' } });
@@ -182,9 +167,8 @@ const getPendingHotels = async (req, res) => {
   }
 };
 
-/**
- * Approve a hotel (Admin Only)
- */
+// Approve a hotel (Admin Only)
+
 const approveHotel = async (req, res) => {
   const hotelId = req.params.id;
 
@@ -208,9 +192,8 @@ const approveHotel = async (req, res) => {
   }
 };
 
-/**
- * Reject a hotel (Admin Only)
- */
+// Reject a hotel (Admin Only)
+
 const rejectHotel = async (req, res) => {
   const hotelId = req.params.id;
 
@@ -234,9 +217,8 @@ const rejectHotel = async (req, res) => {
   }
 };
 
-/**
- * Get a single hotel by ID (Approved only)
- */
+// Get a single hotel by ID (Approved only)
+
 const getHotelById = async (req, res) => {
   const { id } = req.params;
   try {
@@ -255,9 +237,7 @@ const getHotelById = async (req, res) => {
   }
 };
 
-/**
- * Update hotel availability (Admin Only)
- */
+// Update hotel availability
 const updateHotelAvailability = async (req, res) => {
   const { id } = req.params;
   const { availability } = req.body;
@@ -283,9 +263,7 @@ const updateHotelAvailability = async (req, res) => {
   }
 };
 
-/**
- * Get authenticated user's hotels (Approved only)
- */
+// Get user's hotels
 const getUserHotels = async (req, res) => {
   try {
     const userUid = req.user.uid;
@@ -316,11 +294,9 @@ const getUserHotels = async (req, res) => {
   }
 };
 
-/**
- * Update a hotel by ID (Full Update)
- */
+// Update a hotel 
+
 const updateHotel = async (req, res) => {
-  // Handle validation errors
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ success: false, errors: errors.array() });
@@ -347,13 +323,13 @@ const updateHotel = async (req, res) => {
       roomTypes,
       seasonalPricing,
       amenities,
-      images, // Expecting an array of Base64 strings
-      availability, // Date-wise availability
-      status, // Optional: Allow status updates if authorized
+      images, 
+      availability, 
+      status, 
     } = req.body;
 
     // Validate and process images
-    let processedImages = hotel.images; // Start with existing images
+    let processedImages = hotel.images; 
     if (images && Array.isArray(images)) {
       processedImages = images.map((base64String) => {
         // Validate the Base64 string format
@@ -420,9 +396,8 @@ const updateHotel = async (req, res) => {
   }
 };
 
-/**
- * Delete a hotel by ID
- */
+// Delete a hotel by ID
+
 const deleteHotel = async (req, res) => {
   const hotelId = req.params.id;
 
@@ -455,6 +430,6 @@ module.exports = {
   getHotelById,
   updateHotelAvailability,
   getUserHotels,
-  updateHotel,      // Newly added method
-  deleteHotel,      // Newly added method
+  updateHotel,      
+  deleteHotel,      
 };

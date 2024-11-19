@@ -1,5 +1,3 @@
-// backend/controllers/flightController.js
-
 const axios = require('axios');
 
 // Function to get Amadeus Access Token
@@ -22,7 +20,7 @@ const getAmadeusAccessToken = async () => {
   }
 };
 
-// Controller function to search flights
+// search flights
 const searchFlights = async (req, res) => {
   const {
     originLocationCode,
@@ -40,7 +38,7 @@ const searchFlights = async (req, res) => {
     currencyCode,
   } = req.body;
 
-  // Basic server-side validation
+  // validation
   if (!originLocationCode || originLocationCode.length !== 3) {
     return res.status(400).json({ errors: [{ msg: 'Invalid originLocationCode.' }] });
   }
@@ -70,9 +68,7 @@ const searchFlights = async (req, res) => {
           originLocationCode: originLocationCode.toUpperCase(),
           destinationLocationCode: destinationLocationCode.toUpperCase(),
           departureDateTimeRange: {
-            date: departureDate, // Expecting 'YYYY-MM-DD' format
-            // Optionally, you can include time
-            // time: "10:00:00"
+            date: departureDate, 
           },
         },
       ],
@@ -104,7 +100,7 @@ const searchFlights = async (req, res) => {
         originLocationCode: destinationLocationCode.toUpperCase(),
         destinationLocationCode: originLocationCode.toUpperCase(),
         departureDateTimeRange: {
-          date: returnDate, // 'YYYY-MM-DD'
+          date: returnDate,
         },
       });
 

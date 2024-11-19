@@ -1,5 +1,3 @@
-// backend/controllers/itineraryController.js
-
 const { Itinerary, User } = require('../models');
 const { validationResult } = require('express-validator');
 
@@ -11,10 +9,10 @@ const createItinerary = async (req, res) => {
   }
 
   const { name, destinations, startDate, endDate, notes } = req.body;
-  const firebaseUid = req.user.uid; // Use 'uid' instead of 'id'
+  const firebaseUid = req.user.uid; 
 
   try {
-    // Find user by FirebaseUID
+  
     const user = await User.findOne({ where: { FirebaseUID: firebaseUid } });
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
@@ -26,7 +24,7 @@ const createItinerary = async (req, res) => {
       startDate,
       endDate,
       notes,
-      userId: user.UserID, // Assign 'userId' correctly
+      userId: user.UserID, 
     });
 
     res.status(201).json({ success: true, itinerary });
@@ -107,7 +105,7 @@ const updateItinerary = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Itinerary not found' });
     }
 
-    // Update fields if provided
+    // Update fields
     if (name) itinerary.name = name;
     if (destinations) itinerary.destinations = destinations;
     if (startDate) itinerary.startDate = startDate;

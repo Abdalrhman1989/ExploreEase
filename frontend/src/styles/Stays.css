@@ -412,7 +412,7 @@
 }
 
 .stays-component-favorite-info {
-  flex-grow: 1; /* Allows the info section to take up available space */
+  flex-grow: 1; 
   display: flex;
   flex-direction: column;
 }
@@ -502,8 +502,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #e2e8f0; /* Light gray background */
-  color: #4a5568; /* Dark gray text */
+  background-color: #e2e8f0; 
+  color: #4a5568; 
   font-size: 0.9rem;
 }
 
@@ -594,7 +594,7 @@
   /* Dynamic Stays and Favorites Grid */
   .stays-component-favorites-grid,
   .stays-component-dynamic-stays .stays-component-grid {
-    grid-template-columns: 1fr; /* Ensure single column */
+    grid-template-columns: 1fr; 
   }
 
   /* Categories Grid */
@@ -615,7 +615,7 @@
   /* Grid Columns */
   .stays-component-grid,
   .stays-component-favorites-grid {
-    grid-template-columns: 1fr; /* Force single column */
+    grid-template-columns: 1fr; 
   }
 
   /* Info Window Adjustments */
@@ -654,7 +654,7 @@
   /* Single Column Grid for Very Small Screens */
   .stays-component-grid,
   .stays-component-favorites-grid {
-    grid-template-columns: 1fr; /* Ensure single column */
+    grid-template-columns: 1fr; 
   }
 
   /* Button Size Adjustments */
@@ -679,5 +679,4 @@
   }
 }
 
-/* Extra Small Devices (Very Small Phones, less than 480px) */
-/* Further adjustments can be made within the above media queries */
+

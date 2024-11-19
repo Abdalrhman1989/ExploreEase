@@ -9,10 +9,9 @@ exports.addFavorite = async (req, res) => {
   }
 
   const { type, placeId, name, address, rating, priceLevel, photoReference } = req.body;
-  const userId = req.user.uid; // Firebase UID
+  const userId = req.user.uid; 
 
   try {
-    // Find or create the user in the database
     let user = await User.findOne({ where: { FirebaseUID: userId } });
     if (!user) {
       user = await User.create({
@@ -49,14 +48,14 @@ exports.addFavorite = async (req, res) => {
   }
 };
 
-// Get all favorites for the authenticated user
+// Get all favorites for the user
 exports.getFavorites = async (req, res) => {
-  const userId = req.user.uid; // Firebase UID
+  const userId = req.user.uid; 
 
   try {
     const user = await User.findOne({ 
       where: { FirebaseUID: userId }, 
-      include: { model: Favorite, as: 'favorites' }  // Include associated favorites
+      include: { model: Favorite, as: 'favorites' } 
     });
     
     if (!user) {
@@ -72,7 +71,7 @@ exports.getFavorites = async (req, res) => {
 
 // Update a favorite by ID
 exports.updateFavorite = async (req, res) => {
-  console.log(`PUT /api/favorites/${req.params.id} - Received request`); // Logging
+  console.log(`PUT /api/favorites/${req.params.id} - Received request`); 
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -81,7 +80,7 @@ exports.updateFavorite = async (req, res) => {
   }
 
   const { type, placeId, name, address, rating, priceLevel, photoReference } = req.body;
-  const userId = req.user.uid; // Firebase UID
+  const userId = req.user.uid; 
   const favoriteId = req.params.id;
 
   try {
@@ -98,7 +97,6 @@ exports.updateFavorite = async (req, res) => {
       return res.status(404).json({ message: 'Favorite not found' });
     }
 
-    // Update fields if they are provided in the request body
     if (type) favorite.type = type;
     if (placeId) favorite.placeId = placeId;
     if (name) favorite.name = name;
@@ -119,7 +117,7 @@ exports.updateFavorite = async (req, res) => {
 
 // Remove a favorite by ID
 exports.removeFavorite = async (req, res) => {
-  const userId = req.user.uid; // Firebase UID
+  const userId = req.user.uid; 
   const favoriteId = req.params.id;
 
   try {

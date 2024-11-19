@@ -1,5 +1,3 @@
-// backend/controllers/travelStatsController.js
-
 const { User, Trip } = require('../models');
 
 const getUserWithTrips = async (firebaseUID) => {
@@ -33,7 +31,7 @@ const computeMostVisitedDestinations = (trips, topN = 5) => {
 const computeTravelTrends = (trips) => {
   const months = trips.reduce((acc, trip) => {
     const date = new Date(trip.departureTime);
-    const month = `${date.getFullYear()}-${date.getMonth() + 1}`; // Format: YYYY-M
+    const month = `${date.getFullYear()}-${date.getMonth() + 1}`; 
     acc[month] = (acc[month] || 0) + 1;
     return acc;
   }, {});

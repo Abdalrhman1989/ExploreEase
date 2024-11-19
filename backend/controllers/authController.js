@@ -1,4 +1,3 @@
-// backend/controllers/authController.js
 const { User } = require('../models');
 
 const syncUser = async (req, res) => {
@@ -21,7 +20,7 @@ const syncUser = async (req, res) => {
       Email: email,
       PhoneNumber: phoneNumber,
       UserType: userType,
-      ProfilePicture: profilePicture || null // Convert empty string to null
+      ProfilePicture: profilePicture || null 
     });
 
     res.status(201).json({ message: 'User synchronized with MySQL', user: newUser });

@@ -1,8 +1,6 @@
-// src/pages/Blog.jsx
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import '../styles/Blog.css'; // Ensure this path is correct based on your project structure
+import '../styles/Blog.css'; 
 
 const Blog = () => {
   const [posts, setPosts] = useState([]);
@@ -11,7 +9,7 @@ const Blog = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
-  // Sample blog data (Replace with API calls if available)
+
   useEffect(() => {
     const blogData = [
       {

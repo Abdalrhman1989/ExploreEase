@@ -1,5 +1,3 @@
-// frontend/src/pages/Booking.jsx
-
 import React, { useState, useEffect, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -26,7 +24,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; 
 import airlineMapping from '../utils/airlineMapping'; 
 import PropTypes from 'prop-types';
-import { AuthContext } from '../context/AuthContext'; // Ensure you have an AuthContext
+import { AuthContext } from '../context/AuthContext'; 
 
 const Booking = () => {
   const location = useLocation();
@@ -35,7 +33,7 @@ const Booking = () => {
 
   const { isAuthenticated, user } = useContext(AuthContext);
 
-  // Form and Payment States
+ 
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -47,7 +45,6 @@ const Booking = () => {
     expiryDate: '',
     issuanceCountry: '',
     nationality: '',
-    // Payment Fields
     cardNumber: '',
     expirationDate: '',
     cvv: '',
@@ -71,7 +68,6 @@ const Booking = () => {
       toast.error('No flight details found. Redirecting to home.');
       navigate('/');
     } else {
-      // Validate required flightDetails fields
       const requiredFields = [
         'type',
         'id',
@@ -104,7 +100,6 @@ const Booking = () => {
           toast.error('Invalid flight itinerary. Redirecting to home.');
           navigate('/');
         } else {
-          // Calculate amount based on flight price
           setAmount(parseFloat(flightDetails.price.total) || 0);
           setLoading(false);
         }
@@ -116,9 +111,7 @@ const Booking = () => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
 
-    // If certain fields change, you might want to recalculate amount or perform other actions
     if (['issuanceDate', 'expiryDate'].includes(name)) {
-      // Example: Additional logic if needed
     }
   };
 
@@ -148,9 +141,6 @@ const Booking = () => {
     } else if (nationality.trim().length < 2 || nationality.trim().length > 3) {
       errors.nationality = 'Nationality code must be 2 or 3 characters.';
     }
-
-    // Validate Payment Fields (optional for simulation)
-    // Since this is a fake payment, you might skip real validation
     if (!formData.cardNumber.trim()) {
       errors.cardNumber = 'Card number is required.';
     } else if (!/^\d{16}$/.test(formData.cardNumber.trim())) {
@@ -186,7 +176,6 @@ const Booking = () => {
     try {
       const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
 
-      // Extract necessary flight details from flightDetails
       const firstItinerary = flightDetails.itineraries[0];
       const firstSegment = firstItinerary.segments[0];
 
@@ -230,12 +219,12 @@ const Booking = () => {
 
       if (bookingResponse.status === 201 && bookingResponse.data.success) {
         const bookingId = bookingResponse.data.flightBooking.FlightBookingID;
-        const bookingAmount = parseFloat(flightDetails.price.total) * 100; // Assuming price is in USD and converting to cents
+        const bookingAmount = parseFloat(flightDetails.price.total) * 100; 
 
-        // Simulate Payment
         const paymentResponse = await axios.post(
           `${backendUrl}/api/payments/simulate-payment`,
-          { bookingId,bookingType: 'flight', amount: bookingAmount },
+          { bookingId,bookingType: 'flight',
+             amount: bookingAmount },
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem('authToken')}`,
@@ -244,7 +233,6 @@ const Booking = () => {
         );
 
         if (paymentResponse.status === 200 && paymentResponse.data.success) {
-          // Fetch confirmed booking details if needed
           const confirmedBooking = bookingResponse.data.flightBooking;
           setBookingDetails({
             bookingId: confirmedBooking.FlightBookingID,
@@ -261,7 +249,6 @@ const Booking = () => {
             phone: confirmedBooking.phone,
           });
 
-          // Open Confirmation Dialog
           setOpenDialog(true);
 
           // Reset Form
@@ -303,11 +290,11 @@ const Booking = () => {
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setBookingDetails(null);
-    navigate('/'); // Redirect to home or booking history as needed
+    navigate('/'); 
   };
 
   if (loading) return <LoadingSpinner />;
-  if (!flightDetails) return null; // Already handled in useEffect
+  if (!flightDetails) return null; 
 
   // Extract flight details
   const { itineraries, validatingAirlineCodes, price } = flightDetails;

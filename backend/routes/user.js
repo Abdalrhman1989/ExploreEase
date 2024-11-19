@@ -10,7 +10,7 @@ const travelStatsRouter = require('./travelStats');
 router.use('/itineraries', itinerariesRouter);
 router.use('/travel-stats', travelStatsRouter);
 
-// profile routes
+
 router.get('/profile', authenticate, userController.getUserDashboard);
 router.put(
   '/profile',

@@ -304,7 +304,7 @@ const CarRentals = () => {
     if (isAuthenticated) {
       fetchFavorites();
     } else {
-      setFavorites([]); // Clear favorites if not authenticated
+      setFavorites([]); 
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, user]);
@@ -322,7 +322,6 @@ const CarRentals = () => {
         },
         (error) => {
           console.error('Error getting user location:', error);
-          // Handle error: set an error state or prompt user
           setError('Unable to retrieve your location. Please allow location access or search manually.');
           setIsLoading(false);
         }
@@ -331,7 +330,7 @@ const CarRentals = () => {
       console.error('Geolocation not supported');
       setError('Geolocation is not supported by your browser.');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  
   }, []);
 
   return (
@@ -554,7 +553,6 @@ const CarRentals = () => {
             )}
           </GoogleMap>
         ) : isLoaded && !mapCenter ? (
-          // If the map is loaded but mapCenter is not set, prompt user
           <Box display="flex" justifyContent="center" alignItems="center" minHeight="600px">
             <Typography variant="h6" color="textSecondary">
               {error
@@ -563,7 +561,6 @@ const CarRentals = () => {
             </Typography>
           </Box>
         ) : (
-          // If the map is not loaded, show a loading spinner or error
           <Box display="flex" justifyContent="center" alignItems="center" minHeight="600px">
             {loadError ? (
               <Typography variant="h6" color="error">
@@ -669,7 +666,7 @@ const CarRentals = () => {
           {favorites.length > 0 ? (
             <Grid container spacing={4}>
               {favorites
-                .filter((fav) => fav.type === 'car_rental') // Filter to only 'car_rental' favorites
+                .filter((fav) => fav.type === 'car_rental') 
                 .map((fav) => (
                   <Grid item xs={12} sm={6} md={4} key={fav.id}>
                     <Card className="car-rentals-component-favorite-item">

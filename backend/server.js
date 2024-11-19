@@ -28,9 +28,6 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 
-
-
-
 // Setup Winston logger for logging events and errors
 const logger = winston.createLogger({
   level: 'info', 
@@ -43,7 +40,7 @@ const logger = winston.createLogger({
   ],
 });
 
-// If not in production, also log to the console for easier debugging
+// If not in production,  log to the console 
 if (process.env.NODE_ENV !== 'production') {
   logger.add(new winston.transports.Console({
     format: winston.format.simple(),
@@ -55,15 +52,15 @@ app.use(express.json());
 
 // Configure CORS
 app.use(cors({
-  origin: 'http://localhost:3000', // Update this to frontend URL in production
+  origin: 'http://localhost:3000', 
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Rate Limiting to prevent abuse
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  windowMs: 15 * 60 * 1000, 
+  max: 100, 
   message: 'Too many requests from this IP, please try again after 15 minutes',
 });
 app.use(limiter);
@@ -87,8 +84,8 @@ const initDB = async () => {
     console.log('Connected to MySQL');
     logger.info('Connected to MySQL');
 
-    // Sync models (Optional: use migrations in production)
-    await sequelize.sync(); // { force: true } to drop and recreate tables
+    // Sync models 
+    await sequelize.sync(); 
     console.log('Database synchronized');
     logger.info('Database synchronized');
   } catch (error) {
@@ -148,11 +145,11 @@ app.post('/api/subscribe',
 
     const mailchimpData = {
       email_address: email,
-      status: 'subscribed', // Use 'pending' for double opt-in
+      status: 'subscribed', 
     };
 
     try {
-      // Add subscriber to Mailchimp Audience
+      // Add subscriber to Mailchimp 
       const response = await axios.post(
         `https://${process.env.MAILCHIMP_SERVER_PREFIX}.api.mailchimp.com/3.0/lists/${process.env.MAILCHIMP_AUDIENCE_ID}/members`,
         mailchimpData,
@@ -213,12 +210,11 @@ ExploreEase Team`,
         logger.info(`Welcome email sent to subscriber: ${email}. Message ID: ${info.messageId}`);
       } catch (error) {
         logger.error(`Error sending welcome email to ${email}:`, error);
-        // Optionally, inform the user that welcome email failed
       
       }
 
       // Notification Email to Admin
-      const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER; // Use ADMIN_EMAIL if defined, else EMAIL_USER
+      const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER; 
       const mailOptionsToAdmin = {
         from: `"ExploreEase" <${process.env.EMAIL_USER}>`,
         to: adminEmail,

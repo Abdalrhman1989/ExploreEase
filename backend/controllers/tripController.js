@@ -1,15 +1,8 @@
-// controllers/tripController.js
-
 const { Trip, User } = require('../models');
 const { validationResult } = require('express-validator');
 
-/**
- * Create a new trip
- */
+// Create a new trip
 const createTrip = async (req, res) => {
-  console.log('Received trip data:', req.body);
-  console.log('Authenticated user UID:', req.user.uid);
-
 
   // Handle validation errors
   const errors = validationResult(req);
@@ -32,22 +25,17 @@ const createTrip = async (req, res) => {
       schedule,
       ticketProviderUrl,
     } = req.body;
-    const firebaseUid = req.user.uid; // Firebase UID from token
+    const firebaseUid = req.user.uid; 
 
-    // Find user by FirebaseUID
     const user = await User.findOne({ where: { FirebaseUID: firebaseUid } });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    // Log the user data to verify UserID
     console.log('User found:', user.toJSON());
-
-    // Check if UserID is valid
     if (!user.UserID) {
       console.error('User.UserID is null or undefined:', user.UserID);
       return res.status(500).json({ message: 'Internal Server Error: UserID is missing.' });
     }
-
     // Create new trip
     const newTrip = await Trip.create({
       UserID: user.UserID,
@@ -63,16 +51,15 @@ const createTrip = async (req, res) => {
       ticketProviderUrl,
     });
 
-    res.status(201).json(newTrip); // Respond with the created trip
+    res.status(201).json(newTrip); 
   } catch (error) {
     console.error('Error creating trip:', error);
     res.status(500).json({ message: 'Server Error' });
   }
 };
 
-/**
- * Get all trips for the authenticated user
- */
+// Get all trips 
+
 const getAllTrips = async (req, res) => {
   try {
     const firebaseUid = req.user.uid;
@@ -92,9 +79,8 @@ const getAllTrips = async (req, res) => {
   }
 };
 
-/**
- * Get a single trip by ID
- */
+// Get a single trip by ID
+
 const getTripById = async (req, res) => {
   const tripId = req.params.id;
   const firebaseUid = req.user.uid;
@@ -118,14 +104,10 @@ const getTripById = async (req, res) => {
   }
 };
 
-/**
- * Update a trip by ID
- */
+// Update a trip by ID
 const updateTrip = async (req, res) => {
   const tripId = req.params.id;
   const firebaseUid = req.user.uid;
-
-  // Handle validation errors
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
@@ -153,9 +135,7 @@ const updateTrip = async (req, res) => {
   }
 };
 
-/**
- * Delete a trip by ID
- */
+// Delete a trip by ID
 const deleteTrip = async (req, res) => {
   const tripId = req.params.id;
   const firebaseUid = req.user.uid;

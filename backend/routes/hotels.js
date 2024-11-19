@@ -5,33 +5,33 @@ const authorize = require('../middleware/authorize');
 
 const router = express.Router();
 
-// 1. Specific Routes First
 
-// Route to get approved hotels with optional city and location filter (Public Access)
+
+// get approved hotels 
 router.get('/approved', hotelController.getApprovedHotels);
 
-// Route to get pending hotels (Admin Only)
+// get pending hotels (Admin Only)
 router.get('/pending', authorize(['Admin']), hotelController.getPendingHotels);
 
-// Route to get authenticated user's hotels (Protected: User, BusinessAdministrator, Admin)
+// get user's hotels 
 router.get(
   '/user',
   authorize(['User', 'BusinessAdministrator', 'Admin']),
   hotelController.getUserHotels
 );
 
-// 2. Dynamic Routes After Specific Routes
 
-// Route to approve a hotel (Admin Only)
+
+// approve a hotel (Admin Only)
 router.post('/:id/approve', authorize(['Admin']), hotelController.approveHotel);
 
-// Route to reject a hotel (Admin Only)
+// reject a hotel (Admin Only)
 router.post('/:id/reject', authorize(['Admin']), hotelController.rejectHotel);
 
-// Route to get a single hotel by ID (Public Access, Approved only)
+// get a single hotel by ID
 router.get('/:id', hotelController.getHotelById);
 
-// Route to create a new hotel submission (Protected: User and BusinessAdministrator)
+// create a new hotel
 router.post(
   '/',
   authorize(['User', 'BusinessAdministrator']),
@@ -48,7 +48,7 @@ router.post(
   hotelController.createHotel
 );
 
-// Route to update hotel availability (Admin Only)
+// update hotel availability
 router.put(
   '/:id/availability',
   authorize(['Admin']),
@@ -57,7 +57,6 @@ router.put(
       .isObject()
       .withMessage('Availability must be an object with date keys')
       .custom((value) => {
-        // Validate that keys are dates in YYYY-MM-DD format and values are boolean
         for (const [date, available] of Object.entries(value)) {
           if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
             throw new Error(`Invalid date format: ${date}. Expected YYYY-MM-DD.`);
@@ -72,7 +71,7 @@ router.put(
   hotelController.updateHotelAvailability
 );
 
-// Route to update hotel details (Full Update) (Protected: Owner or Admin)
+// update hotel details (Full Update)
 router.put(
   '/:id',
   authorize(['Admin', 'User', 'BusinessAdministrator']),
@@ -89,7 +88,7 @@ router.put(
   hotelController.updateHotel
 );
 
-// Route to delete a hotel by ID (Protected: Owner or Admin)
+// delete a hotel by ID
 router.delete(
   '/:id',
   authorize(['Admin', 'User', 'BusinessAdministrator']),

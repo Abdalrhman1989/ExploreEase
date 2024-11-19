@@ -1,5 +1,3 @@
-// models/trip.js
-
 'use strict';
 const { Model } = require('sequelize');
 
@@ -11,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // Define association to User
+     
       Trip.belongsTo(models.User, { foreignKey: 'UserID', as: 'user' });
     }
   }
@@ -22,17 +20,17 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
       allowNull: false
     },
-    UserID: { // Foreign key
+    UserID: { 
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'Users', // Must match the table name
-        key: 'UserID'    // Must match the primary key in User model
+        model: 'Users', 
+        key: 'UserID'    
       },
       onUpdate: 'CASCADE',
       onDelete: 'CASCADE'
     },
-    type: { // ENUM: bus, train, flight
+    type: { 
       type: DataTypes.ENUM('bus', 'train', 'flight'),
       allowNull: false
     },
@@ -52,28 +50,28 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: false
     },
-    duration: { // Duration in minutes
+    duration: { 
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    transitStops: { // JSON array
+    transitStops: { 
       type: DataTypes.JSON,
       allowNull: true
     },
-    transitLines: { // JSON array
+    transitLines: { 
       type: DataTypes.JSON,
       allowNull: true
     },
-    schedule: { // JSON array
+    schedule: { 
       type: DataTypes.JSON,
       allowNull: true
     },
-    createdAt: { // Timestamp
+    createdAt: { 
       allowNull: false,
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW
     },
-    updatedAt: { // Timestamp
+    updatedAt: { 
       allowNull: false,
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW

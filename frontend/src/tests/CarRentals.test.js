@@ -1,8 +1,6 @@
-// src/tests/CarRentals.test.js
-
 import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
-import CarRentals from '../pages/CarRentals'; // Adjust the path if necessary
+import CarRentals from '../pages/CarRentals'; 
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
 import '@testing-library/jest-dom';
@@ -518,8 +516,6 @@ describe('CarRentals Component', () => {
 
     // Check for success toast
     expect(require('react-toastify').toast.success).toHaveBeenCalledWith('Favorite added successfully!');
-  });
-
-  
+  }); 
 
 });

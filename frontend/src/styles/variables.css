@@ -1,14 +1,14 @@
 :root {
     /* Color Palette */
-    --primary-color: #1e3c72; /* Deep Blue */
-    --secondary-color: #2a5298; /* Medium Blue */
-    --accent-color: #ffffff; /* White */
-    --background-color: #f4f6f8; /* Light Gray */
-    --card-background: #ffffff; /* White */
-    --text-color: #333333; /* Dark Gray */
-    --secondary-text-color: #555555; /* Medium Gray */
-    --error-color: #dc3545; /* Red for errors */
-    --success-color: #28a745; /* Green for success messages */
+    --primary-color: #1e3c72; 
+    --secondary-color: #2a5298; 
+    --accent-color: #ffffff; 
+    --background-color: #f4f6f8; 
+    --card-background: #ffffff; 
+    --text-color: #333333; 
+    --secondary-text-color: #555555; 
+    --error-color: #dc3545; 
+    --success-color: #28a745; 
   
     /* Gradients */
     --primary-gradient: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);

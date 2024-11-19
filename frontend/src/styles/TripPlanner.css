@@ -1,7 +1,5 @@
-/* Import React Big Calendar Default Styles */
 @import '~react-big-calendar/lib/css/react-big-calendar.css';
 
-/* Override Default Styles for a Modern and Responsive Look */
 
 /* Calendar Container */
 .rbc-calendar {
@@ -156,7 +154,6 @@
     font-size: 0.75rem;
   }
 
-  /* Switch to Agenda View for Better Mobile Experience */
   .rbc-agenda-view {
     padding: 5px;
   }

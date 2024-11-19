@@ -1,9 +1,5 @@
-// frontend/src/App.jsx
-
 import React, { useContext } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-
-// Context
 import { AuthContext } from './context/AuthContext';
 
 // Pages
@@ -38,9 +34,6 @@ import ManageRestaurants from './pages/ManageRestaurants.jsx';
 import ManageHotels from './pages/ManageHotels.jsx';
 import PaymentPage from './pages/PaymentPage.jsx'; 
 import RestaurantDetails from './pages/RestaurantDetails'; 
-
-
-// New Pages
 import Blog from './pages/Blog';
 import Careers from './pages/Careers';
 
@@ -63,7 +56,7 @@ function App() {
   const isAdminRoute = location.pathname.startsWith('/admin');
   const isBusinessRoute = location.pathname.startsWith('/business');
 
-  const { isAuthenticated, loading } = useContext(AuthContext); // Access AuthContext
+  const { isAuthenticated, loading } = useContext(AuthContext);
 
   return (
     <div className="app">

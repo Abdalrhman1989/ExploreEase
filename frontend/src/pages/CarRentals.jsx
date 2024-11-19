@@ -108,11 +108,15 @@ const CarRentals = () => {
       return;
     }
 
+    // Debugging: Log favoriteData to ensure placeId is present
+    console.log('Adding favorite:', favoriteData);
+
     try {
       const idToken = await user.getIdToken();
       const response = await axios.post(`${BACKEND_URL}/api/favorites`, favoriteData, {
         headers: {
           Authorization: `Bearer ${idToken}`,
+          'Content-Type': 'application/json', // Ensure content type is JSON
         },
       });
       setFavorites((prevFavorites) => [...prevFavorites, response.data.favorite]);
@@ -272,6 +276,7 @@ const CarRentals = () => {
           'price_level',
           'user_ratings_total',
           'vicinity',
+          'place_id', // Explicitly request 'place_id'
         ],
       },
       (place, status) => {
@@ -533,17 +538,27 @@ const CarRentals = () => {
                       className="car-rentals-component-favorite-button"
                       startIcon={<FavoriteBorder />}
                       onClick={() => {
+                        // Ensure 'selected.place_id' is defined
+                        if (!selected.place_id) {
+                          toast.error('Place ID is missing. Cannot add to favorites.');
+                          return;
+                        }
+
                         const favoriteData = {
                           type: 'car_rental',
                           placeId: selected.place_id,
                           name: selected.name,
-                          address: selected.formatted_address || '',
+                          address: selected.vicinity || selected.formatted_address || '',
                           rating: selected.rating || null,
                           photoReference:
                             selected.photos && selected.photos.length > 0
                               ? selected.photos[0].photo_reference
                               : null,
                         };
+
+                        // Additional Debugging
+                        console.log('Favorite Data from InfoWindow:', favoriteData);
+
                         addFavoriteToDB(favoriteData);
                       }}
                     >

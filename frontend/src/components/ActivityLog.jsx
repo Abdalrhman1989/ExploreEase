@@ -1,5 +1,3 @@
-// src/components/ActivityLog.jsx
-
 import React, { useState, useEffect } from 'react';
 import {
   Box,
@@ -14,7 +12,7 @@ import {
 import axios from 'axios';
 import { SaveAlt } from '@mui/icons-material';
 import { saveAs } from 'file-saver';
-import Papa from 'papaparse'; // For CSV export
+import Papa from 'papaparse'; 
 
 const ActivityLog = ({ idToken, API_BASE_URL }) => {
   const [activities, setActivities] = useState([]);

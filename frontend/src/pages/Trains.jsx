@@ -566,6 +566,7 @@ const Trains = () => {
       {
         placeId: placeId,
         fields: [
+          'place_id', // Added place_id to ensure it's available
           'name',
           'rating',
           'formatted_address',
@@ -1075,7 +1076,7 @@ const Trains = () => {
                     onClick={() => {
                       const favoriteData = {
                         type: 'train_station',
-                        placeId: selected.place_id,
+                        placeId: selected.place_id, // Ensure place_id is correctly passed
                         name: selected.name,
                         address: selected.formatted_address || '',
                         rating: selected.rating || null,

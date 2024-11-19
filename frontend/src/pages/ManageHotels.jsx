@@ -34,6 +34,7 @@ const ManageHotels = () => {
   const [formData, setFormData] = useState({
     name: '',
     location: '',
+    city: '', // Added city field
     type: '',
     basePrice: '',
     rating: '',
@@ -72,13 +73,13 @@ const ManageHotels = () => {
     try {
       const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
       let url = '';
-  
+
       if (userRole === 'Admin') {
         url = `${backendUrl}/api/hotels/pending`;
       } else {
         url = `${backendUrl}/api/hotels/user`;
       }
-  
+
       const response = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${idToken}`,
@@ -130,13 +131,14 @@ const ManageHotels = () => {
       setFormData({
         name: hotel.name || '',
         location: hotel.location || '',
+        city: hotel.city || '', // Populate city
         type: hotel.type || '',
         basePrice: hotel.basePrice || '',
         rating: hotel.rating || '',
         description: hotel.description || '',
         amenities: hotel.amenities || [],
         images: hotel.images || [],
-        availability: hotel.availability || {}, 
+        availability: hotel.availability || {},
         latitude: hotel.latitude || '',
         longitude: hotel.longitude || '',
       });
@@ -196,9 +198,21 @@ const ManageHotels = () => {
     if (place.geometry) {
       const lat = place.geometry.location.lat();
       const lng = place.geometry.location.lng();
+      const addressComponents = place.address_components;
+      let city = '';
+
+      // Extract city from address components
+      for (const component of addressComponents) {
+        if (component.types.includes('locality')) {
+          city = component.long_name;
+          break;
+        }
+      }
+
       setFormData({
         ...formData,
         location: place.formatted_address || place.name || '',
+        city: city, // Set the city
         latitude: lat,
         longitude: lng,
       });
@@ -221,9 +235,20 @@ const ManageHotels = () => {
 
       if (geocodeResponse.data.status === 'OK') {
         const address = geocodeResponse.data.results[0]?.formatted_address || '';
+        // Extract city from address components
+        const addressComponents = geocodeResponse.data.results[0]?.address_components || [];
+        let city = '';
+        for (const component of addressComponents) {
+          if (component.types.includes('locality')) {
+            city = component.long_name;
+            break;
+          }
+        }
+
         setFormData((prevFormData) => ({
           ...prevFormData,
           location: address,
+          city: city, // Set the city
         }));
       } else {
         toast.error('Failed to retrieve address from coordinates.');
@@ -239,7 +264,11 @@ const ManageHotels = () => {
     const lat = event.latLng.lat();
     const lng = event.latLng.lng();
     setMarkerPosition({ lat, lng });
-    setFormData({ ...formData, latitude: lat, longitude: lng });
+    setFormData({ 
+      ...formData, 
+      latitude: lat, 
+      longitude: lng 
+    });
     // Optionally, reverse geocode to get address
     reverseGeocode(lat, lng);
   };
@@ -254,6 +283,7 @@ const ManageHotels = () => {
     const payload = {
       name: formData.name,
       location: formData.location,
+      city: formData.city, // Include city
       type: formData.type,
       basePrice: parseFloat(formData.basePrice),
       rating: parseFloat(formData.rating), 
@@ -282,6 +312,7 @@ const ManageHotels = () => {
       setFormData({
         name: '',
         location: '',
+        city: '', // Reset city
         type: '',
         basePrice: '',
         rating: '',
@@ -380,6 +411,9 @@ const ManageHotels = () => {
                 <strong>Location:</strong> {selectedHotel.location}
               </p>
               <p>
+                <strong>City:</strong> {selectedHotel.city} {/* Display city */}
+              </p>
+              <p>
                 <strong>Type:</strong> {selectedHotel.type}
               </p>
               <p>
@@ -460,6 +494,16 @@ const ManageHotels = () => {
                   className="autocomplete-input"
                 />
               </Autocomplete>
+
+              {/* City Input */}
+              <input
+                type="text"
+                name="city"
+                placeholder="City"
+                value={formData.city || ''}
+                onChange={handleChange}
+                required
+              />
 
               {/* Type Input */}
               <input

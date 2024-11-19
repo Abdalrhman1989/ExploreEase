@@ -9,31 +9,17 @@
   --secondary-text-color: #555555; 
   --error-color: #dc3545; 
   --success-color: #28a745; 
-
-  /* Gradients */
   --primary-gradient: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
   --secondary-gradient: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-
-  /* Shadows */
   --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   --hover-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-
-  /* Border Radius */
   --border-radius: 12px;
-
-  /* Transitions */
   --transition-speed: 0.3s;
-
-  /* Font Sizes */
   --font-size-small: 0.9rem;
   --font-size-medium: 1rem;
   --font-size-large: 1.5rem;
   --font-size-xlarge: 2.5rem;
-
-  /* Z-Index for layering */
   --z-index-modal: 1000;
-
-  /* Typography */
   --font-family: 'Roboto', sans-serif;
 }
 
@@ -214,12 +200,12 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 40px;
-  align-items: stretch; /* Ensures all grid items stretch to the same height */
+  align-items: stretch; 
 }
 
 /* Ensure grid containers have uniform row heights */
 .trains-component-categories-grid {
-  grid-auto-rows: 1fr; /* Can be adjusted as needed */
+  grid-auto-rows: 1fr; 
 }
 
 .trains-component-category-item {
@@ -231,7 +217,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100%; /* Make it responsive within grid */
+  width: 100%; 
   box-shadow: var(--box-shadow);
 }
 
@@ -515,7 +501,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-height: 400px; /* Ensures uniform height */
+  min-height: 400px; 
 }
 
 .trains-component-journey-item:hover {
@@ -556,8 +542,10 @@
 }
 
 /* New class for actions */
-.trains-component-journey-actions {
-  margin-top: auto; /* Pushes the actions to the bottom */
+.trains-component-journey-actions,
+.trains-component-saved-trip-actions,
+.trains-component-favorite-actions {
+  margin-top: auto; 
   display: flex;
   justify-content: space-between;
   gap: 12px;
@@ -565,7 +553,10 @@
 
 .trains-component-view-details-button,
 .trains-component-buy-ticket-button,
-.trains-component-save-trip-button {
+.trains-component-save-trip-button,
+.trains-component-delete-trip-button,
+.trains-component-google-maps-button,
+.trains-component-delete-favorite-button {
   background: var(--primary-gradient);
   color: var(--accent-color);
   padding: 12px 25px;
@@ -578,13 +569,15 @@
   gap: 10px;
   font-size: var(--font-size-small);
   font-weight: 600;
-  margin-right: 15px;
   box-shadow: var(--box-shadow);
 }
 
 .trains-component-view-details-button:hover,
 .trains-component-buy-ticket-button:hover,
-.trains-component-save-trip-button:hover {
+.trains-component-save-trip-button:hover,
+.trains-component-delete-trip-button:hover,
+.trains-component-google-maps-button:hover,
+.trains-component-delete-favorite-button:hover {
   background: var(--secondary-gradient);
   transform: scale(1.05);
   box-shadow: var(--hover-shadow);
@@ -660,7 +653,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-height: 400px; /* Ensures uniform height */
+  min-height: 400px; 
 }
 
 .trains-component-saved-trip-item:hover {
@@ -698,44 +691,6 @@
   text-decoration: underline;
 }
 
-/* New class for actions */
-.trains-component-saved-trip-actions {
-  margin-top: auto; /* Pushes the actions to the bottom */
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.trains-component-delete-trip-button {
-  background: var(--secondary-gradient);
-  color: var(--accent-color);
-  padding: 12px 25px;
-  border: none;
-  border-radius: 50px;
-  cursor: pointer;
-  transition: background var(--transition-speed), transform var(--transition-speed);
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  font-size: var(--font-size-small);
-  font-weight: 600;
-  box-shadow: var(--box-shadow);
-}
-
-.trains-component-delete-trip-button:hover {
-  background: var(--primary-gradient);
-  transform: scale(1.05);
-  box-shadow: var(--hover-shadow);
-}
-
-.no-saved-trips-message,
-.no-favorites-message {
-  text-align: center;
-  font-size: 1.4rem;
-  margin-top: 50px;
-  color: var(--secondary-text-color);
-}
-
 /* Favorites Section */
 .trains-component-favorites-section {
   padding: 60px 20px;
@@ -751,11 +706,7 @@
 }
 
 .trains-component-favorites-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 40px;
-  align-items: stretch; /* Ensures all grid items stretch to the same height */
-  grid-auto-rows: minmax(400px, auto); /* Ensures all grid items have at least 400px height */
+ 
 }
 
 .trains-component-favorite-item {
@@ -767,7 +718,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-height: 400px; /* Ensures uniform height */
+  min-height: 400px;
 }
 
 .trains-component-favorite-item:hover {
@@ -813,11 +764,10 @@
 .trains-component-favorite-info p {
   margin: 6px 0;
   font-size: var(--font-size-medium);
-  color: var(--text-color);
 }
 
 .trains-component-favorite-actions {
-  margin-top: auto; /* Pushes the actions to the bottom */
+  margin-top: auto; 
   display: flex;
   justify-content: space-between;
   gap: 12px;
@@ -901,7 +851,9 @@
 
 /* Large Devices (Desktops, 1200px and up) */
 @media (min-width: 1201px) {
-  /* No additional styles needed as the default styles cater to large screens */
+  .trains-component-favorites-grid {
+    
+  }
 }
 
 /* Medium Devices (Tablets, 768px to 1200px) */
@@ -1007,7 +959,7 @@
   .trains-component-dynamic-trains .MuiGrid-container,
   .trains-component-saved-trips-section .MuiGrid-container {
     grid-template-columns: 1fr;
-    grid-auto-rows: minmax(400px, auto); /* Maintain uniform row heights */
+    grid-auto-rows: minmax(400px, auto); 
   }
 
   /* Reduce gaps for smaller screens */
@@ -1046,7 +998,7 @@
   .trains-component-dynamic-trains .MuiGrid-container,
   .trains-component-saved-trips-section .MuiGrid-container {
     grid-template-columns: 1fr;
-    grid-auto-rows: minmax(400px, auto); /* Maintain uniform row heights */
+    grid-auto-rows: minmax(400px, auto); 
   }
 
   .trains-component-saved-trips-filter span {
@@ -1069,7 +1021,6 @@
     font-size: var(--font-size-small);
   }
 
-  /* Ensure images fit within very small screens */
   .trains-component-placeholder,
   .trains-component-info-window-image,
   .trains-component-favorite-image-button img {
@@ -1077,17 +1028,15 @@
   }
 }
 
-/* Ensure Journey, Saved Trip, and Favorite Items are Flex Containers */
 .trains-component-journey-item,
 .trains-component-saved-trip-item,
 .trains-component-favorite-item {
   display: flex;
   flex-direction: column;
-  height: 100%; /* Makes the card stretch to fill the grid cell */
-  min-height: 400px; /* Ensures uniform height */
+  height: 100%; 
+  min-height: 400px; 
 }
 
-/* Make Content Areas Flexible */
 .trains-component-journey-content,
 .trains-component-saved-trip-content,
 .trains-component-favorite-info {
@@ -1096,17 +1045,15 @@
   flex-direction: column;
 }
 
-/* Align Action Buttons at the Bottom */
 .trains-component-journey-actions,
 .trains-component-saved-trip-actions,
 .trains-component-favorite-actions {
-  margin-top: auto; /* Pushes the actions to the bottom */
+  margin-top: auto; 
   display: flex;
   justify-content: space-between;
   gap: 12px;
 }
 
-/* Ensure Consistent Button Heights */
 .trains-component-view-details-button,
 .trains-component-buy-ticket-button,
 .trains-component-save-trip-button,
@@ -1115,12 +1062,11 @@
 .trains-component-delete-favorite-button {
   padding: 12px 25px;
   font-size: var(--font-size-small);
-  min-height: 45px; /* Ensures all buttons have the same height */
+  min-height: 45px; 
 }
 
-/* Optional: Set a Minimum Height for Cards */
 .trains-component-journey-item,
 .trains-component-saved-trip-item,
 .trains-component-favorite-item {
-  min-height: 400px; /* Adjust as needed based on your design */
+  min-height: 400px; 
 }

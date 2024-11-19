@@ -1,5 +1,3 @@
-// src/components/Accordion.jsx
-
 import React, { useState } from 'react';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import '../styles/Accordion.css';

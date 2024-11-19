@@ -1,7 +1,6 @@
-/* Define CSS Variables for Consistent Theming */
 :root {
-  --primary-color: #1976d2; /* MUI Default Primary Color */
-  --secondary-color: #dc004e; /* MUI Default Secondary Color */
+  --primary-color: #1976d2; 
+  --secondary-color: #dc004e; 
   --background-color: #ffffff;
   --surface-color: #f5f5f5;
   --error-color: #d32f2f;

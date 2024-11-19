@@ -1,5 +1,3 @@
-// Attractions.jsx
-
 import React, { useState, useRef, useEffect, useContext, useCallback } from 'react';
 import {
   GoogleMap,
@@ -524,7 +522,7 @@ const Attractions = () => {
                 }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
-                    e.preventDefault(); // Prevent form submission or default behavior
+                    e.preventDefault(); 
                     const query = e.target.value.trim();
                     if (query) {
                       setIsLoading(true);
@@ -705,7 +703,7 @@ const Attractions = () => {
                         onClick={() => {
                           const favoriteData = {
                             type: 'attraction',
-                            placeId: selected.place_id || `user-${selected.id}`, // Ensure unique identifier for user-created attractions
+                            placeId: selected.place_id || `user-${selected.id}`, 
                             name: selected.name,
                             address: selected.formatted_address || selected.location || '',
                             rating: selected.rating || null,
@@ -744,7 +742,7 @@ const Attractions = () => {
                 googleMarkers.map((attraction) => (
                   <div key={attraction.place_id} className="attractions-component-item">
                     <button
-                      onClick={() => handleViewDetails(attraction, 'map')} // Show InfoWindow on map
+                      onClick={() => handleViewDetails(attraction, 'map')} 
                       className="attractions-component-image-button"
                       aria-label={`View details for ${attraction.name}`}
                     >
@@ -774,7 +772,7 @@ const Attractions = () => {
                       <p>{attraction.formatted_address || attraction.vicinity || 'No address available'}</p>
                       <div className="attractions-component-actions">
                         <button
-                          onClick={() => handleViewDetails(attraction, 'map')} // Show InfoWindow on map
+                          onClick={() => handleViewDetails(attraction, 'map')} 
                           className="attractions-component-favorite-button"
                           aria-label={`View details for ${attraction.name}`}
                         >
@@ -845,7 +843,7 @@ const Attractions = () => {
                       <p>{attraction.location || 'No location available'}</p>
                       <div className="approved-attractions-actions">
                         <button
-                          onClick={() => handleViewDetails(attraction, 'approved')} // Navigate to details page or handle as needed
+                          onClick={() => handleViewDetails(attraction, 'approved')} 
                           className="approved-attractions-view-details-button"
                           aria-label={`View details for ${attraction.name}`}
                         >
@@ -855,7 +853,7 @@ const Attractions = () => {
                           onClick={() => {
                             const favoriteData = {
                               type: 'attraction',
-                              placeId: attraction.AttractionID, // Assuming placeId can be AttractionID
+                              placeId: attraction.AttractionID, 
                               name: attraction.name,
                               address: `${attraction.location}`,
                               rating: attraction.rating || null,
@@ -863,7 +861,6 @@ const Attractions = () => {
                               photoReference: attraction.images && attraction.images.length > 0
                                 ? attraction.images[0]
                                 : null,
-                              // Include latitude and longitude for map positioning
                               latitude: attraction.latitude,
                               longitude: attraction.longitude,
                             };
@@ -890,7 +887,7 @@ const Attractions = () => {
                 {favorites.filter(fav => fav.type === 'attraction').map((fav) => (
                   <div key={fav.id || fav.AttractionID} className="attractions-component-favorite-item">
                     <button
-                      onClick={() => handleViewDetails(fav, 'map')} // Show InfoWindow on map
+                      onClick={() => handleViewDetails(fav, 'map')} 
                       className="attractions-component-favorite-image-button"
                       aria-label={`View details for ${fav.name}`}
                     >

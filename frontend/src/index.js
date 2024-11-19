@@ -4,9 +4,8 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import App from './App';
 import { AuthProvider } from './context/AuthContext'; 
 import './styles/App.css';
-import * as serviceWorker from '../src/serviceWorker'; // Import the service worker registration
+import * as serviceWorker from '../src/serviceWorker'; 
 
-// Dynamically add the manifest.json file to the app
 const link = document.createElement('link');
 link.rel = 'manifest';
 link.href = './manifest.json'; 

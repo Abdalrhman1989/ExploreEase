@@ -343,21 +343,7 @@ const HotelForm = () => {
         required
       />
 
-      {/* Autocomplete Search Box */}
-      <Autocomplete
-        onLoad={(autocomplete) => (autocompleteRef.current = autocomplete)}
-        onPlaceChanged={handlePlaceChanged}
-      >
-        <input
-          type="text"
-          name="location"
-          placeholder="Search Location"
-          value={hotelDetails.location}
-          onChange={handleChange}
-          required
-          className="autocomplete-input"
-        />
-      </Autocomplete>
+      
 
       <input
         type="number"

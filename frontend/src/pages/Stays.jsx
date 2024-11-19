@@ -109,6 +109,10 @@ const Stays = () => {
     try {
       const idToken = await user.getIdToken();
       const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
+      
+      // Debugging: Log the favoriteData being sent
+      console.log('Adding favorite:', favoriteData);
+
       const response = await axios.post(
         `${backendUrl}/api/favorites`,
         favoriteData,
@@ -266,6 +270,7 @@ const Stays = () => {
       {
         placeId: placeId,
         fields: [
+          'place_id', // Added place_id
           'name',
           'rating',
           'price_level',
@@ -420,31 +425,40 @@ const Stays = () => {
     }
   }, [isLoaded]);
 
-  // Fetch user's location or default to world overview
+  // Fetch user's current geolocation and set map center accordingly
   useEffect(() => {
+    const handleLocationSuccess = (position) => {
+      setMapCenter({
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      });
+      setMapZoom(12);
+      setIsLoading(true);
+      searchStaysByLocation({
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      });
+    };
+
+    const handleLocationError = (error) => {
+      console.error('Error fetching user location:', error);
+      setMapCenter({ lat: 0, lng: 0 }); // World center
+      setMapZoom(2); // World view
+      setError('Failed to retrieve your location. Showing world overview.');
+    };
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(handleLocationSuccess, handleLocationError);
+    } else {
+      console.error('Geolocation not supported by this browser.');
+      setMapCenter({ lat: 0, lng: 0 }); // World center
+      setMapZoom(2); // World view
+      setError('Geolocation is not supported by your browser.');
+    }
+
+    // If authenticated, optionally fetch user-specific data
     if (isAuthenticated) {
       fetchUserHotel();
-    } else {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            setMapCenter({
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            });
-            setMapZoom(12);
-          },
-          (error) => {
-            console.error('Error fetching user location:', error);
-            setMapCenter({ lat: 0, lng: 0 }); // World center
-            setMapZoom(2); // World view
-          }
-        );
-      } else {
-        console.error('Geolocation not supported by this browser.');
-        setMapCenter({ lat: 0, lng: 0 }); // World center
-        setMapZoom(2); // World view
-      }
     }
   }, [isAuthenticated, user, fetchUserHotel]);
 
@@ -682,13 +696,17 @@ const Stays = () => {
                       const categoryType = typeMapping[primaryType] || 'hotel'; 
                       const favoriteData = {
                         type: categoryType, 
-                        placeId: selected.place_id,
+                        placeId: selected.place_id, // Ensure place_id is included
                         name: selected.name,
                         address: selected.formatted_address || '',
                         rating: selected.rating || null,
                         priceLevel: selected.price_level || null,
                         photoReference: selected.photos && selected.photos.length > 0 ? selected.photos[0].photo_reference : null
                       };
+                      
+                      // Debugging: Log favoriteData before sending
+                      console.log('Favorite Data from InfoWindow:', favoriteData);
+
                       addFavoriteToDB(favoriteData);
                     }}
                     className="stays-component-favorite-button"
@@ -770,6 +788,10 @@ const Stays = () => {
                               priceLevel: stay.price_level || null,
                               photoReference: stay.photos && stay.photos.length > 0 ? stay.photos[0].photo_reference : null
                             };
+                            
+                            // Debugging: Log favoriteData before sending
+                            console.log('Favorite Data from Dynamic Stays:', favoriteData);
+
                             addFavoriteToDB(favoriteData);
                           }}
                           className="stays-component-add-favorite-button"

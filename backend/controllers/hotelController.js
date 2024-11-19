@@ -1,10 +1,10 @@
+// controllers/hotelController.js
+
 const { validationResult } = require('express-validator');
-const { Hotel } = require('../models'); 
-const { Op } = require('sequelize');
+const { Hotel } = require('../models'); // Adjust the path as needed
 
 // Create a new hotel
 const createHotel = async (req, res) => {
-  // validation errors
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ success: false, errors: errors.array() });
@@ -14,100 +14,66 @@ const createHotel = async (req, res) => {
     const {
       name,
       location,
-      city, 
+      city,
       basePrice,
       description,
+      latitude,
+      longitude,
       roomTypes,
       seasonalPricing,
       amenities,
-      images, 
-      availability, 
-      latitude, 
-      longitude, 
+      images,
+      availability,
     } = req.body;
 
-    // Validate
+    // Validate and process images
     let processedImages = [];
     if (images && Array.isArray(images)) {
       processedImages = images.map((base64String) => {
         // Validate the Base64 string format
         if (!base64String.startsWith('data:image/')) {
-          throw new Error('Invalid image format. Images must be Base64 encoded strings starting with "data:image/".');
+          throw new Error(
+            'Invalid image format. Images must be Base64 encoded strings starting with "data:image/".'
+          );
         }
         return base64String;
       });
     }
 
-    // Validate roomTypes
-    let processedRoomTypes = [];
-    if (roomTypes && Array.isArray(roomTypes)) {
-      processedRoomTypes = roomTypes;
-    }
-
-    // Validate seasonalPricing
-    let processedSeasonalPricing = [];
-    if (seasonalPricing && Array.isArray(seasonalPricing)) {
-      processedSeasonalPricing = seasonalPricing;
-    }
-
-    // Validate amenities
-    let processedAmenities = amenities || [];
-
-    // Validate availability
-    let processedAvailability = {};
-    if (availability && typeof availability === 'object' && !Array.isArray(availability)) {
-      for (const [date, isAvailable] of Object.entries(availability)) {
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-          throw new Error(`Invalid date format: ${date}. Expected YYYY-MM-DD.`);
-        }
-        if (typeof isAvailable !== 'boolean') {
-          throw new Error(`Invalid availability value for ${date}. Expected boolean.`);
-        }
-        processedAvailability[date] = isAvailable;
-      }
-    } else {
-      throw new Error('Availability must be an object with date keys in YYYY-MM-DD format and boolean values.');
-    }
-
-    // Validate latitude and longitude
-    if (typeof latitude !== 'number' || typeof longitude !== 'number') {
-      throw new Error('Latitude and Longitude must be numbers.');
-    }
-
-    // Create new hotel with status 'Pending'
-    const newHotel = await Hotel.create({
+    // Create the hotel
+    const hotel = await Hotel.create({
       FirebaseUID: req.user.uid,
       name,
       location,
-      city, 
+      city,
       basePrice,
       description,
-      roomTypes: processedRoomTypes, 
-      seasonalPricing: processedSeasonalPricing, 
-      amenities: processedAmenities,
+      latitude,
+      longitude,
+      roomTypes,
+      seasonalPricing,
+      amenities,
       images: processedImages,
+      availability,
       status: 'Pending',
-      availability: processedAvailability, 
-      latitude, 
-      longitude, 
     });
 
-    res.status(201).json({
-      success: true,
-      message: 'Hotel submitted successfully and is pending approval.',
-      hotel: newHotel,
-    });
+    res.status(201).json({ success: true, message: 'Hotel created successfully.', hotel });
   } catch (error) {
     console.error('Error creating hotel:', error);
-    res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'Internal server error', error: error.message });
   }
 };
 
 // Get approved hotels
-
 const getApprovedHotels = async (req, res) => {
   try {
-    const { lat, lng, radius = 10000 } = req.query; 
+    const { lat, lng, radius = 10000 } = req.query;
+
+    // Define whereClause to filter approved hotels
+    const whereClause = { status: 'Approved' };
 
     if (lat && lng) {
       const latitude = parseFloat(lat);
@@ -115,7 +81,9 @@ const getApprovedHotels = async (req, res) => {
       const radiusInMeters = parseInt(radius, 10);
 
       if (isNaN(latitude) || isNaN(longitude) || isNaN(radiusInMeters)) {
-        return res.status(400).json({ success: false, message: 'Invalid latitude, longitude, or radius.' });
+        return res
+          .status(400)
+          .json({ success: false, message: 'Invalid latitude, longitude, or radius.' });
       }
 
       const sequelize = require('../models').sequelize;
@@ -150,25 +118,29 @@ const getApprovedHotels = async (req, res) => {
     res.status(200).json({ success: true, hotels });
   } catch (error) {
     console.error('Error fetching approved hotels:', error);
-    res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'Internal server error', error: error.message });
   }
 };
 
-
-// Get pending hotels (Admin Only)
-
+// Get pending hotels (Admin only)
 const getPendingHotels = async (req, res) => {
   try {
-    const hotels = await Hotel.findAll({ where: { status: 'Pending' } });
+    const hotels = await Hotel.findAll({
+      where: { status: 'Pending' },
+      order: [['createdAt', 'DESC']],
+    });
     res.status(200).json({ success: true, hotels });
   } catch (error) {
     console.error('Error fetching pending hotels:', error);
-    res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'Internal server error', error: error.message });
   }
 };
 
-// Approve a hotel (Admin Only)
-
+// Approve a hotel (Admin only)
 const approveHotel = async (req, res) => {
   const hotelId = req.params.id;
 
@@ -179,7 +151,9 @@ const approveHotel = async (req, res) => {
     }
 
     if (hotel.status !== 'Pending') {
-      return res.status(400).json({ success: false, message: `Cannot approve a hotel with status ${hotel.status}` });
+      return res
+        .status(400)
+        .json({ success: false, message: `Cannot approve a hotel with status ${hotel.status}` });
     }
 
     hotel.status = 'Approved';
@@ -188,12 +162,13 @@ const approveHotel = async (req, res) => {
     res.status(200).json({ success: true, message: 'Hotel approved successfully', hotel });
   } catch (error) {
     console.error('Error approving hotel:', error);
-    res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'Internal server error', error: error.message });
   }
 };
 
-// Reject a hotel (Admin Only)
-
+// Reject a hotel (Admin only)
 const rejectHotel = async (req, res) => {
   const hotelId = req.params.id;
 
@@ -204,7 +179,9 @@ const rejectHotel = async (req, res) => {
     }
 
     if (hotel.status !== 'Pending') {
-      return res.status(400).json({ success: false, message: `Cannot reject a hotel with status ${hotel.status}` });
+      return res
+        .status(400)
+        .json({ success: false, message: `Cannot reject a hotel with status ${hotel.status}` });
     }
 
     hotel.status = 'Rejected';
@@ -213,12 +190,13 @@ const rejectHotel = async (req, res) => {
     res.status(200).json({ success: true, message: 'Hotel rejected successfully', hotel });
   } catch (error) {
     console.error('Error rejecting hotel:', error);
-    res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'Internal server error', error: error.message });
   }
 };
 
 // Get a single hotel by ID (Approved only)
-
 const getHotelById = async (req, res) => {
   const { id } = req.params;
   try {
@@ -233,7 +211,9 @@ const getHotelById = async (req, res) => {
     res.status(200).json({ success: true, hotel });
   } catch (error) {
     console.error('Error fetching hotel by ID:', error);
-    res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'Internal server error', error: error.message });
   }
 };
 
@@ -244,7 +224,9 @@ const updateHotelAvailability = async (req, res) => {
 
   // Validate availability is an object with date keys
   if (typeof availability !== 'object' || Array.isArray(availability)) {
-    return res.status(400).json({ success: false, message: 'Availability must be an object with date keys' });
+    return res
+      .status(400)
+      .json({ success: false, message: 'Availability must be an object with date keys' });
   }
 
   try {
@@ -259,7 +241,9 @@ const updateHotelAvailability = async (req, res) => {
     res.status(200).json({ success: true, message: 'Availability updated successfully', hotel });
   } catch (error) {
     console.error('Error updating availability:', error);
-    res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'Internal server error', error: error.message });
   }
 };
 
@@ -290,12 +274,13 @@ const getUserHotels = async (req, res) => {
     res.status(200).json({ success: true, hotels });
   } catch (error) {
     console.error('Error fetching user hotels:', error);
-    res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'Internal server error', error: error.message });
   }
 };
 
-// Update a hotel 
-
+// Update a hotel
 const updateHotel = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -312,29 +297,36 @@ const updateHotel = async (req, res) => {
 
     // Check if the user is authorized to update the hotel
     if (hotel.FirebaseUID !== req.user.uid && !['Admin'].includes(req.user.role)) {
-      return res.status(403).json({ success: false, message: 'Unauthorized to update this hotel.' });
+      return res
+        .status(403)
+        .json({ success: false, message: 'Unauthorized to update this hotel.' });
     }
 
     const {
       name,
       location,
+      city,
       basePrice,
       description,
+      latitude,
+      longitude,
       roomTypes,
       seasonalPricing,
       amenities,
-      images, 
-      availability, 
-      status, 
+      images,
+      availability,
+      status,
     } = req.body;
 
     // Validate and process images
-    let processedImages = hotel.images; 
+    let processedImages = hotel.images;
     if (images && Array.isArray(images)) {
       processedImages = images.map((base64String) => {
         // Validate the Base64 string format
         if (!base64String.startsWith('data:image/')) {
-          throw new Error('Invalid image format. Images must be Base64 encoded strings starting with "data:image/".');
+          throw new Error(
+            'Invalid image format. Images must be Base64 encoded strings starting with "data:image/".'
+          );
         }
         return base64String;
       });
@@ -376,8 +368,11 @@ const updateHotel = async (req, res) => {
     // Update hotel details
     hotel.name = name || hotel.name;
     hotel.location = location || hotel.location;
+    hotel.city = city || hotel.city;
     hotel.basePrice = basePrice || hotel.basePrice;
     hotel.description = description || hotel.description;
+    hotel.latitude = latitude || hotel.latitude;
+    hotel.longitude = longitude || hotel.longitude;
     hotel.roomTypes = processedRoomTypes;
     hotel.seasonalPricing = processedSeasonalPricing;
     hotel.amenities = processedAmenities;
@@ -392,12 +387,13 @@ const updateHotel = async (req, res) => {
     res.status(200).json({ success: true, message: 'Hotel updated successfully.', hotel });
   } catch (error) {
     console.error('Error updating hotel:', error);
-    res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'Internal server error', error: error.message });
   }
 };
 
 // Delete a hotel by ID
-
 const deleteHotel = async (req, res) => {
   const hotelId = req.params.id;
 
@@ -409,7 +405,9 @@ const deleteHotel = async (req, res) => {
 
     // Check if the user is authorized to delete the hotel
     if (hotel.FirebaseUID !== req.user.uid && !['Admin'].includes(req.user.role)) {
-      return res.status(403).json({ success: false, message: 'Unauthorized to delete this hotel.' });
+      return res
+        .status(403)
+        .json({ success: false, message: 'Unauthorized to delete this hotel.' });
     }
 
     await hotel.destroy();
@@ -417,7 +415,9 @@ const deleteHotel = async (req, res) => {
     res.status(200).json({ success: true, message: 'Hotel deleted successfully.' });
   } catch (error) {
     console.error('Error deleting hotel:', error);
-    res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'Internal server error', error: error.message });
   }
 };
 
@@ -430,6 +430,6 @@ module.exports = {
   getHotelById,
   updateHotelAvailability,
   getUserHotels,
-  updateHotel,      
-  deleteHotel,      
+  updateHotel,
+  deleteHotel,
 };

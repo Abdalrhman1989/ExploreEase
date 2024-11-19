@@ -1,5 +1,3 @@
-// src/components/MapComponent.jsx
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   GoogleMap,
@@ -10,10 +8,9 @@ import {
   Marker,
 } from '@react-google-maps/api';
 import PropTypes from 'prop-types';
-import '../styles/MapComponent.css'; // Ensure this CSS file exists
+import '../styles/MapComponent.css'; 
 
-const libraries = ['places']; // Necessary for the Autocomplete and Places API
-
+const libraries = ['places']; 
 const mapContainerStyle = {
   width: '100%',
   height: '500px',
@@ -31,7 +28,7 @@ const searchBarStyle = {
   left: '50%',
   transform: 'translateX(-50%)',
   width: '300px',
-  zIndex: 5, // Ensures it is above the map
+  zIndex: 5, 
 };
 
 const travelModeButtonStyle = {
@@ -49,7 +46,7 @@ const MARKER_ICONS = {
   tourist_attraction: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
   restaurant: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
   lodging: 'http://maps.google.com/mapfiles/ms/icons/purple-dot.png',
-  museum: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png', // Added museum icon
+  museum: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png', 
   destination: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
   searched_place: 'http://maps.google.com/mapfiles/ms/icons/orange-dot.png',
   user_location: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
@@ -61,17 +58,17 @@ const MapComponent = ({
   travelMode,
   setTravelMode,
 }) => {
-  const [selectedPlace, setSelectedPlace] = useState(null); // For InfoWindow
-  const [directions, setDirections] = useState(null); // For DirectionsRenderer
-  const [autocomplete, setAutocomplete] = useState(null); // For Autocomplete
-  const [places, setPlaces] = useState([]); // Store fetched places
-  const [placesLoading, setPlacesLoading] = useState(false); // Loading state for places
-  const [placesError, setPlacesError] = useState(null); // Error state for places
+  const [selectedPlace, setSelectedPlace] = useState(null); 
+  const [directions, setDirections] = useState(null); 
+  const [autocomplete, setAutocomplete] = useState(null); 
+  const [places, setPlaces] = useState([]); 
+  const [placesLoading, setPlacesLoading] = useState(false); 
+  const [placesError, setPlacesError] = useState(null); 
   const [distanceInfo, setDistanceInfo] = useState(null);
 
-  const mapRef = useRef(); // Reference to the Google Map instance
+  const mapRef = useRef(); 
 
-  const GOOGLE_MAPS_API_KEY = 'AIzaSyAUsvB5yrnAISRSaSaoL-oCC3Su8LMFK3M'; // Replace with your actual key
+  const GOOGLE_MAPS_API_KEY = 'AIzaSyAUsvB5yrnAISRSaSaoL-oCC3Su8LMFK3M';
 
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: GOOGLE_MAPS_API_KEY,
@@ -162,7 +159,7 @@ const MapComponent = ({
           address: place.formatted_address,
           rating: place.rating,
           userRatingsTotal: place.user_ratings_total,
-          category: 'searched_place', // To identify as searched place
+          category: 'searched_place', 
         });
         handleDirections(coords);
         mapRef.current.panTo(coords);
@@ -176,7 +173,7 @@ const MapComponent = ({
   // Handle marker click
   const handleMarkerClick = (place) => {
     setSelectedPlace(place);
-    setTravelMode(null); // Reset travel mode when a new place is selected
+    setTravelMode(null); // 
     setDirections(null); // Clear existing directions
     setDistanceInfo(null); // Clear existing distance info
     mapRef.current.panTo(place.location);

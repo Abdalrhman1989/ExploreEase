@@ -46,8 +46,8 @@ const stayCategories = [
 
 const Stays = () => {
   const { user, isAuthenticated, loading: authLoading } = useContext(AuthContext);
-  const [mapCenter, setMapCenter] = useState({ lat: 0, lng: 0 }); // World center
-  const [mapZoom, setMapZoom] = useState(2); // Zoom level for world view
+  const [mapCenter, setMapCenter] = useState({ lat: 0, lng: 0 }); 
+  const [mapZoom, setMapZoom] = useState(2); 
   const [places, setPlaces] = useState([]);
   const [selected, setSelected] = useState(null);
   const [favorites, setFavorites] = useState([]);

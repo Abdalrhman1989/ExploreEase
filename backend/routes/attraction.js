@@ -1,5 +1,3 @@
-// backend/routes/attractionRoutes.js
-
 const express = require('express');
 const { body } = require('express-validator');
 const attractionController = require('../controllers/attractionController');
@@ -8,36 +6,33 @@ const authenticate = require('../middleware/authenticate');
 
 const router = express.Router();
 
-// 1. Public Routes (No Authentication Required)
+
 router.get('/approved', attractionController.getApprovedAttractions);
 
-// 2. Apply Authentication Middleware to Protect Subsequent Routes
+
 router.use(authenticate);
 
-// 3. Protected Routes (Authentication Required)
 
-// Route to get all pending attractions (Admin Only)
 router.get(
   '/pending',
   authorize(['Admin']),
   attractionController.getPendingAttractions
 );
 
-// Route to approve an attraction (Admin Only)
 router.post(
   '/:id/approve',
   authorize(['Admin']),
   attractionController.approveAttraction
 );
 
-// Route to reject an attraction (Admin Only)
+
 router.post(
   '/:id/reject',
   authorize(['Admin']),
   attractionController.rejectAttraction
 );
 
-// Route to create a new attraction submission (Protected: 'User' and 'BusinessAdministrator')
+
 router.post(
   '/',
   authorize(['User', 'BusinessAdministrator']),
@@ -62,21 +57,20 @@ router.post(
   attractionController.createAttraction
 );
 
-// Route to get authenticated user's attractions (Protected: 'User', 'BusinessAdministrator', 'Admin')
 router.get(
   '/user',
   authorize(['User', 'BusinessAdministrator', 'Admin']),
   attractionController.getUserAttractions
 );
 
-// Route to delete an attraction (Protected: 'Admin', 'User', 'BusinessAdministrator')
+
 router.delete(
   '/:id',
   authorize(['Admin', 'User', 'BusinessAdministrator']),
   attractionController.deleteAttraction
 );
 
-// Route to update an attraction (Protected: 'Admin', 'User', 'BusinessAdministrator')
+
 router.put(
   '/:id',
   authorize(['Admin', 'User', 'BusinessAdministrator']),
@@ -92,7 +86,6 @@ router.put(
   attractionController.updateAttraction
 );
 
-// Make GET /:id public by defining it after other routes
 router.get('/:id', attractionController.getAttractionById);
 
 module.exports = router;

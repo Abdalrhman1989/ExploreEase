@@ -1,12 +1,8 @@
-// backend/controllers/attractionController.js
-
 const { Attraction } = require('../models');
 const { validationResult } = require('express-validator');
 const axios = require('axios');
 
-/**
- * Create a new Attraction (Accessible by 'User' and 'BusinessAdministrator')
- */
+
 exports.createAttraction = async (req, res) => {
   // Validate incoming request
   const errors = validationResult(req);
@@ -29,7 +25,7 @@ exports.createAttraction = async (req, res) => {
       longitude,
     } = req.body;
 
-    const FirebaseUID = req.user.uid; // Extracted from authentication middleware
+    const FirebaseUID = req.user.uid; 
 
     const newAttraction = await Attraction.create({
       FirebaseUID,
@@ -44,7 +40,7 @@ exports.createAttraction = async (req, res) => {
       images,
       latitude,
       longitude,
-      status: 'Pending', // Set initial status
+      status: 'Pending', 
     });
 
     res.status(201).json({
@@ -57,9 +53,8 @@ exports.createAttraction = async (req, res) => {
   }
 };
 
-/**
- * Get all Approved Attractions (Public Access) with optional city filtering
- */
+// Get all Approved Attractions
+
 exports.getApprovedAttractions = async (req, res) => {
   try {
     const { city } = req.query;
@@ -75,29 +70,26 @@ exports.getApprovedAttractions = async (req, res) => {
   }
 };
 
-/**
- * Get a Single Attraction by ID (Public Access)
- */
+// Get a Single Attraction by ID 
+
 exports.getAttractionById = async (req, res) => {
   try {
     const { id } = req.params;
 
     if (!isNaN(id)) {
-      // User-Created Attraction (AttractionID is an integer)
       const attraction = await Attraction.findByPk(id);
 
       if (!attraction) {
         return res.status(404).json({ message: 'Attraction not found' });
       }
 
-      // Only return approved attractions to the public
+      // Only return approved attractions
       if (attraction.status !== 'Approved') {
         return res.status(403).json({ message: 'Forbidden: Attraction not approved' });
       }
 
       res.status(200).json({ attraction });
     } else {
-      // Google Place (place_id is a string)
       const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
       const response = await axios.get(
         `https://maps.googleapis.com/maps/api/place/details/json?place_id=${id}&fields=name,rating,price_level,formatted_address,photos,reviews,website,url,geometry&key=${GOOGLE_MAPS_API_KEY}`
@@ -115,9 +107,8 @@ exports.getAttractionById = async (req, res) => {
   }
 };
 
-/**
- * Get all Pending Attractions (Admin Only)
- */
+// Get all Pending Attractions (Admin Only)
+
 exports.getPendingAttractions = async (req, res) => {
   try {
     const attractions = await Attraction.findAll({ where: { status: 'Pending' } });
@@ -128,9 +119,7 @@ exports.getPendingAttractions = async (req, res) => {
   }
 };
 
-/**
- * Approve an Attraction (Admin Only)
- */
+// Approve an Attraction (Admin Only)
 exports.approveAttraction = async (req, res) => {
   try {
     const { id } = req.params;
@@ -154,9 +143,7 @@ exports.approveAttraction = async (req, res) => {
   }
 };
 
-/**
- * Reject an Attraction (Admin Only)
- */
+// Reject an Attraction (Admin Only)
 exports.rejectAttraction = async (req, res) => {
   try {
     const { id } = req.params;
@@ -180,12 +167,10 @@ exports.rejectAttraction = async (req, res) => {
   }
 };
 
-/**
- * Get Authenticated User's Attractions (Accessible by 'User', 'BusinessAdministrator', 'Admin')
- */
+// Get BusinessAdministrator's Attractions 
 exports.getUserAttractions = async (req, res) => {
   try {
-    const FirebaseUID = req.user.uid; // Extracted from authentication middleware
+    const FirebaseUID = req.user.uid; 
     const attractions = await Attraction.findAll({ where: { FirebaseUID } });
     res.status(200).json({ attractions });
   } catch (error) {
@@ -194,9 +179,7 @@ exports.getUserAttractions = async (req, res) => {
   }
 };
 
-/**
- * Delete an Attraction (Accessible by 'Admin', 'User', 'BusinessAdministrator')
- */
+// BusinessAdministrator Delete an Attraction 
 exports.deleteAttraction = async (req, res) => {
   try {
     const { id } = req.params;
@@ -205,8 +188,6 @@ exports.deleteAttraction = async (req, res) => {
     if (!attraction) {
       return res.status(404).json({ message: 'Attraction not found' });
     }
-
-    // Authorization: Admin can delete any, users can delete their own
     if (req.user.role !== 'Admin' && attraction.FirebaseUID !== req.user.uid) {
       return res.status(403).json({ message: 'Forbidden: You cannot delete this attraction' });
     }
@@ -240,8 +221,6 @@ exports.updateAttraction = async (req, res) => {
     if (attraction.FirebaseUID !== req.user.uid && req.user.role !== 'Admin') {
       return res.status(403).json({ message: 'Unauthorized to update this attraction.' });
     }
-
-    // Update fields
     const {
       name,
       location,

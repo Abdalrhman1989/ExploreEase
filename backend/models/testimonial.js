@@ -1,5 +1,3 @@
-// backend/models/testimonial.js
-
 'use strict';
 const { Model } = require('sequelize');
 
@@ -9,17 +7,16 @@ module.exports = (sequelize, DataTypes) => {
      * Define associations here.
      */
     static associate(models) {
-      // A Testimonial belongs to a User
       Testimonial.belongsTo(models.User, { foreignKey: 'UserID', as: 'user' });
     }
   }
 
   Testimonial.init({
-    UserID: { // Changed from userId to UserID to match User model's primary key
-      type: DataTypes.INTEGER, // Align with User.UserID type
+    UserID: { 
+      type: DataTypes.INTEGER, 
       allowNull: false,
       references: {
-        model: 'Users', // Ensure this matches the table name in your database
+        model: 'Users', 
         key: 'UserID',
       },
       onDelete: 'CASCADE',
@@ -52,7 +49,7 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     modelName: 'Testimonial',
     tableName: 'testimonials',
-    timestamps: true, // Adds createdAt and updatedAt
+    timestamps: true, 
   });
 
   return Testimonial;

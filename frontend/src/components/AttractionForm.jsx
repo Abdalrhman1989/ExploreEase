@@ -1,9 +1,7 @@
-// frontend/src/components/AttractionForm.jsx
-
 import React, { useState, useContext, useRef, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
-import '../styles/AttractionForm.css'; // Ensure this path is correct
+import '../styles/AttractionForm.css'; 
 import { GoogleMap, Marker, useLoadScript, Autocomplete } from '@react-google-maps/api';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -16,7 +14,7 @@ const mapContainerStyle = {
 };
 
 const defaultCenter = {
-  lat: 48.8566, // Fallback to Paris
+  lat: 48.8566, 
   lng: 2.3522,
 };
 
@@ -64,7 +62,6 @@ const AttractionForm = () => {
         },
         (error) => {
           console.error('Error fetching user location:', error);
-          // Notify the user about the fallback
           toast.info('Unable to retrieve your location. Defaulting to Paris.');
         }
       );
@@ -176,7 +173,7 @@ const AttractionForm = () => {
     e.preventDefault();
     setMessage(null);
     setError(null);
-    toast.dismiss(); // Dismiss existing toasts
+    toast.dismiss(); 
 
     try {
       if (loading) {
@@ -279,7 +276,7 @@ const AttractionForm = () => {
       const response = await axios.post(`${backendUrl}/api/attractions`, payload, {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${idToken}`, // Include the token
+          Authorization: `Bearer ${idToken}`, 
         },
       });
 
@@ -302,8 +299,8 @@ const AttractionForm = () => {
       });
       setImages([]);
       setSelectedAmenities([]);
-      setMarkerPosition(null); // Reset marker
-      setMapCenter(defaultCenter); // Reset map center
+      setMarkerPosition(null); 
+      setMapCenter(defaultCenter); 
       // Optionally, navigate to another page
       // navigate('/attractions');
     } catch (err) {
@@ -488,7 +485,7 @@ const AttractionForm = () => {
           <GoogleMap
             mapContainerStyle={mapContainerStyle}
             zoom={markerPosition ? 15 : 12}
-            center={mapCenter} // Dynamic map center based on user's location
+            center={mapCenter}
             onClick={handleMapClick}
             options={{
               disableDefaultUI: false,

@@ -1,8 +1,6 @@
-// src/components/AdminConfirmRestaurantOffers.jsx
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import '../styles/AdminConfirmBusinessOffers.css'; // Reuse the same styles
+import '../styles/AdminConfirmBusinessOffers.css'; 
 import { toast } from 'react-toastify';
 
 const AdminConfirmRestaurantOffers = () => {
@@ -20,7 +18,7 @@ const AdminConfirmRestaurantOffers = () => {
     setActionMessage(null);
     setActionError(null);
     try {
-      const token = localStorage.getItem('authToken'); // Ensure this key matches your auth implementation
+      const token = localStorage.getItem('authToken'); 
       if (!token) {
         setActionError('Authentication required. Please log in.');
         setLoading(false);
@@ -46,7 +44,7 @@ const AdminConfirmRestaurantOffers = () => {
     setActionMessage(null);
     setActionError(null);
     try {
-      const token = localStorage.getItem('authToken'); // Ensure this key matches your auth implementation
+      const token = localStorage.getItem('authToken'); 
       if (!token) {
         setActionError('Authentication required. Please log in.');
         return;
@@ -71,7 +69,7 @@ const AdminConfirmRestaurantOffers = () => {
     setActionMessage(null);
     setActionError(null);
     try {
-      const token = localStorage.getItem('authToken'); // Ensure this key matches your auth implementation
+      const token = localStorage.getItem('authToken'); 
       if (!token) {
         setActionError('Authentication required. Please log in.');
         return;

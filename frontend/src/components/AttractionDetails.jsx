@@ -1,5 +1,3 @@
-// src/pages/AttractionDetails.jsx
-
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
@@ -35,6 +33,7 @@ const AttractionDetails = () => {
   const [selectedMarker, setSelectedMarker] = useState(null);
 
   const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
 
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: GOOGLE_MAPS_API_KEY,
@@ -52,9 +51,9 @@ const AttractionDetails = () => {
         const freshToken = await user.getIdToken(true);
         console.log(`Fetching attraction details for ID: ${id} with fresh token: ${freshToken}`);
 
-        const response = await axios.get(`http://localhost:3001/api/attractions/${id}`, {
+        const response = await axios.get(`${BACKEND_URL}/api/attractions/${id}`, {
           headers: {
-            Authorization: `Bearer ${freshToken}`, // Include the fresh token in headers
+            Authorization: `Bearer ${freshToken}`,
           },
         });
         console.log('API Response:', response.data);
@@ -89,7 +88,6 @@ const AttractionDetails = () => {
       }
     };
 
-    // Ensure that AuthContext has finished loading
     if (!loading) {
       if (isAuthenticated && idToken && user) {
         fetchAttractionDetails();
@@ -98,7 +96,7 @@ const AttractionDetails = () => {
         setIsLoading(false);
       }
     }
-  }, [id, isAuthenticated, idToken, loading, user]);
+  }, [id, isAuthenticated, idToken, loading, user, BACKEND_URL]);
 
   const handleAddFavorite = async () => {
     if (!isAuthenticated || !user) {
@@ -109,7 +107,6 @@ const AttractionDetails = () => {
     if (!attraction) return;
 
     try {
-      // Force refresh the token before making the POST request
       const freshToken = await user.getIdToken(true);
       console.log(`Adding favorite with fresh token: ${freshToken}`);
 
@@ -130,9 +127,9 @@ const AttractionDetails = () => {
 
       console.log('Favorite Data:', favoriteData);
 
-      await axios.post('http://localhost:3001/api/favorites', favoriteData, {
+      await axios.post(`${BACKEND_URL}/api/favorites`, favoriteData, {
         headers: {
-          Authorization: `Bearer ${freshToken}`, // Include the fresh token in headers
+          Authorization: `Bearer ${freshToken}`,
         },
       });
       alert('Favorite added successfully!');
@@ -273,7 +270,6 @@ const AttractionDetails = () => {
       {/* Optionally, include user reviews or other details here */}
     </div>
   );
-
 };
 
 export default AttractionDetails;

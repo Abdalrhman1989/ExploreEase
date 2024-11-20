@@ -234,7 +234,6 @@ const AdminDashboard = () => {
               <span>{user ? user.displayName || 'Admin' : 'Admin'}</span>
               <i className="fas fa-chevron-down"></i>
               <ul className="dropdown-menu">
-                <li onClick={handleProfileNavigation}>Profile</li>
               </ul>
             </div>
           </div>

@@ -1,5 +1,3 @@
-// src/components/BookingModal.js
-
 import React from 'react';
 import '../styles/BookingModal.css';
 
@@ -7,7 +5,6 @@ const BookingModal = ({ flight, onClose }) => {
   if (!flight) return null;
 
   const handleBooking = () => {
-    // Implement booking logic, such as redirecting to payment or saving booking details
     alert('Booking functionality to be implemented.');
   };
 

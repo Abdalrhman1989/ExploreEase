@@ -20,7 +20,8 @@ const Testimonials = () => {
   // Fetch testimonials from API
   const fetchTestimonials = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/api/testimonials');
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
+      const response = await axios.get(`${backendUrl}/api/testimonials`);
       setTestimonialsData(response.data.testimonials);
     } catch (error) {
       console.error('Error fetching testimonials:', error);
@@ -53,8 +54,9 @@ const Testimonials = () => {
         return;
       }
 
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
       const response = await axios.post(
-        'http://localhost:3001/api/testimonials',
+        `${backendUrl}/api/testimonials`,
         { content },
         {
           headers: {
@@ -117,8 +119,8 @@ const Testimonials = () => {
 
   // Construct image URL
   const getImageUrl = (path) => {
-    const baseURL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
-    return `${baseURL}${path}`;
+    const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
+    return `${backendUrl}${path}`;
   };
 
   return (

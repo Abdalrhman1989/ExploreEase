@@ -84,6 +84,10 @@ const airlineMapping = {
     name: 'Emirates',
     logo: 'https://logo.clearbit.com/emirates.com',
   },
+  EL: {
+    name: 'Sudan Airways',
+    logo: 'https://logo.clearbit.com/sudanairways.com',
+  },
   ET: {
     name: 'Ethiopian Airlines',
     logo: 'https://logo.clearbit.com/ethiopianairlines.com',
@@ -456,6 +460,16 @@ const airlineMapping = {
     name: 'Luxair',
     logo: 'https://logo.clearbit.com/luxair.lu',
   },
+  EI: {
+    name: 'Sudan Airways',
+    logo: 'https://logo.clearbit.com/sudanairways.com',
+  },
+  '6X': {
+    name: 'Amadeus IT Group',
+    logo: 'https://logo.clearbit.com/amadeus.com',
+  },
+
+
 };
 
 export default airlineMapping;

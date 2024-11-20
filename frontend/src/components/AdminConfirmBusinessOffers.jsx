@@ -1,5 +1,3 @@
-// src/components/AdminConfirmBusinessOffers.jsx
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../styles/AdminConfirmBusinessOffers.css';
@@ -19,13 +17,13 @@ const AdminConfirmBusinessOffers = () => {
     setActionMessage(null);
     setActionError(null);
     try {
-      const token = localStorage.getItem('authToken'); // Updated key
+      const token = localStorage.getItem('authToken'); 
       if (!token) {
         setActionError('Authentication required. Please log in.');
         setLoading(false);
         return;
       }
-      const response = await axios.get('http://localhost:3001/api/hotels/pending', { // Added full URL
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/hotels/pending`, { 
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -43,12 +41,12 @@ const AdminConfirmBusinessOffers = () => {
     setActionMessage(null);
     setActionError(null);
     try {
-      const token = localStorage.getItem('authToken'); // Updated key
+      const token = localStorage.getItem('authToken'); 
       if (!token) {
         setActionError('Authentication required. Please log in.');
         return;
       }
-      const response = await axios.post(`http://localhost:3001/api/hotels/${id}/approve`, {}, { // Added full URL
+      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/hotels/${id}/approve`, {}, { 
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -65,12 +63,12 @@ const AdminConfirmBusinessOffers = () => {
     setActionMessage(null);
     setActionError(null);
     try {
-      const token = localStorage.getItem('authToken'); // Updated key
+      const token = localStorage.getItem('authToken'); 
       if (!token) {
         setActionError('Authentication required. Please log in.');
         return;
       }
-      const response = await axios.post(`http://localhost:3001/api/hotels/${id}/reject`, {}, { // Added full URL
+      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/hotels/${id}/reject`, {}, { // Updated URL
         headers: {
           Authorization: `Bearer ${token}`,
         },

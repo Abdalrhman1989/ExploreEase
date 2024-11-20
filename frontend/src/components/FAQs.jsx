@@ -1,5 +1,3 @@
-// src/components/FAQs.js
-
 import React from 'react';
 import { Accordion, AccordionSummary, AccordionDetails, Typography } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -15,7 +13,6 @@ const FAQs = () => {
       question: 'Can I book one-way flight tickets?',
       answer: 'Yes, you can book one-way, round trip, and multi-city flights on our site.',
     },
-    // Add more FAQs as needed
   ];
 
   return (

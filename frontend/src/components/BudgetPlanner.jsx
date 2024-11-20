@@ -1,5 +1,3 @@
-// src/components/BudgetPlanner.jsx
-
 import React, { useState, useEffect } from 'react';
 import {
   Paper,
@@ -40,7 +38,7 @@ const BudgetPlanner = () => {
 
   // State for Expense Dialog
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogMode, setDialogMode] = useState('add'); // 'add' or 'edit'
+  const [dialogMode, setDialogMode] = useState('add'); 
   const [currentExpense, setCurrentExpense] = useState(null);
   const [expenseData, setExpenseData] = useState({
     category: '',
@@ -52,7 +50,7 @@ const BudgetPlanner = () => {
   // State for Snackbar Notifications
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMsg, setSnackbarMsg] = useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState('success'); // 'success' | 'error' | 'warning' | 'info'
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success'); 
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -224,7 +222,7 @@ const BudgetPlanner = () => {
       .filter((exp) => exp.category === category)
       .reduce((acc, exp) => acc + exp.amount, 0);
     return { name: category, value: total };
-  }).filter((data) => data.value > 0); // Remove categories with 0 value
+  }).filter((data) => data.value > 0); 
 
   return (
     <Paper elevation={1} sx={{ p: { xs: 2, sm: 3 } }}>

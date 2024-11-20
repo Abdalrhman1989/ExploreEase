@@ -1,9 +1,7 @@
-// src/components/AdminPendingTestimonials.jsx
-
 import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
-import '../styles/AdminPendingTestimonials.css'; // Import the CSS file
+import '../styles/AdminPendingTestimonials.css'; 
 
 const AdminPendingTestimonials = () => {
   const { idToken, loading, isAuthenticated, userRole } = useContext(AuthContext);
@@ -18,7 +16,7 @@ const AdminPendingTestimonials = () => {
       }
 
       try {
-        const response = await axios.get('http://localhost:3001/api/testimonials/pending', {
+        const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/testimonials/pending`, {
           headers: {
             Authorization: `Bearer ${idToken}`,
           },
@@ -44,7 +42,7 @@ const AdminPendingTestimonials = () => {
     if (!confirmApprove) return;
 
     try {
-      const response = await axios.post(`http://localhost:3001/api/testimonials/approve/${id}`, {}, {
+      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/testimonials/approve/${id}`, {}, {
         headers: {
           Authorization: `Bearer ${idToken}`,
         },
@@ -62,7 +60,7 @@ const AdminPendingTestimonials = () => {
     if (!confirmReject) return;
 
     try {
-      const response = await axios.post(`http://localhost:3001/api/testimonials/reject/${id}`, {}, {
+      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/testimonials/reject/${id}`, {}, {
         headers: {
           Authorization: `Bearer ${idToken}`,
         },

@@ -1,4 +1,3 @@
-// src/components/NavBar.jsx
 
 import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -8,7 +7,7 @@ import '../styles/NavBar.css';
 import { AuthContext } from '../context/AuthContext';
 import ReactCountryFlag from 'react-country-flag';
 import { FaBars, FaTimes, FaSignOutAlt } from 'react-icons/fa';
-import { MdLanguage } from 'react-icons/md'; // Corrected import
+import { MdLanguage } from 'react-icons/md'; 
 
 const Navbar = () => {
   const [menuActive, setMenuActive] = useState(false);
@@ -30,7 +29,6 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      // The AuthContext will automatically update the state
     } catch (error) {
       console.error('Error during sign out:', error);
     }
@@ -48,7 +46,7 @@ const Navbar = () => {
     if (user && user.displayName) {
       return user.displayName.charAt(0).toUpperCase();
     }
-    return 'U'; // Default initial if name is not available
+    return 'U'; 
   };
 
   return (

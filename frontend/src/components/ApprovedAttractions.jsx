@@ -1,11 +1,9 @@
-// frontend/src/components/ApprovedAttractions.jsx
-
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import '../styles/ApprovedAttractions.css'; // Correct CSS import
+import '../styles/ApprovedAttractions.css'; 
 
 const ApprovedAttractions = () => {
   const { user, isAuthenticated, loading: authLoading } = useContext(AuthContext);
@@ -15,13 +13,14 @@ const ApprovedAttractions = () => {
   const [error, setError] = useState(null);
 
   const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
 
   // Function to fetch approved attractions from the backend
   const fetchApprovedAttractions = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await axios.get('http://localhost:3001/api/attractions/approved');
+      const response = await axios.get(`${BACKEND_URL}/api/attractions/approved`);
       setApprovedAttractions(response.data.attractions);
       setIsLoading(false);
     } catch (err) {
@@ -29,7 +28,7 @@ const ApprovedAttractions = () => {
       setError('Failed to fetch approved attractions.');
       setIsLoading(false);
     }
-  }, []);
+  }, [BACKEND_URL]);
 
   // Function to add an attraction to favorites
   const addFavoriteToDB = useCallback(async (favoriteData) => {
@@ -40,9 +39,8 @@ const ApprovedAttractions = () => {
 
     try {
       const idToken = await user.getIdToken();
-      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
       await axios.post(
-        `${backendUrl}/api/favorites`,
+        `${BACKEND_URL}/api/favorites`,
         favoriteData,
         {
           headers: {
@@ -69,7 +67,7 @@ const ApprovedAttractions = () => {
         toast.error('Failed to add favorite.');
       }
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, BACKEND_URL]);
 
   // Function to remove an attraction from favorites
   const removeFavoriteFromDB = useCallback(async (favoriteId) => {
@@ -80,8 +78,7 @@ const ApprovedAttractions = () => {
 
     try {
       const idToken = await user.getIdToken();
-      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
-      await axios.delete(`${backendUrl}/api/favorites/${favoriteId}`, {
+      await axios.delete(`${BACKEND_URL}/api/favorites/${favoriteId}`, {
         headers: {
           Authorization: `Bearer ${idToken}`,
         },
@@ -91,7 +88,7 @@ const ApprovedAttractions = () => {
       console.error('Error removing favorite:', err.response ? err.response.data : err.message);
       toast.error('Failed to remove favorite.');
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, BACKEND_URL]);
 
   // Fetch approved attractions on component mount
   useEffect(() => {

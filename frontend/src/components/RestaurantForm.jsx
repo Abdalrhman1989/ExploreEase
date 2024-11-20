@@ -1,4 +1,3 @@
-// src/components/RestaurantForm.jsx
 import React, { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
@@ -75,7 +74,6 @@ const RestaurantForm = () => {
     setSelectedRange({ startDate: start, endDate: end });
 
     if (start && end) {
-      // Generate all dates within the selected range
       const datesInRange = [];
       let currentDate = new Date(start);
       while (currentDate <= end) {
@@ -104,14 +102,14 @@ const RestaurantForm = () => {
   // Handle Form Submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    toast.dismiss(); // Dismiss existing toasts
+    toast.dismiss(); 
     setError(null);
     setMessage(null);
 
     // Convert availability array to JSON object
     const availabilityObj = {};
     availability.forEach((date) => {
-      availabilityObj[date] = true; // Mark as available
+      availabilityObj[date] = true; 
     });
 
     // Construct the payload
@@ -122,9 +120,9 @@ const RestaurantForm = () => {
       priceRange: parseInt(restaurantDetails.priceRange, 10),
       rating: parseFloat(restaurantDetails.rating),
       description: restaurantDetails.description,
-      amenities: restaurantDetails.amenities, // Send as an array
-      images: images, // Array of Base64 strings
-      availability: availabilityObj, // Date-wise availability
+      amenities: restaurantDetails.amenities, 
+      images: images, 
+      availability: availabilityObj, 
     };
 
     try {

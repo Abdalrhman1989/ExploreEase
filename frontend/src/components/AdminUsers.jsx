@@ -1,5 +1,3 @@
-// frontend/src/pages/AdminUsers.js
-
 import React, { useState, useEffect } from 'react';
 import {
   Box,
@@ -52,7 +50,7 @@ const AdminUsers = () => {
     LastName: '',
     Email: '',
     PhoneNumber: '',
-    UserType: 'User', // Default role
+    UserType: 'User', 
     ProfilePicture: '',
   });
   const [createFormData, setCreateFormData] = useState({
@@ -61,7 +59,7 @@ const AdminUsers = () => {
     LastName: '',
     Email: '',
     PhoneNumber: '',
-    UserType: 'User', // Default role
+    UserType: 'User', 
     Password: '',
     ProfilePicture: '',
   });
@@ -78,11 +76,8 @@ const AdminUsers = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const navigate = useNavigate();
-
-  // State for expanded rows on small screens
   const [expandedRows, setExpandedRows] = useState([]);
 
-  // Fetch users from backend
   const fetchUsers = async () => {
     const token = localStorage.getItem('authToken');
     if (!token) {
@@ -122,7 +117,6 @@ const AdminUsers = () => {
 
   useEffect(() => {
     fetchUsers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -270,7 +264,7 @@ const AdminUsers = () => {
       LastName: '',
       Email: '',
       PhoneNumber: '',
-      UserType: 'User', // Default role
+      UserType: 'User', 
       Password: '',
       ProfilePicture: '',
     });
@@ -357,7 +351,6 @@ const AdminUsers = () => {
 
       {/* Responsive Table or Cards based on screen size */}
       {isSmallScreen ? (
-        // Card Layout for Small Screens
         <Grid container spacing={2}>
           {loading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', padding: 4, width: '100%' }}>

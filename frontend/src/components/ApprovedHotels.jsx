@@ -1,12 +1,10 @@
-// src/components/ApprovedHotels.jsx
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../styles/ApprovedHotels.css';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
 import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css'; // Import calendar styles
+import 'react-calendar/dist/Calendar.css'; 
 import { format } from 'date-fns';
 import { FaCalendarAlt, FaInfoCircle, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import { MdClose } from 'react-icons/md';
@@ -16,12 +14,11 @@ const ApprovedHotels = ({ currentLocation }) => {
   const [hotels, setHotels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedHotel, setSelectedHotel] = useState(null); // Track selected hotel for calendar
-  const [expandedHotelId, setExpandedHotelId] = useState(null); // Track which hotel is expanded
+  const [selectedHotel, setSelectedHotel] = useState(null); 
+  const [expandedHotelId, setExpandedHotelId] = useState(null); 
 
   useEffect(() => {
     fetchApprovedHotels();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentLocation]);
 
   const fetchApprovedHotels = async () => {
@@ -31,12 +28,12 @@ const ApprovedHotels = ({ currentLocation }) => {
       const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
       const params = {
         page: 1,
-        limit: 100, // Adjust as needed
+        limit: 100, 
       };
       if (currentLocation) {
         params.lat = currentLocation.lat;
         params.lng = currentLocation.lng;
-        params.radius = 10000; // 10km radius, adjust as needed
+        params.radius = 10000; 
       }
       const response = await axios.get(`${backendUrl}/api/hotels/approved`, { params });
       setHotels(response.data.hotels);
@@ -206,7 +203,6 @@ const ApprovedHotels = ({ currentLocation }) => {
             <h3>Availability for {selectedHotel.name}</h3>
             <div className="approved-hotels-calendar-container">
               <Calendar
-                // Define tileClassName to mark available/unavailable dates
                 tileClassName={({ date, view }) => {
                   if (view === 'month') {
                     const dateStr = format(date, 'yyyy-MM-dd');

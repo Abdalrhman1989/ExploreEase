@@ -1,5 +1,3 @@
-// src/components/AdminConfirmUserRegistrations.jsx
-
 import React, { useState, useEffect } from 'react';
 import '../styles/AdminConfirmUserRegistrations.css';
 

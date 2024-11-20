@@ -1,5 +1,3 @@
-// src/components/HowItWorks.jsx
-
 import React from 'react';
 import { Grid, Typography, Stepper, Step, StepLabel } from '@mui/material';
 import '../styles/HowItWorks.css';

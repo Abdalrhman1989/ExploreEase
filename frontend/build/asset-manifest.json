@@ -1,0 +1,33 @@
+{
+  "files": {
+    "main.css": "/static/css/main.c14f1d56.css",
+    "main.js": "/static/js/main.2b8ceb40.js",
+    "static/media/hotel.jpg": "/static/media/hotel.2cfe92c259aafcbf4987.jpg",
+    "static/media/flight3.jpg": "/static/media/flight3.44cdcb00d3fed012e42e.jpg",
+    "static/media/flight2.jpg": "/static/media/flight2.d6a143622e93a8bcdfca.jpg",
+    "static/media/carrenter.jpg": "/static/media/carrenter.03bf6a6a91d77dcd09ba.jpg",
+    "static/media/flight1.jpg": "/static/media/flight1.9d07336a0fe093fb7887.jpg",
+    "static/media/paris1.jpg": "/static/media/paris1.c936aa35da070317cfef.jpg",
+    "static/media/flight.jpg": "/static/media/flight.d36998a2c9a1e80f213f.jpg",
+    "static/media/Restaurant1.jpg": "/static/media/Restaurant1.887e2928aae0252b966d.jpg",
+    "static/media/hotel1.jpg": "/static/media/hotel1.09e874bffe869e69b53d.jpg",
+    "static/media/newyork1.jpg": "/static/media/newyork1.e5fbe6144fd11e744d49.jpg",
+    "static/media/train1.jpg": "/static/media/train1.1a61e530e9a6aabaec8a.jpg",
+    "static/media/-Colosseum 1.jpg": "/static/media/bf7644e548a12ca8d92d1f56b96b20eb-Colosseum 1.788d409d0fe4009b65a9.jpg",
+    "static/media/tokyo1.jpg": "/static/media/tokyo1.3c18c684eabc3e218857.jpg",
+    "static/media/london1.jpg": "/static/media/london1.3f4ed5d47eecf42371d4.jpg",
+    "static/media/bus1.jpg": "/static/media/bus1.129de915339b5c2145f5.jpg",
+    "static/media/slick.svg": "/static/media/slick.2630a3e3eab21c607e21.svg",
+    "static/media/slick.eot": "/static/media/slick.a4e97f5a2a64f0ab1323.eot",
+    "static/media/slick.ttf": "/static/media/slick.c94f7671dcc99dce43e2.ttf",
+    "static/media/slick.woff": "/static/media/slick.295183786cd8a1389865.woff",
+    "index.html": "/index.html",
+    "static/media/google-icon-logo.svg": "/static/media/google-icon-logo.e9a9751cede23097df5da534f5ff1d65.svg",
+    "main.c14f1d56.css.map": "/static/css/main.c14f1d56.css.map",
+    "main.2b8ceb40.js.map": "/static/js/main.2b8ceb40.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.c14f1d56.css",
+    "static/js/main.2b8ceb40.js"
+  ]
+}

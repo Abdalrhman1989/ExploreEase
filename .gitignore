@@ -46,9 +46,6 @@ frontend/.env
 frontend/node_modules/.cache/
 backend/node_modules/.cache/
 
-# Build directories
-dist/
-build/
 
 # IDE and editor settings
 .vscode/

@@ -51,11 +51,7 @@ if (process.env.NODE_ENV !== 'production') {
 app.use(express.json()); 
 
 // Configure CORS
-app.use(cors({
-  origin: 'http://localhost:3000', 
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+app.use(cors());
 
 // Rate Limiting to prevent abuse
 const limiter = rateLimit({

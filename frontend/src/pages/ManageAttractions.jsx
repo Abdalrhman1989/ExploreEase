@@ -1,5 +1,3 @@
-// src/pages/ManageAttractions.jsx
-
 import React, { useEffect, useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
@@ -40,9 +38,9 @@ const ManageAttractions = () => {
       let url = '';
 
       if (userRole === 'Admin') {
-        url = `${backendUrl}/api/attractions/pending`; // Fetch pending attractions for Admin
+        url = `${backendUrl}/api/attractions/pending`; 
       } else {
-        url = `${backendUrl}/api/attractions/user`; // Fetch user's attractions
+        url = `${backendUrl}/api/attractions/user`; 
       }
 
       const response = await axios.get(url, {
@@ -54,11 +52,11 @@ const ManageAttractions = () => {
       // Standardize attractions to have 'id'
       const standardizedAttractions = response.data.attractions.map((attraction) => ({
         ...attraction,
-        id: attraction.id || attraction.AttractionID, // Adjust based on actual property
+        id: attraction.id || attraction.AttractionID, 
       }));
 
       setAttractions(standardizedAttractions);
-      console.log('Fetched Attractions:', standardizedAttractions); // Debugging line
+      console.log('Fetched Attractions:', standardizedAttractions); 
     } catch (err) {
       console.error('Error fetching attractions:', err);
       setError('Failed to fetch attractions.');
@@ -94,13 +92,12 @@ const ManageAttractions = () => {
 
   // Handle Select for View/Edit
   const handleSelect = (attraction) => {
-    const attractionId = attraction.id || attraction.AttractionID; // Adjust based on actual property
+    const attractionId = attraction.id || attraction.AttractionID; 
     if (selectedAttraction && selectedAttraction.id === attractionId && !isEditing) {
-      // Toggle off selection if already selected and not editing
       setSelectedAttraction(null);
       setIsEditing(false);
     } else {
-      setSelectedAttraction({ ...attraction, id: attractionId }); // Ensure 'id' is set
+      setSelectedAttraction({ ...attraction, id: attractionId }); 
       setFormData({
         name: attraction.name || '',
         location: attraction.location || '',
@@ -163,7 +160,7 @@ const ManageAttractions = () => {
   // Handle Form Submission for Edit
   const handleSubmit = async (e) => {
     e.preventDefault();
-    toast.dismiss(); // Dismiss existing toasts
+    toast.dismiss(); 
     setError('');
 
     if (!selectedAttraction || !selectedAttraction.id) {
@@ -177,15 +174,15 @@ const ManageAttractions = () => {
       name: formData.name,
       location: formData.location,
       type: formData.type,
-      rating: parseFloat(formData.rating), // Ensure rating is a float
+      rating: parseFloat(formData.rating), 
       description: formData.description,
-      amenities: formData.amenities, // Assuming backend accepts array
-      images: formData.images, // Array of Base64 strings
+      amenities: formData.amenities, 
+      images: formData.images, 
     };
 
     try {
       const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
-      await axios.put(`${backendUrl}/api/attractions/${selectedAttraction.id}`, payload, { // Use 'id'
+      await axios.put(`${backendUrl}/api/attractions/${selectedAttraction.id}`, payload, { 
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${idToken}`,

@@ -34,7 +34,7 @@ const ManageHotels = () => {
   const [formData, setFormData] = useState({
     name: '',
     location: '',
-    city: '', // Added city field
+    city: '', 
     type: '',
     basePrice: '',
     rating: '',
@@ -131,7 +131,7 @@ const ManageHotels = () => {
       setFormData({
         name: hotel.name || '',
         location: hotel.location || '',
-        city: hotel.city || '', // Populate city
+        city: hotel.city || '', 
         type: hotel.type || '',
         basePrice: hotel.basePrice || '',
         rating: hotel.rating || '',

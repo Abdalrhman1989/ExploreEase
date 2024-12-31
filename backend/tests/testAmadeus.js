@@ -1,4 +1,4 @@
-// backend/testAmadeus.js
+
 
 const Amadeus = require('amadeus');
 const dotenv = require('dotenv');

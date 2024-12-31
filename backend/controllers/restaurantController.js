@@ -111,7 +111,7 @@ const getApprovedRestaurants = async (req, res) => {
       ],
       limit: parseInt(limit),
       offset: parseInt(offset),
-      order: [['name', 'ASC']], // Optional: order by name
+      order: [['name', 'ASC']], 
     });
 
     res.status(200).json({ 
@@ -131,7 +131,7 @@ const getApprovedRestaurants = async (req, res) => {
 const getAllRestaurants = async (req, res) => {
   try {
     const restaurants = await Restaurant.findAll({
-      where: {}, // No filtering
+      where: {},
       attributes: [
         'RestaurantID',
         'FirebaseUID',

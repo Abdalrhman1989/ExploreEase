@@ -1,3 +1,5 @@
+// src/pages/Buses.jsx
+
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import {
   GoogleMap,
@@ -43,8 +45,8 @@ const categories = [
 
 const Buses = () => {
   const { user, isAuthenticated, loading: authLoading } = useContext(AuthContext);
-  // Initialize mapCenter to { lat: 0, lng: 0 } for world view
-  const [mapCenter, setMapCenter] = useState({ lat: 0, lng: 0 });
+  // Initialize mapCenter to null to handle asynchronous geolocation
+  const [mapCenter, setMapCenter] = useState(null);
   // Initialize mapZoom to 2 for a global overview
   const [mapZoom, setMapZoom] = useState(2);
   const [markers, setMarkers] = useState([]);
@@ -407,9 +409,9 @@ const Buses = () => {
         } else {
           console.error('Geocoding failed:', status);
           setJourneyError('Location not found. Please try a different search.');
-          // Set map to world view instead of New York
-          setMapCenter({ lat: 0, lng: 0 });
-          setMapZoom(2);
+          // Center map on Odense instead of world view
+          setMapCenter({ lat: 55.4038, lng: 10.4024 }); // Odense coordinates
+          setMapZoom(12);
           setMarkers([]);
           setIsLoading(false);
           setJourneyLoading(false);
@@ -669,9 +671,9 @@ const Buses = () => {
         });
       } else {
         setError('Location not found. Please try a different search.');
-        // Set map to world view instead of New York
-        setMapCenter({ lat: 0, lng: 0 });
-        setMapZoom(2);
+        // Center map on Odense instead of world view
+        setMapCenter({ lat: 55.4038, lng: 10.4024 }); // Odense coordinates
+        setMapZoom(12);
         setMarkers([]);
         setIsLoading(false);
       }
@@ -837,14 +839,18 @@ const Buses = () => {
         },
         (error) => {
           console.error('Error fetching user location:', error);
-          toast.info('Using default world view.');
-          // Keep mapCenter as { lat: 0, lng: 0 } and zoom: 2
+          toast.info('Using Odense, Denmark as the default location.');
+          // Center map on Odense instead of world view
+          setMapCenter({ lat: 55.4038, lng: 10.4024 }); 
+          setMapZoom(12);
         }
       );
     } else {
       console.error('Geolocation not supported by this browser.');
-      toast.info('Geolocation not supported. Using default world view.');
-      // Keep mapCenter as { lat: 0, lng: 0 } and zoom: 2
+      toast.info('Geolocation not supported. Using Odense, Denmark as the default location.');
+      // Center map on Odense instead of world view
+      setMapCenter({ lat: 55.4038, lng: 10.4024 }); // Odense coordinates
+      setMapZoom(12);
     }
   }, []);
 

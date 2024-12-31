@@ -1,7 +1,5 @@
-// controllers/hotelController.js
-
 const { validationResult } = require('express-validator');
-const { Hotel } = require('../models'); // Adjust the path as needed
+const { Hotel } = require('../models'); 
 
 // Create a new hotel
 const createHotel = async (req, res) => {

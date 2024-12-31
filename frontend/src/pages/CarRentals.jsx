@@ -53,7 +53,9 @@ const categories = [
 
 const CarRentals = () => {
   const { user, isAuthenticated, loading: authLoading } = useContext(AuthContext);
-  const [mapCenter, setMapCenter] = useState(null); // Initialize with null
+  // Set default location to Odense
+  const defaultLocation = { lat: 55.4038, lng: 10.4024 }; // Odense coordinates
+  const [mapCenter, setMapCenter] = useState(defaultLocation); // Initialize with default
   const [mapZoom, setMapZoom] = useState(12);
   const [markers, setMarkers] = useState([]);
   const [selected, setSelected] = useState(null);
@@ -311,7 +313,7 @@ const CarRentals = () => {
     if (isAuthenticated) {
       fetchFavorites();
     } else {
-      setFavorites([]); 
+      setFavorites([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, user]);
@@ -329,15 +331,15 @@ const CarRentals = () => {
         },
         (error) => {
           console.error('Error getting user location:', error);
-          setError('Unable to retrieve your location. Please allow location access or search manually.');
+          setError('Unable to retrieve your location. Displaying default location.');
           setIsLoading(false);
+          // Retain default location
         }
       );
     } else {
       console.error('Geolocation not supported');
-      setError('Geolocation is not supported by your browser.');
+      setError('Geolocation is not supported by your browser. Displaying default location.');
     }
-  
   }, []);
 
   return (

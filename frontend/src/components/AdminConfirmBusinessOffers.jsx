@@ -68,7 +68,7 @@ const AdminConfirmBusinessOffers = () => {
         setActionError('Authentication required. Please log in.');
         return;
       }
-      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/hotels/${id}/reject`, {}, { // Updated URL
+      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/hotels/${id}/reject`, {}, { 
         headers: {
           Authorization: `Bearer ${token}`,
         },

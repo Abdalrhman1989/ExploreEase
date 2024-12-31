@@ -53,8 +53,8 @@ const categories = [
 
 const Restaurants = () => {
   const { user, isAuthenticated, loading: authLoading } = useContext(AuthContext);
-  // Initialize map to center of the world
-  const [mapCenter, setMapCenter] = useState({ lat: 0, lng: 0 });
+  // Initialize map to null to handle asynchronous geolocation
+  const [mapCenter, setMapCenter] = useState(null);
   const [mapZoom, setMapZoom] = useState(2);
   const [markers, setMarkers] = useState([]);
   const [selected, setSelected] = useState(null);
@@ -117,7 +117,7 @@ const Restaurants = () => {
 
   // useEffect to determine current city whenever mapCenter changes
   useEffect(() => {
-    if (isLoaded && window.google) {
+    if (isLoaded && window.google && mapCenter) {
       getCityFromCoordinates(mapCenter.lat, mapCenter.lng)
         .then((city) => {
           setCurrentCity(city);
@@ -291,8 +291,9 @@ const Restaurants = () => {
         });
       } else {
         setError('Location not found. Please try a different search.');
-        setMapCenter({ lat: 0, lng: 0 }); // Reset to world view
-        setMapZoom(2);
+        // Center map on Odense instead of world view
+        setMapCenter({ lat: 55.4038, lng: 10.4024 }); // Odense coordinates
+        setMapZoom(12);
         setMarkers([]);
         setIsLoading(false);
       }
@@ -478,13 +479,19 @@ const Restaurants = () => {
         },
         (error) => {
           console.error('Error fetching geolocation:', error);
-          toast.error('Unable to retrieve your location. Showing world view.');
+          toast.error('Unable to retrieve your location. Showing Odense, Denmark.');
+          // Center map on Odense instead of world view
+          setMapCenter({ lat: 55.4038, lng: 10.4024 }); // Odense coordinates
+          setMapZoom(12);
           setLocationLoading(false);
         }
       );
     } else {
       console.error('Geolocation not supported by this browser.');
-      toast.error('Geolocation is not supported by your browser. Showing world view.');
+      toast.error('Geolocation is not supported by your browser. Showing Odense, Denmark.');
+      // Center map on Odense instead of world view
+      setMapCenter({ lat: 55.4038, lng: 10.4024 }); // Odense coordinates
+      setMapZoom(12);
       setLocationLoading(false);
     }
   }, []);
@@ -503,7 +510,7 @@ const Restaurants = () => {
 
   // Add markers to the map when markers state changes
   useEffect(() => {
-    if (isLoaded && markers.length > 0) {
+    if (isLoaded && markers.length > 0 && mapRef.current) {
       const newMarkers = markers
         .map((marker) => {
           if (marker.geometry && marker.geometry.location) {

@@ -1,6 +1,4 @@
-// backend/middleware/authenticate.js
-
-const admin = require('../firebaseAdmin'); // Adjust the path as needed
+const admin = require('../firebaseAdmin'); 
 
 const authenticate = async (req, res, next) => {
   const authHeader = req.headers.authorization;

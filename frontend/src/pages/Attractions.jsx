@@ -342,7 +342,7 @@ const Attractions = () => {
             price_level: place.price_level,
             opening_hours: place.opening_hours,
             types: place.types,
-            amenities: place.types, // Assuming 'types' can act as amenities
+            amenities: place.types, 
             photos: place.photos,
             latitude: place.geometry.location.lat(),
             longitude: place.geometry.location.lng(),
@@ -409,7 +409,7 @@ const Attractions = () => {
       }
     } else if (source === 'approved') {
       const id = attraction.AttractionID || attraction.id;
-      navigate(`/attractions/${id}`); // Navigate to the details page
+      navigate(`/attractions/${id}`); 
     }
   };
 

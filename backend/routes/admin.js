@@ -1,5 +1,3 @@
-// backend/routes/admin.js
-
 const express = require('express');
 const router = express.Router();
 const authorize = require('../middleware/authorize');
@@ -7,7 +5,7 @@ const {
   getAllUsers,
   updateUser,
   deleteUser,
-  createUser, // Import the createUser controller
+  createUser, 
 } = require('../controllers/adminController');
 
 // Admin Dashboard Route
@@ -19,7 +17,7 @@ router.get('/dashboard', authorize('Admin'), (req, res) => {
 router.get('/users', authorize('Admin'), getAllUsers);
 
 // Create a new user
-router.post('/users', authorize('Admin'), createUser); // Ensure createUser is defined
+router.post('/users', authorize('Admin'), createUser); 
 
 // Update a user
 router.put('/users/:userId', authorize('Admin'), updateUser);

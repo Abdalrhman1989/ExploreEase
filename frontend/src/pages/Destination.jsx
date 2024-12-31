@@ -5,7 +5,7 @@ import { useParams, Link } from 'react-router-dom';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebase'; // Firestore instance
 import '../styles/Destination.css';
-import MapComponent from '../components/MapComponent'; // Import the new MapComponent
+import MapComponent from '../components/MapComponent'; 
 
 const Destination = () => {
   const { destinationName } = useParams(); // Get destination name from URL

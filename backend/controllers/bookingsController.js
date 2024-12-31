@@ -1,22 +1,20 @@
-// backend/controllers/bookingsController.js
-
 const { Booking, Hotel, User, Payment } = require('../models');
 const { validationResult } = require('express-validator');
-const nodemailer = require('nodemailer'); // For sending emails
-require('dotenv').config(); // Ensure environment variables are loaded
+const nodemailer = require('nodemailer'); 
+require('dotenv').config(); 
 
 // Check if essential environment variables are present
 if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
   console.error('Error: Missing EMAIL_USER or EMAIL_PASS in environment variables.');
-  process.exit(1); // Exit the application if SMTP config is missing
+  process.exit(1); 
 }
 
 // Configure Nodemailer transporter using Gmail SMTP
 const transporter = nodemailer.createTransport({
   service: 'Gmail',
   auth: {
-    user: process.env.EMAIL_USER, // Your Gmail address
-    pass: process.env.EMAIL_PASS, // Your Gmail App Password
+    user: process.env.EMAIL_USER, 
+    pass: process.env.EMAIL_PASS, 
   },
 });
 
@@ -29,7 +27,7 @@ transporter.verify()
 const sendEmail = async (to, subject, html) => {
   try {
     await transporter.sendMail({
-      from: `"ExploreEase" <${process.env.EMAIL_USER}>`, // Sender address
+      from: `"ExploreEase" <${process.env.EMAIL_USER}>`, 
       to,
       subject,
       html,
@@ -55,7 +53,7 @@ const calculateBookingAmount = (booking) => {
     // Add other room types and their prices as needed
   };
 
-  const pricePerNight = roomPrices[booking.roomType] || 100; // Default to $100 if roomType not found
+  const pricePerNight = roomPrices[booking.roomType] || 100; 
   return numberOfNights * pricePerNight;
 };
 
@@ -76,7 +74,7 @@ const createBooking = async (req, res) => {
     checkOut,
     guests,
     hotelId,
-    roomType, // Ensure roomType is provided in the request body
+    roomType, 
   } = req.body;
 
   try {
@@ -102,7 +100,7 @@ const createBooking = async (req, res) => {
 
     // Create the booking with status 'Pending'
     const booking = await Booking.create({
-      UserID: userId, // Use the retrieved UserID
+      UserID: userId, 
       HotelID: hotelId,
       fullName,
       email,
@@ -111,7 +109,7 @@ const createBooking = async (req, res) => {
       checkOut,
       guests,
       roomType,
-      status: 'Pending', // Initial status
+      status: 'Pending', 
     });
 
     console.log('Booking created:', booking);
@@ -175,161 +173,160 @@ const getAllBookings = async (req, res) => {
   }
 };
 
-// Get a single booking by ID
-const getBookingById = async (req, res) => {
-  const bookingId = req.params.id;
-  const userId = req.userData.UserID;
-  const userRole = req.userData.UserType;
+  // Get a single booking by ID
+  const getBookingById = async (req, res) => {
+    const bookingId = req.params.id;
+    const userId = req.userData.UserID;
+    const userRole = req.userData.UserType;
 
-  try {
-    const booking = await Booking.findOne({
-      where: { BookingID: bookingId },
-      include: [
-        { model: User, as: 'user', attributes: ['UserID', 'UserName', 'Email'] },
-        { model: Hotel, as: 'hotel', attributes: ['HotelID', 'name'] },
-        { model: Payment, as: 'payment' },
-      ],
-    });
+    try {
+      const booking = await Booking.findOne({
+        where: { BookingID: bookingId },
+        include: [
+          { model: User, as: 'user', attributes: ['UserID', 'UserName', 'Email'] },
+          { model: Hotel, as: 'hotel', attributes: ['HotelID', 'name'] },
+          { model: Payment, as: 'payment' },
+        ],
+      });
 
-    if (!booking) {
-      return res.status(404).json({ success: false, message: 'Booking not found.' });
-    }
-
-    // Allow access if admin or the user who made the booking
-    if (userRole !== 'Admin' && booking.UserID !== userId) {
-      return res.status(403).json({ success: false, message: 'Access denied.' });
-    }
-
-    res.status(200).json({ success: true, booking });
-  } catch (error) {
-    console.error('Error fetching booking:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-};
-
-// Update a booking
-const updateBooking = async (req, res) => {
-  const bookingId = req.params.id;
-  const userId = req.userData.UserID;
-  const userRole = req.userData.UserType; // ensure userData has UserType
-  const { status } = req.body;
-
-  try {
-    const booking = await Booking.findOne({
-      where: { BookingID: bookingId },
-      include: [
-        { model: User, as: 'user', attributes: ['UserID', 'UserName', 'Email'] },
-        { model: Hotel, as: 'hotel', attributes: ['HotelID', 'name'] },
-        { model: Payment, as: 'payment' },
-      ],
-    });
-
-    if (!booking) {
-      return res.status(404).json({ success: false, message: 'Booking not found.' });
-    }
-
-    if (userRole === 'Admin') {
-      // Admin can update status and other details
-      if (status && ['Approved', 'Rejected', 'Cancelled'].includes(status)) {
-        booking.status = status;
-
-        if (status === 'Approved') {
-          // Send approval email to user
-          await sendEmail(
-            booking.user.Email,
-            'Booking Approved',
-            `<p>Dear ${booking.user.UserName},</p>
-             <p>Your booking (ID: ${booking.BookingID}) for a <strong>${booking.roomType}</strong> room at <strong>${booking.hotel.name}</strong> from <strong>${new Date(booking.checkIn).toLocaleDateString()}</strong> to <strong>${new Date(booking.checkOut).toLocaleDateString()}</strong> has been approved.</p>
-             <p>Payment Details:</p>
-             <ul>
-               <li>Amount: $${(booking.payment.amount / 100).toFixed(2)}</li>
-               <li>Payment Method: ${booking.payment.paymentMethod}</li>
-               <li>Receipt: <a href="${booking.payment.receiptUrl}" target="_blank" rel="noopener noreferrer">View Receipt</a></li>
-             </ul>
-             <p>Thank you for choosing ExploreEase!</p>`
-          );
-        } else if (status === 'Rejected') {
-          // Send rejection email to user
-          await sendEmail(
-            booking.user.Email,
-            'Booking Rejected',
-            `<p>Dear ${booking.user.UserName},</p>
-             <p>We regret to inform you that your booking (ID: ${booking.BookingID}) for a <strong>${booking.roomType}</strong> room at <strong>${booking.hotel.name}</strong> from <strong>${new Date(booking.checkIn).toLocaleDateString()}</strong> to <strong>${new Date(booking.checkOut).toLocaleDateString()}</strong> has been rejected.</p>
-             <p>If you have any questions, please contact our support team.</p>
-             <p>Thank you for choosing ExploreEase.</p>`
-          );
-        }
-
-        // For 'Cancelled' status, send appropriate email if needed
-        // Implement as per requirements
+      if (!booking) {
+        return res.status(404).json({ success: false, message: 'Booking not found.' });
       }
 
-      await booking.save();
-
-      res.status(200).json({ success: true, booking });
-    } else {
-      // Users can update their own booking details only if it's still pending
-      if (booking.UserID !== userId) {
+      // Allow access if admin or the user who made the booking
+      if (userRole !== 'Admin' && booking.UserID !== userId) {
         return res.status(403).json({ success: false, message: 'Access denied.' });
       }
 
-      if (booking.status !== 'Pending') {
-        return res.status(400).json({ success: false, message: 'Cannot edit booking that is not pending.' });
+      res.status(200).json({ success: true, booking });
+    } catch (error) {
+      console.error('Error fetching booking:', error);
+      res.status(500).json({ success: false, message: 'Server error' });
+    }
+  };
+
+  // Update a booking
+  const updateBooking = async (req, res) => {
+    const bookingId = req.params.id;
+    const userId = req.userData.UserID;
+    const userRole = req.userData.UserType; 
+    const { status } = req.body;
+
+    try {
+      const booking = await Booking.findOne({
+        where: { BookingID: bookingId },
+        include: [
+          { model: User, as: 'user', attributes: ['UserID', 'UserName', 'Email'] },
+          { model: Hotel, as: 'hotel', attributes: ['HotelID', 'name'] },
+          { model: Payment, as: 'payment' },
+        ],
+      });
+
+      if (!booking) {
+        return res.status(404).json({ success: false, message: 'Booking not found.' });
       }
 
-      // Update allowed fields (e.g., phone, checkIn, checkOut, guests, roomType)
-      const { phone, checkIn, checkOut, guests, roomType } = req.body;
+      if (userRole === 'Admin') {
+        // Admin can update status and other details
+        if (status && ['Approved', 'Rejected', 'Cancelled'].includes(status)) {
+          booking.status = status;
 
-      if (phone) booking.phone = phone;
-      if (checkIn) booking.checkIn = checkIn;
-      if (checkOut) booking.checkOut = checkOut;
-      if (guests) booking.guests = guests;
-      if (roomType) booking.roomType = roomType;
+          if (status === 'Approved') {
+            await sendEmail(
+              booking.user.Email,
+              'Booking Approved',
+              `<p>Dear ${booking.user.UserName},</p>
+              <p>Your booking (ID: ${booking.BookingID}) for a <strong>${booking.roomType}</strong> room at <strong>${booking.hotel.name}</strong> from <strong>${new Date(booking.checkIn).toLocaleDateString()}</strong> to <strong>${new Date(booking.checkOut).toLocaleDateString()}</strong> has been approved.</p>
+              <p>Payment Details:</p>
+              <ul>
+                <li>Amount: $${(booking.payment.amount / 100).toFixed(2)}</li>
+                <li>Payment Method: ${booking.payment.paymentMethod}</li>
+                <li>Receipt: <a href="${booking.payment.receiptUrl}" target="_blank" rel="noopener noreferrer">View Receipt</a></li>
+              </ul>
+              <p>Thank you for choosing ExploreEase!</p>`
+            );
+          } else if (status === 'Rejected') {
+            // Send rejection email to user
+            await sendEmail(
+              booking.user.Email,
+              'Booking Rejected',
+              `<p>Dear ${booking.user.UserName},</p>
+              <p>We regret to inform you that your booking (ID: ${booking.BookingID}) for a <strong>${booking.roomType}</strong> room at <strong>${booking.hotel.name}</strong> from <strong>${new Date(booking.checkIn).toLocaleDateString()}</strong> to <strong>${new Date(booking.checkOut).toLocaleDateString()}</strong> has been rejected.</p>
+              <p>If you have any questions, please contact our support team.</p>
+              <p>Thank you for choosing ExploreEase.</p>`
+            );
+          }
 
-      // Optionally, recalculate the amount if roomType or dates have changed
-      // Not implemented here; can be added as needed
+          // For 'Cancelled' status, send appropriate email if needed
+          // Implement as per requirements
+        }
 
-      await booking.save();
+        await booking.save();
 
-      res.status(200).json({ success: true, booking });
+        res.status(200).json({ success: true, booking });
+      } else {
+        // Users can update their own booking details only if it's still pending
+        if (booking.UserID !== userId) {
+          return res.status(403).json({ success: false, message: 'Access denied.' });
+        }
+
+        if (booking.status !== 'Pending') {
+          return res.status(400).json({ success: false, message: 'Cannot edit booking that is not pending.' });
+        }
+
+        // Update allowed fields (e.g., phone, checkIn, checkOut, guests, roomType)
+        const { phone, checkIn, checkOut, guests, roomType } = req.body;
+
+        if (phone) booking.phone = phone;
+        if (checkIn) booking.checkIn = checkIn;
+        if (checkOut) booking.checkOut = checkOut;
+        if (guests) booking.guests = guests;
+        if (roomType) booking.roomType = roomType;
+
+        // Optionally, recalculate the amount if roomType or dates have changed
+        // Not implemented here; can be added as needed
+
+        await booking.save();
+
+        res.status(200).json({ success: true, booking });
+      }
+    } catch (error) {
+      console.error('Error updating booking:', error);
+      res.status(500).json({ success: false, message: 'Server error' });
     }
-  } catch (error) {
-    console.error('Error updating booking:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-};
+  };
 
-// Delete a booking
-const deleteBooking = async (req, res) => {
-  const bookingId = req.params.id;
-  const userId = req.userData.UserID;
-  const userRole = req.userData.UserType;
+  // Delete a booking
+  const deleteBooking = async (req, res) => {
+    const bookingId = req.params.id;
+    const userId = req.userData.UserID;
+    const userRole = req.userData.UserType;
 
-  try {
-    const booking = await Booking.findOne({ where: { BookingID: bookingId } });
+    try {
+      const booking = await Booking.findOne({ where: { BookingID: bookingId } });
 
-    if (!booking) {
-      return res.status(404).json({ success: false, message: 'Booking not found.' });
+      if (!booking) {
+        return res.status(404).json({ success: false, message: 'Booking not found.' });
+      }
+
+      // Allow deletion if admin or the user who made the booking
+      if (userRole !== 'Admin' && booking.UserID !== userId) {
+        return res.status(403).json({ success: false, message: 'Access denied.' });
+      }
+
+      await booking.destroy();
+
+      res.status(200).json({ success: true, message: 'Booking deleted successfully.' });
+    } catch (error) {
+      console.error('Error deleting booking:', error);
+      res.status(500).json({ success: false, message: 'Server error' });
     }
+  };
 
-    // Allow deletion if admin or the user who made the booking
-    if (userRole !== 'Admin' && booking.UserID !== userId) {
-      return res.status(403).json({ success: false, message: 'Access denied.' });
-    }
-
-    await booking.destroy();
-
-    res.status(200).json({ success: true, message: 'Booking deleted successfully.' });
-  } catch (error) {
-    console.error('Error deleting booking:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-};
-
-module.exports = {
-  createBooking,
-  getAllBookings,
-  getBookingById,
-  updateBooking,
-  deleteBooking,
-};
+  module.exports = {
+    createBooking,
+    getAllBookings,
+    getBookingById,
+    updateBooking,
+    deleteBooking,
+  };

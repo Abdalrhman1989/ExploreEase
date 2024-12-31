@@ -1,5 +1,3 @@
-// src/components/Dashboard.jsx
-
 import React, { useState, useContext, useEffect } from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import '../styles/Dashboard.css';
@@ -30,7 +28,7 @@ const Dashboard = () => {
 
   const handleProfileNavigation = () => {
     navigate('/profile'); 
-    setSidebarOpen(false); // Close sidebar on navigation
+    setSidebarOpen(false); 
   };
 
   // Close sidebar when navigating to a new route

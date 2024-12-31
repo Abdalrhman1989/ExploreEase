@@ -46,8 +46,10 @@ const stayCategories = [
 
 const Stays = () => {
   const { user, isAuthenticated, loading: authLoading } = useContext(AuthContext);
-  const [mapCenter, setMapCenter] = useState({ lat: 0, lng: 0 }); 
-  const [mapZoom, setMapZoom] = useState(2); 
+  
+  // **Set default map center to  Denmark**
+  const [mapCenter, setMapCenter] = useState({ lat: 55.4038, lng: 10.4024 }); 
+  const [mapZoom, setMapZoom] = useState(12); 
   const [places, setPlaces] = useState([]);
   const [selected, setSelected] = useState(null);
   const [favorites, setFavorites] = useState([]);
@@ -245,9 +247,9 @@ const Stays = () => {
         });
       } else {
         console.error('Geocoding failed:', status);
-        setError('Location not found. Showing world overview.');
-        setMapCenter({ lat: 0, lng: 0 }); // World center
-        setMapZoom(2); // World view
+        setMapCenter({ lat: 55.4038, lng: 10.4024 }); 
+        setMapZoom(12);
+        setError('Location not found. Showing Odense, Denmark.');
         setPlaces([]);
         setIsLoading(false);
       }
@@ -341,15 +343,15 @@ const Stays = () => {
         const userHotel = userHotels[0];
         geocodeAddress(userHotel.location);
       } else {
-        console.warn('User has no hotels. Using world overview.');
-        setMapCenter({ lat: 0, lng: 0 });
-        setMapZoom(2);
+        console.warn('User has no hotels. Using Odense, Denmark.');
+        setMapCenter({ lat: 55.4038, lng: 10.4024 }); 
+        setMapZoom(12);
       }
     } catch (err) {
       console.error('Error fetching user hotels:', err.response ? err.response.data : err.message);
       setError('Failed to fetch your hotel information.');
-      setMapCenter({ lat: 0, lng: 0 });
-      setMapZoom(2);
+      setMapCenter({ lat: 55.4038, lng: 10.4024 }); 
+      setMapZoom(12);
     }
   }, [isAuthenticated, user]);
 
@@ -367,13 +369,13 @@ const Stays = () => {
           lat: location.lat(),
           lng: location.lng(),
         });
-        setMapZoom(14); // Zoom into the location
+        setMapZoom(14); 
         searchStaysByLocation(location);
       } else {
         console.error('Geocoding failed:', status);
-        setError('Failed to locate your hotel. Showing world overview.');
-        setMapCenter({ lat: 0, lng: 0 }); // World center
-        setMapZoom(2); // World view
+        setMapCenter({ lat: 55.4038, lng: 10.4024 }); 
+        setMapZoom(12);
+        setError('Failed to locate your hotel. Showing Odense, Denmark.');
       }
     });
   };
@@ -409,7 +411,7 @@ const Stays = () => {
     if (isLoaded && window.google) {
       const service = new window.google.maps.places.PlacesService(document.createElement('div'));
       const request = {
-        placeId: 'ChIJD7fiBh9u5kcRYJSMaMOCCwQ', // Example Place ID
+        placeId: 'ChIJD7fiBh9u5kcRYJSMaMOCCwQ', 
         fields: ['photos'],
       };
 
@@ -425,7 +427,7 @@ const Stays = () => {
     }
   }, [isLoaded]);
 
-  // Fetch user's current geolocation and set map center accordingly
+  // **Fetch user's current geolocation and set map center accordingly**
   useEffect(() => {
     const handleLocationSuccess = (position) => {
       setMapCenter({
@@ -442,18 +444,18 @@ const Stays = () => {
 
     const handleLocationError = (error) => {
       console.error('Error fetching user location:', error);
-      setMapCenter({ lat: 0, lng: 0 }); // World center
-      setMapZoom(2); // World view
-      setError('Failed to retrieve your location. Showing world overview.');
+      setMapCenter({ lat: 55.4038, lng: 10.4024 }); 
+      setMapZoom(12);
+      setError('Failed to retrieve your location. Showing Odense, Denmark.');
     };
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(handleLocationSuccess, handleLocationError);
     } else {
       console.error('Geolocation not supported by this browser.');
-      setMapCenter({ lat: 0, lng: 0 }); // World center
-      setMapZoom(2); // World view
-      setError('Geolocation is not supported by your browser.');
+      setMapCenter({ lat: 55.4038, lng: 10.4024 }); 
+      setMapZoom(12);
+      setError('Geolocation is not supported by your browser. Showing Odense, Denmark.');
     }
 
     // If authenticated, optionally fetch user-specific data

@@ -1,5 +1,3 @@
-// backend/controllers/flightBookingsController.js
-
 const { FlightBooking, User, Payment } = require('../models');
 const { validationResult } = require('express-validator');
 const nodemailer = require('nodemailer');
@@ -8,18 +6,18 @@ require('dotenv').config();
 // Check if essential environment variables are present
 if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
   console.error('Error: Missing EMAIL_USER or EMAIL_PASS in environment variables.');
-  process.exit(1); // Exit the application if SMTP config is missing
+  process.exit(1); 
 }
 
 // Configure Nodemailer transporter using Gmail SMTP
 const transporter = nodemailer.createTransport({
   service: 'Gmail',
   host: 'smtp.gmail.com',
-  port: 587, // Use 587 for STARTTLS
-  secure: false, // Upgrade later with STARTTLS
+  port: 587, 
+  secure: false, 
   auth: {
-    user: process.env.EMAIL_USER, // Your Gmail address
-    pass: process.env.EMAIL_PASS, // Your Gmail App Password
+    user: process.env.EMAIL_USER, 
+    pass: process.env.EMAIL_PASS, 
   },
 });
 
@@ -32,7 +30,7 @@ transporter.verify()
 const sendEmail = async (to, subject, html) => {
   try {
     await transporter.sendMail({
-      from: `"ExploreEase" <${process.env.EMAIL_USER}>`, // Sender address
+      from: `"ExploreEase" <${process.env.EMAIL_USER}>`, 
       to,
       subject,
       html,
@@ -211,7 +209,7 @@ const getFlightBookingById = async (req, res) => {
 const updateFlightBooking = async (req, res) => {
   const flightBookingId = req.params.id;
   const userId = req.userData.UserID;
-  const userRole = req.userData.UserType; // ensure userData has UserType
+  const userRole = req.userData.UserType; 
   const { status, flightNumber, departureAirport, arrivalAirport, departureTime, arrivalTime, seatClass, price } = req.body;
 
   try {
@@ -247,7 +245,6 @@ const updateFlightBooking = async (req, res) => {
              <p>Thank you for choosing ExploreEase!</p>`
           );
         } else if (status === 'Rejected') {
-          // Send rejection email to user
           await sendEmail(
             flightBooking.user.Email,
             'Flight Booking Rejected',

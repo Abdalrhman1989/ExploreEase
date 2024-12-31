@@ -56,7 +56,7 @@ const categories = [
 
 const Trains = () => {
   const { user, isAuthenticated, loading: authLoading } = useContext(AuthContext);
-  const [mapCenter, setMapCenter] = useState({ lat: 55.4038, lng: 10.4024 }); // Default to Odense center
+  const [mapCenter, setMapCenter] = useState({ lat: 55.4038, lng: 10.4024 }); 
   const [mapZoom, setMapZoom] = useState(12);
   const [markers, setMarkers] = useState([]);
   const [selected, setSelected] = useState(null);
@@ -413,7 +413,7 @@ const Trains = () => {
           setMapCenter({ lat, lng });
           setMapZoom(12);
 
-          // DirectionsService request with corrected transitOptions
+          // DirectionsService request 
           const directionsService = new window.google.maps.DirectionsService();
           directionsService.route(
             {
@@ -566,7 +566,7 @@ const Trains = () => {
       {
         placeId: placeId,
         fields: [
-          'place_id', // Added place_id to ensure it's available
+          'place_id', 
           'name',
           'rating',
           'formatted_address',
@@ -1076,7 +1076,7 @@ const Trains = () => {
                     onClick={() => {
                       const favoriteData = {
                         type: 'train_station',
-                        placeId: selected.place_id, // Ensure place_id is correctly passed
+                        placeId: selected.place_id, 
                         name: selected.name,
                         address: selected.formatted_address || '',
                         rating: selected.rating || null,

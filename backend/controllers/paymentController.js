@@ -1,9 +1,7 @@
-// backend/controllers/paymentController.js
-
 const { Payment, Booking, FlightBooking, User, Hotel } = require('../models');
 const { validationResult } = require('express-validator');
 const nodemailer = require('nodemailer');
-require('dotenv').config(); // Ensure environment variables are loaded
+require('dotenv').config(); 
 
 // Configure Nodemailer transporter (use Mailtrap for testing or another SMTP server)
 const transporter = nodemailer.createTransport({
